@@ -84,6 +84,22 @@ export const strings = {
     invalidTurnoutNumber: 'Enter a turnout number between 1 and 2048.',
   },
 
+  signalTypes: {
+    main2: 'Main signal, 2 aspects',
+    main3: 'Main signal, 3 aspects',
+    distant: 'Distant signal',
+    shunting: 'Shunting signal',
+    aspects: {
+      stop: 'Stop',
+      proceed: 'Proceed',
+      reduced: 'Proceed, reduced speed',
+      expectStop: 'Expect stop',
+      expectProceed: 'Expect proceed',
+      shuntStop: 'Stop',
+      shuntAllowed: 'Shunting allowed',
+    },
+  },
+
   notices: {
     extAccessoryUnsupported:
       'The central unit’s firmware is too old for extended accessories (needs 1.40). Nothing was sent.',
