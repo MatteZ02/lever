@@ -34,6 +34,8 @@ export const settingsSchema = z.object({
     .prefault({}),
   theme: z.enum(['system', 'light', 'dark']).default('system'),
   protocolLog: z.boolean().default(false),
+  // Reopened at start-up (PRJ-4). Set by the main process only.
+  lastProjectPath: z.string().nullable().default(null),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;

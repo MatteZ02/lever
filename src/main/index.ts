@@ -12,9 +12,12 @@ import {
   MenuItemConstructorOptions,
 } from 'electron';
 import iconPath from '../../assets/icon.png?asset';
+import {Project} from '../model/project';
+import {ProjectFileAction, ProjectState} from '../shared/projectApi';
 import {Settings, settingsUpdateSchema} from '../shared/settings';
 import {strings} from '../shared/strings';
 import {EngineHost} from './engineHost';
+import {ProjectController} from './project/projectController';
 import {applySecurityPolicy} from './security';
 import {applySettingsUpdate, loadSettings, saveSettings} from './settingsFile';
 
@@ -23,6 +26,49 @@ import {applySettingsUpdate, loadSettings, saveSettings} from './settingsFile';
 
 const engine = new EngineHost();
 let settings: Settings;
+let projects: ProjectController;
+// The last central-unit profile sent to the engine, to send only changes.
+let appliedProfile = '';
+
+const PROJECT_ACTIONS: ProjectFileAction[] = [
+  'new',
+  'open',
+  'save',
+  'saveAs',
+  'exportCopy',
+  'import',
+  'restoreBackup',
+];
+
+const broadcastProject = (state: ProjectState): void => {
+  for (const window of BrowserWindow.getAllWindows()) {
+    window.webContents.send('project:changed', state);
+  }
+  applyProjectToEngine(state.project);
+};
+
+const applyProjectToEngine = (project: Project): void => {
+  const {accessoryGapMs, feedbackSources} = project.settings.centralUnit;
+  const key = JSON.stringify({accessoryGapMs, feedbackSources});
+  if (key !== appliedProfile) {
+    appliedProfile = key;
+    engine.configureLayout({accessoryGapMs, feedbackSources});
+  }
+};
+
+const rememberProjectPath = (path: string | null): void => {
+  if (settings.lastProjectPath !== path) {
+    settings = {...settings, lastProjectPath: path};
+    void saveSettings(settings);
+  }
+};
+
+const runProjectAction = (action: ProjectFileAction): void => {
+  const window = BrowserWindow.getFocusedWindow() ?? undefined;
+  void projects.run(action, window).catch((error: unknown) => {
+    void dialog.showMessageBox({type: 'error', message: String(error)});
+  });
+};
 
 const isAppFrame = (event: IpcMainEvent | IpcMainInvokeEvent): boolean => {
   const url = event.senderFrame?.url ?? '';
@@ -77,7 +123,43 @@ const buildMenu = (): void => {
   const template: MenuItemConstructorOptions[] = [
     {
       label: strings.menu.file,
-      submenu: [{role: 'quit', label: strings.menu.quit}],
+      submenu: [
+        {
+          label: strings.menu.newProject,
+          accelerator: 'CmdOrCtrl+N',
+          click: () => runProjectAction('new'),
+        },
+        {
+          label: strings.menu.open,
+          accelerator: 'CmdOrCtrl+O',
+          click: () => runProjectAction('open'),
+        },
+        {
+          label: strings.menu.save,
+          accelerator: 'CmdOrCtrl+S',
+          click: () => runProjectAction('save'),
+        },
+        {
+          label: strings.menu.saveAs,
+          accelerator: 'CmdOrCtrl+Shift+S',
+          click: () => runProjectAction('saveAs'),
+        },
+        {type: 'separator'},
+        {
+          label: strings.menu.exportCopy,
+          click: () => runProjectAction('exportCopy'),
+        },
+        {
+          label: strings.menu.importCopy,
+          click: () => runProjectAction('import'),
+        },
+        {
+          label: strings.menu.restoreBackup,
+          click: () => runProjectAction('restoreBackup'),
+        },
+        {type: 'separator'},
+        {role: 'quit', label: strings.menu.quit},
+      ],
     },
     {
       label: strings.menu.view,
@@ -143,6 +225,35 @@ const registerIpc = (): void => {
   ipcMain.handle('app:info', (event) =>
     isAppFrame(event) ? {version: app.getVersion()} : undefined,
   );
+
+  ipcMain.handle('project:get', (event) =>
+    isAppFrame(event) ? projects.document.get() : undefined,
+  );
+
+  // A whole project from the editor; validated by the document. Returns the
+  // new revision, or an error message (e.g. read-only).
+  ipcMain.handle('project:update', (event, project: unknown) => {
+    if (!isAppFrame(event)) {
+      return {error: 'not allowed'};
+    }
+    try {
+      return {revision: projects.document.update(project)};
+    } catch (error) {
+      return {error: String(error)};
+    }
+  });
+
+  ipcMain.handle('project:action', async (event, action: unknown) => {
+    if (
+      isAppFrame(event) &&
+      PROJECT_ACTIONS.includes(action as ProjectFileAction)
+    ) {
+      await projects.run(
+        action as ProjectFileAction,
+        BrowserWindow.fromWebContents(event.sender) ?? undefined,
+      );
+    }
+  });
 };
 
 const start = async (): Promise<void> => {
@@ -150,12 +261,18 @@ const start = async (): Promise<void> => {
   app.setAppUserModelId('fi.alppirautatiet.lever');
   applySecurityPolicy();
   settings = await loadSettings();
+  projects = new ProjectController({
+    onState: broadcastProject,
+    rememberPath: rememberProjectPath,
+  });
   buildMenu();
   registerIpc();
 
   engine.start();
   engine.setProtocolLog(settings.protocolLog);
+  applyProjectToEngine(projects.document.get().project);
   engine.connect(settings.centralUnit.host, settings.centralUnit.port);
+  await projects.reopen(settings.lastProjectPath);
   createWindow();
 };
 
@@ -164,10 +281,15 @@ app.on('before-quit', (event) => {
   if (stopping) {
     return;
   }
-  // Log off from the central unit before quitting (REU-4).
+  // Save the project, then log off from the central unit (REU-4).
   event.preventDefault();
-  stopping = true;
-  void engine.stop().finally(() => app.quit());
+  void projects.beforeQuit().then((proceed) => {
+    if (!proceed) {
+      return;
+    }
+    stopping = true;
+    void engine.stop().finally(() => app.quit());
+  });
 });
 
 app.on('window-all-closed', () => {

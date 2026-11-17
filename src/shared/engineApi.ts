@@ -33,6 +33,7 @@ export const engineCommandSchema = z.discriminatedUnion('type', [
     fAdr: fAdrSchema,
     output: z.union([z.literal(0), z.literal(1)]),
     pulseMs: z.number().int().positive().optional(),
+    queued: z.boolean().optional(),
   }),
   z.object({v: version, type: z.literal('queryAccessory'), fAdr: fAdrSchema}),
   // Extended accessory (FW 1.40+). Refused when the firmware is known to be
@@ -202,6 +203,12 @@ export const engineControlSchema = z.discriminatedUnion('type', [
   }),
   // Applied before connecting, so the log includes the connect sequence.
   z.object({type: z.literal('setProtocolLog'), enabled: z.boolean()}),
+  // From the open project's central-unit profile (LOAD-1, LOAD-2).
+  z.object({
+    type: z.literal('configureLayout'),
+    accessoryGapMs: z.number().int().min(20).max(5000),
+    feedbackSources: z.array(feedbackSourceSchema),
+  }),
   // Log off cleanly and exit.
   z.object({type: z.literal('shutdown')}),
 ]);

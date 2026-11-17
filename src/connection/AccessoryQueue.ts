@@ -28,6 +28,9 @@ export type AccessoryJob =
       fAdr: number;
       output: AccessoryOutput;
       pulseMs: number;
+      // Q flag (FW 1.24+). Set from the project's central-unit profile, the
+      // same for every command, so Q=0 and Q=1 are never mixed (§5.2.2).
+      queued?: boolean;
     }
   | {kind: 'extAccessory'; rawAddress: number; value: number}
   // A request whose answer arrives as a broadcast-style message (turnout
@@ -170,13 +173,20 @@ export class AccessoryQueue {
     switch (job.kind) {
       case 'switch': {
         const pulseMs = clamp(job.pulseMs, MIN_PULSE_MS, MAX_PULSE_MS);
+        const queue = job.queued ?? false;
         const deactivate = lanXSetTurnout({
           fAdr: job.fAdr,
           output: job.output,
           activate: false,
+          queue,
         });
         this.send([
-          lanXSetTurnout({fAdr: job.fAdr, output: job.output, activate: true}),
+          lanXSetTurnout({
+            fAdr: job.fAdr,
+            output: job.output,
+            activate: true,
+            queue,
+          }),
         ]);
         this.wait(pulseMs, () => {
           if (this.connected) {

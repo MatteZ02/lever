@@ -5,8 +5,48 @@
 export const strings = {
   appName: 'Lever',
 
+  project: {
+    fileType: 'Lever layout',
+    untitled: 'New layout',
+    openTitle: 'Open layout',
+    saveAsTitle: 'Save layout as',
+    exportTitle: 'Save a copy of the layout',
+    importTitle: 'Import a layout as a new copy',
+    restoreTitle: 'Restore a backup',
+    noBackups:
+      'Backups exist only for a layout saved as a file and open for editing.',
+    saveFailed: 'The layout could not be saved.',
+    openFailed: (path: string) => `“${path}” could not be opened.`,
+    openedReadOnly:
+      'This layout is open for editing in another copy of Lever, so it is opened read-only here.',
+    lockedBy: (host: string) =>
+      `Open on: ${host}. Close it there to edit it here.`,
+    migrated: (version: number) =>
+      `This layout was made with an older version of Lever (format ${version}). It has been updated; the original is kept in the backups.`,
+    saveBeforeQuit: 'Save the new layout before closing?',
+    save: 'Save…',
+    dontSave: 'Don’t save',
+    cancel: 'Cancel',
+    errors: {
+      notAProject: 'This is not a Lever layout file.',
+      newerVersion:
+        'This layout was made with a newer version of Lever. Update Lever to open it.',
+      missingMigration: (version: number) =>
+        `Lever cannot update layouts of format ${version}.`,
+      invalid: (details: string) =>
+        `The file is damaged or was edited by hand:\n${details}`,
+    },
+  },
+
   menu: {
     file: 'File',
+    newProject: 'New layout',
+    open: 'Open…',
+    save: 'Save',
+    saveAs: 'Save as…',
+    exportCopy: 'Save a copy…',
+    importCopy: 'Import as new copy…',
+    restoreBackup: 'Restore a backup…',
     quit: 'Quit',
     view: 'View',
     zoomIn: 'Zoom in',

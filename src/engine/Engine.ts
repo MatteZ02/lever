@@ -144,6 +144,10 @@ export class Engine {
     this.broadcastSnapshot();
   }
 
+  setAccessoryGap(gapMs: number): void {
+    this.queue.setGap(gapMs);
+  }
+
   // Logs off cleanly (§2.2).
   shutdown(): void {
     this.queue.dispose();
@@ -192,6 +196,7 @@ export class Engine {
           fAdr: command.fAdr,
           output: command.output,
           pulseMs: command.pulseMs ?? this.defaultPulseMs,
+          queued: command.queued,
         });
         break;
       case 'queryAccessory':

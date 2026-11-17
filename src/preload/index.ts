@@ -4,6 +4,7 @@
 import {contextBridge, ipcRenderer} from 'electron';
 import {ENGINE_API_VERSION} from '../shared/apiVersion';
 import type {EngineCommandInput} from '../shared/engineApi';
+import type {ProjectState} from '../shared/projectApi';
 import type {Settings, SettingsUpdate} from '../shared/settings';
 import type {LeverApi} from './api';
 
@@ -58,6 +59,22 @@ const api: LeverApi = {
   },
   app: {
     info: () => ipcRenderer.invoke('app:info') as Promise<{version: string}>,
+  },
+  project: {
+    get: () => ipcRenderer.invoke('project:get') as Promise<ProjectState>,
+    update: (project) =>
+      ipcRenderer.invoke('project:update', project) as Promise<
+        {revision: number} | {error: string}
+      >,
+    action: (action) =>
+      ipcRenderer.invoke('project:action', action) as Promise<void>,
+    onChange(listener) {
+      const handler = (_event: unknown, state: ProjectState) => listener(state);
+      ipcRenderer.on('project:changed', handler);
+      return () => {
+        ipcRenderer.off('project:changed', handler);
+      };
+    },
   },
 };
 
