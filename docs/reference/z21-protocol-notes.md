@@ -320,6 +320,9 @@ documentation once it is available:
 
 ## 9. Out of scope for v1 (for later reference)
 
+Throttle's list. **Lever** covers accessories (§5) and the occupancy parts of §7, §9.5 and §10.1:
+see sections 10–13 below.
+
 | Area                     | Where        |
 | ------------------------ | ------------ |
 | Turnouts and accessories | §5 pp. 30–36 |
@@ -335,3 +338,114 @@ documentation once it is available:
 | Binary states            | §4.3.3       |
 
 Appendix A (pp. 76–77) is a one-page index of all commands, including which devices support each.
+
+## 10. Accessories (Lever)
+
+Encoders and decoders: `packages/z21-protocol/src/accessories.ts`, `commands.ts`, `messages.ts`.
+Byte-exact tests: `__tests__/accessories.test.ts`.
+
+### Addressing (§5 p. 30)
+
+`FAdr` (function address) is 16 bits, sent **big-endian** (`FAdr_MSB FAdr_LSB`, unlike most other
+multi-byte values). On the track: DCC accessory decoder address = `FAdr >> 2`, port = `FAdr & 3`.
+Valid range 0–2047.
+
+The spec lists four ways systems _display_ turnout numbers. **Roco (Z21 app, multiMaus): turnout #1
+= FAdr 0** (DCC address 0, port 0); #5 = FAdr 4. Lever stores addresses as Roco displays them and
+converts with `FAdr = number − 1 + project offset` (LOAD-5). Other systems (ESU, Uhlenbrock) start
+at DCC address 1, so the same turnout is "#1" there and "#5" on the Z21 ("shift by 4").
+
+**Extended accessories use a different convention**: RawAddress 4 is "address 1" (RCN-213,
+§5.4). So turnout #1 is FAdr 0, but extended accessory 1 is RawAddress 4.
+
+| Message                      | Dir    | Bytes                                                     | Spec       |
+| ---------------------------- | ------ | --------------------------------------------------------- | ---------- |
+| LAN_X_GET_TURNOUT_INFO       | C→Z    | `08 00 40 00 43 <FAdr_MSB> <FAdr_LSB> XOR`                | §5.1 p. 31 |
+| LAN_X_SET_TURNOUT            | C→Z    | `09 00 40 00 53 <FAdr_MSB> <FAdr_LSB> <10Q0A00P> XOR`     | §5.2 p. 31 |
+| LAN_X_TURNOUT_INFO           | Z→C BC | `09 00 40 00 43 <FAdr_MSB> <FAdr_LSB> <000000ZZ> XOR`     | §5.3 p. 34 |
+| LAN_X_SET_EXT_ACCESSORY      | C→Z    | `0A 00 40 00 54 <Raw_MSB> <Raw_LSB> <value> 00 XOR`       | §5.4 p. 35 |
+| LAN_X_GET_EXT_ACCESSORY_INFO | C→Z    | `09 00 40 00 44 <Raw_MSB> <Raw_LSB> 00 XOR`               | §5.5 p. 36 |
+| LAN_X_EXT_ACCESSORY_INFO     | Z→C BC | `0A 00 40 00 44 <Raw_MSB> <Raw_LSB> <value> <status> XOR` | §5.6 p. 36 |
+
+`10Q0A00P`: P = output (0 = output 1, 1 = output 2), A = activate (1) / deactivate (0), Q = queue
+(FW 1.24+). `ZZ`: `00` not switched yet, `01` output 1 (P=0), `10` output 2 (P=1), `11` invalid.
+Ext status: `00` valid, `FF` data unknown. All broadcasts need flag `0x00000001`.
+
+Examples (spec):
+
+- Activate #5 output 2: `09 00 40 00 53 00 04 89 DE`; deactivate: `09 00 40 00 53 00 04 81 D6`.
+- Queued activate #25 output 2: `09 00 40 00 53 00 18 A9 E2`.
+- Ext accessory raw 4 = 5: `0A 00 40 00 54 00 04 05 00 55`; ext emergency stop (raw 2047, value 0):
+  `0A 00 40 00 54 07 FF 00 00 AC`.
+
+### Timing (§5.2.1, §5.2.2)
+
+With `Q=0` the client serialises: **only one switching command may be active at a time**, activate
+must be followed by deactivate, and the client owns the timing (spec example: 100 ms on, 50 ms
+off). With `Q=1` the Z21 queues and repeats the packet itself; the client only times the
+deactivate. **Never mix Q=0 and Q=1.** Lever uses `Q=0` everywhere, through one queue
+(`src/connection/AccessoryQueue.ts`): activate, pulse (default 150 ms, per accessory), deactivate,
+gap (default 150 ms). Reasons: it works on FW < 1.24 and third-party units, and LOAD-2 needs the
+queue anyway.
+
+## 11. Feedback (Lever)
+
+Decoders: `packages/z21-protocol/src/feedback.ts`; the source-independent layer is
+`src/connection/FeedbackTracker.ts`. Tests: `__tests__/feedback.test.ts`.
+
+### Broadcast flags (§2.16 p. 16)
+
+The PDF's flag table is laid out in two columns that are easy to misread. In order: `0x00000001`
+driving and switching, **`0x00000002` R-Bus feedback** (`LAN_RMBUS_DATACHANGED`), `0x00000004`
+RailCom of subscribed locos, `0x00000100` system state. Further: **`0x08000000` LocoNet detectors**
+(FW 1.22), **`0x00080000` CAN detectors** (FW 1.30), `0x00040000` RailCom for all locos (**never**,
+like `0x00010000`), `0x01000000` / `0x02000000` / `0x04000000` raw LocoNet forwarding (not used).
+Lever subscribes to `0x1` plus only the feedback sources the project uses (LOAD-1).
+
+| Message               | Dir    | Bytes                                                                      | Spec        |
+| --------------------- | ------ | -------------------------------------------------------------------------- | ----------- |
+| LAN_RMBUS_GETDATA     | C→Z    | `05 00 81 00 <group>`                                                      | §7.2 p. 45  |
+| LAN_RMBUS_DATACHANGED | Z→C BC | `0F 00 80 00 <group> <10 status bytes>`                                    | §7.1 p. 45  |
+| LAN_LOCONET_DETECTOR  | C→Z    | `07 00 A4 00 <type> <addr u16 LE>`                                         | §9.5 p. 53  |
+| LAN_LOCONET_DETECTOR  | Z→C BC | `<07+n> 00 A4 00 <type> <feedback addr u16 LE> <info[n]>`                  | §9.5 p. 54  |
+| LAN_CAN_DETECTOR      | C→Z    | `07 00 C4 00 00 <NId u16 LE>` (`00 D0` = all)                              | §10.1 p. 57 |
+| LAN_CAN_DETECTOR      | Z→C BC | `0E 00 C4 00 <NId u16> <Addr u16> <Port> <Type> <Value1 u16> <Value2 u16>` | §10.1 p. 58 |
+
+- **R-Bus:** group 0 = modules 1–10, group 1 = 11–20; one byte per module, **input 1 = bit 0**
+  (from the spec example: `0xC5` = inputs 8, 7, 3, 1).
+- **LocoNet:** request types `0x80` SIC (Digitrax/Blücher, address 0), `0x81` Uhlenbrock report
+  address, `0x82` LISSY. Report types `0x01` occupied/free, `0x02`/`0x03` transponder enters/exits,
+  `0x10` LISSY loco, `0x11` LISSY block, `0x12` LISSY speed.
+- **CAN:** Type `0x01` occupancy; Value1 `0x0000` free, `0x0100` free + voltage, `0x1000` occupied,
+  `0x1100` occupied + voltage, `0x1201`–`0x1203` overload 1–3. Types `0x11`–`0x1F`: RailCom loco
+  address list, two per message, ended by address 0; top two bits = direction (`10` forward, `11`
+  backwards, `0x` none). A CAN detector may also be emulated as R-Bus and/or LocoNet (Z21
+  Maintenance Tool; factory: R-Bus on, LocoNet on), so **the same input can arrive by two
+  routes**: a project should use one source per detector.
+
+## 12. Ambiguities found by Lever
+
+1. **Two accessory numbering conventions in one spec:** FAdr 0 = turnout #1 (§5, Roco display),
+   but extended RawAddress 4 = address 1 (§5.4). Separate conversion functions.
+2. **When is `LAN_X_TURNOUT_INFO` sent?** §5.3 says "when the status has been changed". Z21Sim
+   sends it on **activate** and not on deactivate (section 13). To check on the z21 start and the
+   DR5000.
+3. **`ZZ=00` "not switched yet"**: Lever shows it as "not switched since power-up" (unknown
+   position), never as a position (MULTI-3).
+4. **LocoNet `0x81` report address** must be sent as the configured value **minus 1** (§9.5
+   example: 1017 → `0x03F8`). Conversely, **GBM16XN** transponder reports need **+1** to match the
+   configured feedback address. Neither is applied automatically.
+5. **CAN overload values** (`0x12xx`) do not carry the "with voltage" bit. Lever reports
+   `trackVoltage: false` during overload; do not read anything into it.
+6. **CAN identity:** NId is fixed per detector, Addr is user-configured. Lever identifies inputs by
+   **Addr + port** (what the user configures) and shows NId for information.
+7. **LISSY Info[2]** bits are `0 DIR1 DIR0 0 K3 K2 K1 K0`; DIR0 = 0 is forwards, valid only when
+   DIR1 = 1.
+
+## 13. Observed behaviour of Z21Sim for accessories and feedback (Lever, 2026-11-17)
+
+Full table: `docs/dummy-server.md`. In short: turnout info and extended-accessory info are broadcast
+to every client with flag `0x1` (including the sender) **on activate**; `Q=1` is accepted; `ZZ=00`
+for never-switched addresses; extended accessories are supported (FW 1.43); **no reply to any
+feedback request** (R-Bus, LocoNet, CAN). Two complete Lever engines against Z21Sim each see the
+other's switching (`src/engine/__tests__/liveCentralUnit.test.ts`).

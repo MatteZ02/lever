@@ -185,10 +185,11 @@ type AccessoryOutput = {address: number}; // address as the Roco app shows it
 ### 4.4 Feedback: source-independent
 
 ```ts
+// Built in Phase 1: src/shared/feedback.ts
 type FeedbackInputRef =
-  | {source: 'rbus'; group: 0 | 1; module: number; input: number}
-  | {source: 'loconet'; type: number; address: number}
-  | {source: 'can'; networkId: number; module: number; port: number};
+  | {source: 'rbus'; module: number; input: number} // module 1-20, input 1-8
+  | {source: 'loconet'; address: number} // feedback address
+  | {source: 'can'; module: number; port: number}; // module address, port 0-7
 
 type Block = {
   id: string;
@@ -198,9 +199,11 @@ type Block = {
 };
 ```
 
-The connection layer turns each source's messages into one event shape,
-`{input: FeedbackInputRef, occupied: boolean, railcom?: …}`. Adding a source is a project setting
-(which broadcast flag to subscribe to), not code.
+The connection layer (`FeedbackTracker`) turns each source's messages into one shape,
+`FeedbackInputState` = `{input, occupied, locos, overload, …}`, and reports only changes. Adding a
+source is a project setting (which broadcast flag to subscribe to, which status to ask for), not
+code. CAN inputs are identified by the user-set module address and port; the detector's fixed
+network id is shown for information.
 
 ### 4.5 Topology (derived)
 

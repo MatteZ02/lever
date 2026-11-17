@@ -23,13 +23,25 @@ Firmware levels that matter for Lever (spec revision history, §5):
 Note on `Q`: the spec says never to mix `Q=0` and `Q=1` commands. Lever serialises accessory commands
 itself (LOAD-2), so it uses `Q=0` everywhere; that also works on central units without the queue.
 
-To check on the z21 start in Phase 1 (with the protocol log):
+To check on the z21 start (with the user; tools below):
 
-- [ ] Accessory broadcasts reach a second client (MULTI-1).
+- [ ] Accessory broadcasts reach a second client (MULTI-1): run the live test.
+- [ ] Is `LAN_X_TURNOUT_INFO` sent on activate (as Z21Sim does), on deactivate, or both?
 - [ ] `LAN_X_TURNOUT_INFO` after power-up reports `ZZ=00` ("not switched yet") until switched.
-- [ ] Turnout numbering in the Roco app matches `FAdr = number − 1` (spec §5, option 2).
-- [ ] Behaviour when a second activate arrives before the deactivate (must not happen; confirm the
-      queue prevents it).
+- [ ] Turnout numbering in the Roco app matches `FAdr = number − 1` (spec §5, option 2): switch
+      turnout #N in Lever's developer panel and check that the same turnout moves as in the Roco app.
+- [ ] Default pulse 150 ms and gap 150 ms throw the club's turnouts reliably.
+- [ ] Extended accessories are refused by Lever on FW 1.33 (a notice, nothing sent).
+
+Tools, the same for every central unit:
+
+```powershell
+node scripts/z21-probe.mjs 192.168.0.111 21105 --switch-address=<FAdr>   # raw probe with 3 clients
+$env:LEVER_Z21_HOST = '192.168.0.111'; $env:LEVER_Z21_SWITCH_FADR = '<FAdr>'
+npx vitest run src/engine/__tests__/liveCentralUnit.test.ts                # two Lever engines
+```
+
+Both switch one accessory output pair both ways; choose an address where that is harmless.
 
 ## DigiKeijs DR5000 (club central unit)
 

@@ -73,6 +73,27 @@ Turn on **Settings → Protocol log**. `>>` is sent, `<<` is received, `--` is a
 - Lever counts as **connected only after the first reply**.
 - When idle, a keepalive (`07 00 40 00 21 24 05`) is sent about every 25 s.
 - On quit, Lever sends `04 00 30 00` (logoff) before closing.
+- Switching an accessory: activate (e.g. `09 00 40 00 53 00 04 89 DE`), then after the pulse
+  (150 ms) deactivate (`… 81 D6`), then at least 150 ms before the next accessory command.
+
+### Testing accessories and feedback without a layout
+
+Until the track diagrams exist, the **Accessory and feedback test** panel in the main window
+switches one accessory by its number in the Roco app (output 1 / output 2), asks its position, and
+lists what the central unit reports, including changes made from other apps. It can also switch on
+feedback sources (R-Bus, LocoNet, CAN) and lists occupied inputs.
+
+Two copies of Lever, or Lever and the Roco app, should show each other's switching at once.
+
+Protocol-level tools, which also work against real hardware (see
+[hardware-notes.md](hardware-notes.md)):
+
+```powershell
+node scripts/z21-probe.mjs 127.0.0.1 21105        # raw probe with three clients
+$env:LEVER_Z21_HOST = '127.0.0.1'                 # two Lever engines against a live unit
+npx vitest run src/engine/__tests__/liveCentralUnit.test.ts
+Remove-Item Env:LEVER_Z21_HOST
+```
 
 ## Building a release
 

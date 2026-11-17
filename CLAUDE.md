@@ -18,15 +18,15 @@ app), which must keep working without Lever.
 
 ## Status
 
-| Phase | Content                                                               | State                                                                                                |
-| ----- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 0     | Setup, process model, theme, lint, protocol package, packaged app     | done on Windows 10 against Z21Sim; approved 2026-11-17; Windows 11 and low-spec check pending (user) |
-| 1     | Dummy-server probe, accessory/feedback protocol, accessory queue      | in progress                                                                                          |
-| 2     | Project files, single-view editor, validation, test mode              | not started                                                                                          |
-| 3     | Operating mode Level 1, feedback monitor, areas                       | not started                                                                                          |
-| 4     | Several views, multiple windows, full layout view, station connectors | not started                                                                                          |
-| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                          |
-| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                          |
+| Phase | Content                                                               | State                                                                                                    |
+| ----- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| 0     | Setup, process model, theme, lint, protocol package, packaged app     | done on Windows 10 against Z21Sim; approved 2026-11-17; Windows 11 and low-spec check pending (user)     |
+| 1     | Dummy-server probe, accessory/feedback protocol, accessory queue      | done against Z21Sim (incl. two engines, MULTI-1); z21 start test and feedback test server pending (user) |
+| 2     | Project files, single-view editor, validation, test mode              | not started                                                                                              |
+| 3     | Operating mode Level 1, feedback monitor, areas                       | not started                                                                                              |
+| 4     | Several views, multiple windows, full layout view, station connectors | not started                                                                                              |
+| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                              |
+| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                              |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
 screenshots (`Z21_control_station_*.PNG`: olten, inselburg-dettingen, Sissach), the JuliaData
@@ -75,11 +75,14 @@ src/main/               Electron main: windows, menu, IPC, settings.json, Engine
                         crash), security policy. No single-instance lock (MULTI-5).
 src/preload/            contextBridge API `window.lever` (types in api.ts). Holds the raw port.
 src/engine/             utilityProcess entry (index.ts) + Engine (no Electron imports; tested).
-src/connection/         ConnectionManager (from Throttle, see COPIED_FROM.md), Node dgram
-                        transport (ephemeral port), later the accessory queue and feedback.
+src/connection/         ConnectionManager (from Throttle, see COPIED_FROM.md; runtime broadcast
+                        flags), Node dgram transport (ephemeral port), AccessoryQueue (LOAD-2),
+                        FeedbackTracker (R-Bus/LocoNet/CAN → one input-state shape).
 src/model/              PURE: project schema, diagram, topology builder (Phase 2).
-src/interlocking/       PURE: live state, level modules, routing (Phase 3+).
-src/shared/             PURE: engine API (Zod, versioned), settings schema, strings.ts.
+src/interlocking/       PURE: accessoryState.ts (commanded vs reported); later levels, routing.
+src/shared/             PURE: engine API (Zod, versioned), settings schema, feedback types,
+                        strings.ts.
+scripts/z21-probe.mjs   Raw protocol probe with 3 clients; run on Z21Sim, z21 start, DR5000.
 src/renderer/theme/     palette.ts, colors.ts (light/dark tokens incl. diagram), diagram.ts
                         (line patterns), tokens.ts. Exposed as CSS variables.
 src/renderer/src/       React app; Zustand stores mirror engine events; safety/shortcuts.ts.
@@ -87,7 +90,11 @@ src/renderer/src/       React app; Zustand stores mirror engine events; safety/s
 
 Entry points: `src/main/index.ts`, `src/engine/index.ts`, `src/preload/index.ts`,
 `src/renderer/src/main.tsx`. Main applies settings to the engine (connect, protocol log); renderers
-send engine commands (STOP, power) straight over their port.
+send engine commands (STOP, power, accessories, feedback sources) straight over their port. The
+engine API addresses accessories by **FAdr**; converting a displayed Roco number (+ project offset)
+is the model's job. `DeveloperPanel.tsx` is a temporary test tool until the diagrams exist.
+`src/engine/__tests__/liveCentralUnit.test.ts` runs two engines against real hardware when
+`LEVER_Z21_HOST` is set (skipped otherwise).
 
 ## Rules that matter
 
