@@ -62,8 +62,8 @@ const api: LeverApi = {
   },
   project: {
     get: () => ipcRenderer.invoke('project:get') as Promise<ProjectState>,
-    update: (project) =>
-      ipcRenderer.invoke('project:update', project) as Promise<
+    update: (project, clientId) =>
+      ipcRenderer.invoke('project:update', project, clientId) as Promise<
         {revision: number} | {error: string}
       >,
     action: (action) =>

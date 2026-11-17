@@ -21,6 +21,7 @@ export type ColorTokens = {
   textOnAccent: string;
   accent: string;
   focusRing: string;
+  modalBackdrop: string;
 
   // Safety controls and track status (CARRY-2)
   stopButton: string;
@@ -87,6 +88,7 @@ export const lightColors: ColorTokens = {
   textOnAccent: palette.white,
   accent: palette.blue700,
   focusRing: palette.blue500,
+  modalBackdrop: palette.shade,
 
   stopButton: palette.red700,
   stopButtonHover: palette.red800,
@@ -148,6 +150,7 @@ export const darkColors: ColorTokens = {
   textOnAccent: palette.white,
   accent: palette.blue300,
   focusRing: palette.blue300,
+  modalBackdrop: palette.shade,
 
   stopButton: palette.red700,
   stopButtonHover: palette.red600,
@@ -186,7 +189,7 @@ export const darkColors: ColorTokens = {
   trainNumberBackground: palette.grey800,
   trainNumberText: palette.grey50,
 
-  signalBody: palette.grey800,
+  signalBody: palette.grey300,
   signalStop: palette.red500,
   signalProceed: palette.green400,
   signalCaution: palette.amber300,

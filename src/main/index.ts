@@ -20,11 +20,18 @@ import {EngineHost} from './engineHost';
 import {ProjectController} from './project/projectController';
 import {applySecurityPolicy} from './security';
 import {applySettingsUpdate, loadSettings, saveSettings} from './settingsFile';
+import {runUiScript, uiScriptPath} from './uiAutomation';
 
 // Several instances may run at once, also on one PC (MULTI-5), so there is
 // deliberately no app.requestSingleInstanceLock().
 
 const engine = new EngineHost();
+// Development-only UI automation (never in packaged builds). It uses its own
+// settings and recovery folder, never the user's.
+const uiScript = uiScriptPath();
+if (uiScript) {
+  app.setPath('userData', join(process.env['LEVER_UI_OUT'] ?? '.', 'userData'));
+}
 let settings: Settings;
 let projects: ProjectController;
 // The last central-unit profile sent to the engine, to send only changes.
@@ -96,9 +103,15 @@ const createWindow = (): BrowserWindow => {
       nodeIntegration: false,
       webSecurity: true,
       spellcheck: false,
+      // Hidden automation windows must still render (uiAutomation.ts).
+      backgroundThrottling: uiScript === undefined,
     },
   });
-  window.once('ready-to-show', () => window.show());
+  if (uiScript) {
+    window.once('ready-to-show', () => void runUiScript(window, uiScript));
+  } else {
+    window.once('ready-to-show', () => window.show());
+  }
 
   const devServer = process.env['ELECTRON_RENDERER_URL'];
   if (!app.isPackaged && devServer) {
@@ -232,16 +245,24 @@ const registerIpc = (): void => {
 
   // A whole project from the editor; validated by the document. Returns the
   // new revision, or an error message (e.g. read-only).
-  ipcMain.handle('project:update', (event, project: unknown) => {
-    if (!isAppFrame(event)) {
-      return {error: 'not allowed'};
-    }
-    try {
-      return {revision: projects.document.update(project)};
-    } catch (error) {
-      return {error: String(error)};
-    }
-  });
+  ipcMain.handle(
+    'project:update',
+    (event, project: unknown, clientId: unknown) => {
+      if (!isAppFrame(event)) {
+        return {error: 'not allowed'};
+      }
+      try {
+        return {
+          revision: projects.document.update(
+            project,
+            typeof clientId === 'string' ? clientId : undefined,
+          ),
+        };
+      } catch (error) {
+        return {error: String(error)};
+      }
+    },
+  );
 
   ipcMain.handle('project:action', async (event, action: unknown) => {
     if (
@@ -283,7 +304,10 @@ app.on('before-quit', (event) => {
   }
   // Save the project, then log off from the central unit (REU-4).
   event.preventDefault();
-  void projects.beforeQuit().then((proceed) => {
+  const ready = uiScript
+    ? projects.document.close().then(() => true)
+    : projects.beforeQuit();
+  void ready.then((proceed) => {
     if (!proceed) {
       return;
     }

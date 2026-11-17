@@ -43,4 +43,7 @@ export const palette = {
   cyan700: '#00838F',
 
   lunar: '#E8EEF5',
+
+  // Semi-transparent black for modal backdrops.
+  shade: '#00000080',
 } as const;

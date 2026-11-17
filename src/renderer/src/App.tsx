@@ -1,21 +1,11 @@
-import {DeveloperPanel} from './components/DeveloperPanel';
 import {Notices} from './components/Notices';
-import {ProtocolLog} from './components/ProtocolLog';
-import {SettingsPanel} from './components/SettingsPanel';
 import {StatusBar} from './components/StatusBar';
-import {useEngineStore} from './store/engineStore';
+import {Workspace} from './Workspace';
 
-export const App = () => {
-  const protocolLog = useEngineStore((state) => state.protocolLog);
-  return (
-    <div className="app">
-      <StatusBar />
-      <Notices />
-      <main className="workspace">
-        <SettingsPanel />
-        <DeveloperPanel />
-        {protocolLog && <ProtocolLog />}
-      </main>
-    </div>
-  );
-};
+export const App = () => (
+  <div className="app">
+    <StatusBar />
+    <Notices />
+    <Workspace />
+  </div>
+);

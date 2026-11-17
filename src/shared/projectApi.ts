@@ -17,6 +17,12 @@ export type ProjectState = {
   // Changes not yet written to disk (autosave pending, or never saved).
   unsaved: boolean;
   lastSavedAt?: number;
+  // What caused this state: a file action (open, new, restore…), an edit
+  // from a window, or only a save. Windows replace their working copy for
+  // file actions and for edits made by another window.
+  origin: 'file' | 'edit' | 'save';
+  // The window (client id) that made the last edit.
+  editedBy?: string;
 };
 
 export type ProjectFileAction =

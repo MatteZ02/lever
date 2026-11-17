@@ -45,6 +45,7 @@ export class ProjectDocument {
       project: options.initial,
       readOnly: false,
       unsaved: false,
+      origin: 'file',
     };
   }
 
@@ -115,12 +116,12 @@ export class ProjectDocument {
 
   // A change from the editor. Validated again here: it crossed a process
   // boundary.
-  update(project: unknown): number {
+  update(project: unknown, editedBy?: string): number {
     if (this.state.readOnly) {
       throw new Error('Project is read-only');
     }
     const parsed = projectSchema.parse(project);
-    this.replace({project: parsed, unsaved: true});
+    this.replace({project: parsed, unsaved: true}, 'edit', editedBy);
     this.scheduleAutosave();
     return this.state.revision;
   }
@@ -202,8 +203,18 @@ export class ProjectDocument {
     this.lock = null;
   }
 
-  private replace(changes: Partial<ProjectState>): void {
-    this.state = {...this.state, ...changes, revision: this.state.revision + 1};
+  private replace(
+    changes: Partial<ProjectState>,
+    origin: ProjectState['origin'] = 'file',
+    editedBy?: string,
+  ): void {
+    this.state = {
+      ...this.state,
+      ...changes,
+      origin,
+      editedBy: origin === 'save' ? this.state.editedBy : editedBy,
+      revision: this.state.revision + 1,
+    };
     this.options.onChange(this.state);
   }
 
@@ -246,7 +257,7 @@ export class ProjectDocument {
         }
         await writeProjectFile(path, project);
         if (this.state.project === project) {
-          this.replace({unsaved: false, lastSavedAt: now});
+          this.replace({unsaved: false, lastSavedAt: now}, 'save');
         }
       })
       .catch((error: unknown) => {

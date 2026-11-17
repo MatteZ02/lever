@@ -25,7 +25,11 @@ export type LeverApi = {
   project: {
     get(): Promise<ProjectState>;
     // Sends the edited project; the main process validates and autosaves it.
-    update(project: Project): Promise<{revision: number} | {error: string}>;
+    // `clientId` identifies the window, so it can recognise its own edits.
+    update(
+      project: Project,
+      clientId: string,
+    ): Promise<{revision: number} | {error: string}>;
     // File actions; the main process shows the dialogs.
     action(action: ProjectFileAction): Promise<void>;
     onChange(listener: (state: ProjectState) => void): () => void;

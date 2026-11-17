@@ -1,0 +1,619 @@
+// SVG shapes for diagram elements (section 8.0). One grid unit = one SVG user
+// unit; the view's viewBox does the zooming. Colours come from theme tokens;
+// line patterns from theme/diagram.ts.
+//
+// Every shape draws an invisible, wider hit area with data-element-id, so
+// clicks are easy at any zoom. Live state (positions, aspects, occupancy) is
+// optional: the editor draws plain geometry.
+import {memo} from 'react';
+import {
+  BufferStop,
+  DiagramElement,
+  GenericAccessory,
+  Label,
+  Platform,
+  Signal,
+  StationConnector,
+  Track,
+  Turnout,
+  VirtualPoint,
+} from '../../../model/elements';
+import {
+  Direction,
+  GridPoint,
+  rotateDirection,
+  vector,
+} from '../../../model/geometry';
+import {turnoutGeometry, turnoutPorts} from '../../../model/ports';
+import {AspectIcon} from '../../../model/signalTypes';
+import {color, diagramDash, diagramStroke} from '../../theme';
+
+// --- live state (Phase 3 fills these in) -----------------------------------
+
+export type TurnoutDisplay = {
+  // Undefined: position unknown.
+  position?: string;
+  status: 'confirmed' | 'unconfirmed' | 'unknown';
+};
+
+export type ElementDisplay = {
+  turnout?: TurnoutDisplay;
+  aspect?: AspectIcon | 'unknown';
+};
+
+// --- helpers ---------------------------------------------------------------
+
+const HIT_WIDTH = 0.7;
+const unit = (direction: Direction) => {
+  const v = vector(direction);
+  const length = Math.hypot(v.x, v.y);
+  return {x: v.x / length, y: v.y / length};
+};
+const along = (point: GridPoint, direction: Direction, distance: number) => {
+  const u = unit(direction);
+  return {x: point.x + u.x * distance, y: point.y + u.y * distance};
+};
+const trackStroke = {
+  stroke: color.trackFree,
+  strokeWidth: diagramStroke.track,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  fill: 'none',
+};
+
+const Halo = ({d}: {d: string}) => (
+  <path
+    d={d}
+    style={{
+      stroke: color.accent,
+      strokeWidth: 0.42,
+      strokeOpacity: 0.45,
+      fill: 'none',
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+    }}
+  />
+);
+
+const polylinePath = (list: GridPoint[]) =>
+  list.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x} ${p.y}`).join(' ');
+
+// --- track -----------------------------------------------------------------
+
+const TrackShape = ({track, selected}: {track: Track; selected: boolean}) => {
+  const d = polylinePath(track.points);
+  return (
+    <g>
+      {selected && <Halo d={d} />}
+      <path d={d} style={trackStroke} />
+      <path
+        d={d}
+        data-element-id={track.id}
+        style={{stroke: 'transparent', strokeWidth: HIT_WIDTH, fill: 'none'}}
+        pointerEvents="stroke"
+      />
+    </g>
+  );
+};
+
+// --- turnouts, crossings, slips ----------------------------------------------
+
+// The gap left in an inactive leg next to the centre (LOOK-5).
+const GAP = diagramDash.inactiveLegGap;
+
+const TurnoutShape = ({
+  turnout,
+  selected,
+  display,
+}: {
+  turnout: Turnout;
+  selected: boolean;
+  display?: TurnoutDisplay;
+}) => {
+  const geometry = turnoutGeometry(turnout.type, turnout.orientation);
+  const ports = turnoutPorts(turnout);
+  const centre = turnout.at;
+  // Legs that the current position uses (all legs when there is no state).
+  const activePorts = new Set<string>();
+  if (!display || geometry.positions.length === 0) {
+    ports.forEach((port) => activePorts.add(port.name));
+  } else if (display.position) {
+    geometry.transitions
+      .filter((transition) => transition.positions.includes(display.position!))
+      .forEach((transition) => {
+        activePorts.add(transition.from);
+        activePorts.add(transition.to);
+      });
+  }
+  const unknown = display !== undefined && display.status === 'unknown';
+  const manual = turnout.control.kind === 'manual';
+  const legsPath = ports
+    .map((port) => `M${centre.x} ${centre.y} L${port.at.x} ${port.at.y}`)
+    .join(' ');
+
+  return (
+    <g>
+      {selected && <Halo d={legsPath} />}
+      {ports.map((port) => {
+        const active = activePorts.has(port.name);
+        const start = active ? centre : along(centre, port.direction, GAP);
+        return (
+          <line
+            key={port.name}
+            x1={start.x}
+            y1={start.y}
+            x2={port.at.x}
+            y2={port.at.y}
+            style={{
+              ...trackStroke,
+              stroke: active ? color.trackFree : color.trackInactiveLeg,
+              strokeWidth: active
+                ? diagramStroke.track
+                : diagramStroke.inactiveLeg,
+              strokeDasharray:
+                display?.status === 'unconfirmed' && active
+                  ? diagramDash.turnoutUnconfirmed
+                  : undefined,
+            }}
+          />
+        );
+      })}
+      {(turnout.type === 'singleSlip' || turnout.type === 'doubleSlip') && (
+        <SlipMarks turnout={turnout} />
+      )}
+      {/* Switch point: a dot, hollow and coloured for manual turnouts. */}
+      {geometry.positions.length > 0 && (
+        <circle
+          cx={centre.x}
+          cy={centre.y}
+          r={manual ? 0.16 : 0.11}
+          style={{
+            fill: manual ? 'none' : color.trackFree,
+            stroke: manual ? color.turnoutManual : 'none',
+            strokeWidth: 0.06,
+          }}
+        />
+      )}
+      {manual && (
+        <text
+          x={centre.x}
+          y={centre.y - 0.35}
+          textAnchor="middle"
+          style={{fill: color.turnoutManual, fontSize: 0.36, fontWeight: 700}}
+        >
+          M
+        </text>
+      )}
+      {unknown && (
+        <text
+          x={centre.x}
+          y={centre.y + 0.55}
+          textAnchor="middle"
+          style={{fill: color.turnoutUnknown, fontSize: 0.5, fontWeight: 700}}
+        >
+          ?
+        </text>
+      )}
+      <circle
+        cx={centre.x}
+        cy={centre.y}
+        r={0.75}
+        data-element-id={turnout.id}
+        style={{fill: 'transparent'}}
+      />
+    </g>
+  );
+};
+
+// Small dots beside the crossing point mark a slip (as on the Z21 panel).
+const SlipMarks = ({turnout}: {turnout: Turnout}) => {
+  const d = turnout.orientation;
+  const sides =
+    turnout.type === 'doubleSlip'
+      ? [rotateDirection(d, 2), rotateDirection(d, -2)]
+      : [rotateDirection(d, 2)];
+  return (
+    <>
+      {sides.map((side) => {
+        const p = along(turnout.at, side, 0.32);
+        return (
+          <circle
+            key={side}
+            cx={p.x}
+            cy={p.y}
+            r={0.08}
+            style={{fill: color.trackFree}}
+          />
+        );
+      })}
+    </>
+  );
+};
+
+// --- signals ---------------------------------------------------------------
+
+const ASPECT_LAMPS: Record<AspectIcon | 'unknown', string[]> = {
+  stop: [color.signalStop],
+  proceed: [color.signalProceed],
+  reduced: [color.signalProceed, color.signalCaution],
+  expectStop: [color.signalCaution, color.signalCaution],
+  expectProceed: [color.signalProceed, color.signalProceed],
+  shuntStop: [color.signalStop],
+  shuntAllowed: [color.signalShunting],
+  dark: [color.signalDark],
+  unknown: [color.signalUnknown],
+};
+
+const SignalShape = ({
+  signal,
+  selected,
+  category,
+  aspect,
+}: {
+  signal: Signal;
+  selected: boolean;
+  category: 'main' | 'distant' | 'shunting';
+  aspect?: AspectIcon | 'unknown';
+}) => {
+  // Beside the track, on the given side of the direction of travel.
+  const sideDirection = rotateDirection(
+    signal.facing,
+    signal.side === 'right' ? -2 : 2,
+  );
+  const base = along(signal.at, sideDirection, 0.45);
+  const head = along(base, signal.facing, 0.35);
+  const tail = along(base, signal.facing, -0.25);
+  const lamps = aspect ? ASPECT_LAMPS[aspect] : [];
+  const radius = category === 'shunting' ? 0.13 : 0.17;
+  const headShape =
+    category === 'distant' ? (
+      <rect
+        x={head.x - radius}
+        y={head.y - radius}
+        width={radius * 2}
+        height={radius * 2}
+        transform={`rotate(45 ${head.x} ${head.y})`}
+        style={{
+          fill: lamps[0] ?? 'none',
+          stroke: color.signalBody,
+          strokeWidth: 0.05,
+        }}
+      />
+    ) : (
+      <circle
+        cx={head.x}
+        cy={head.y}
+        r={radius}
+        style={{
+          fill: lamps[0] ?? 'none',
+          stroke: color.signalBody,
+          strokeWidth: 0.05,
+        }}
+      />
+    );
+  const second = lamps[1]
+    ? along(head, sideDirection, radius * 2.1)
+    : undefined;
+  return (
+    <g>
+      {selected && <Halo d={`M${tail.x} ${tail.y} L${head.x} ${head.y}`} />}
+      {/* Mast from the track side, pointing in the direction of travel. */}
+      <line
+        x1={tail.x}
+        y1={tail.y}
+        x2={head.x}
+        y2={head.y}
+        style={{
+          stroke: color.signalBody,
+          strokeWidth: 0.07,
+          strokeLinecap: 'round',
+        }}
+      />
+      {headShape}
+      {second && (
+        <circle
+          cx={second.x}
+          cy={second.y}
+          r={radius * 0.8}
+          style={{fill: lamps[1], stroke: color.signalBody, strokeWidth: 0.04}}
+        />
+      )}
+      <circle
+        cx={base.x}
+        cy={base.y}
+        r={0.5}
+        data-element-id={signal.id}
+        style={{fill: 'transparent'}}
+      />
+    </g>
+  );
+};
+
+// --- other point elements ----------------------------------------------------
+
+const BufferStopShape = ({
+  element,
+  selected,
+}: {
+  element: BufferStop;
+  selected: boolean;
+}) => {
+  const across = rotateDirection(element.direction, 2);
+  const a = along(element.at, across, 0.3);
+  const b = along(element.at, across, -0.3);
+  const d = `M${a.x} ${a.y} L${b.x} ${b.y}`;
+  return (
+    <g>
+      {selected && <Halo d={d} />}
+      <path d={d} style={{...trackStroke, strokeWidth: 0.16}} />
+      <circle
+        cx={element.at.x}
+        cy={element.at.y}
+        r={0.45}
+        data-element-id={element.id}
+        style={{fill: 'transparent'}}
+      />
+    </g>
+  );
+};
+
+const VirtualPointShape = ({
+  element,
+  selected,
+}: {
+  element: VirtualPoint;
+  selected: boolean;
+}) => {
+  const {x, y} = element.at;
+  const s = 0.2;
+  const d = `M${x} ${y - s} L${x + s} ${y} L${x} ${y + s} L${x - s} ${y} Z`;
+  return (
+    <g>
+      {selected && <Halo d={d} />}
+      <path
+        d={d}
+        style={{
+          fill: color.diagramBackground,
+          stroke: color.trackFree,
+          strokeWidth: 0.05,
+        }}
+      />
+      <circle
+        cx={x}
+        cy={y}
+        r={0.45}
+        data-element-id={element.id}
+        style={{fill: 'transparent'}}
+      />
+    </g>
+  );
+};
+
+const ConnectorShape = ({
+  element,
+  selected,
+}: {
+  element: StationConnector;
+  selected: boolean;
+}) => {
+  const tipPoint = along(element.at, element.direction, 0.55);
+  const left = along(
+    along(element.at, element.direction, 0.1),
+    rotateDirection(element.direction, 2),
+    0.25,
+  );
+  const right = along(
+    along(element.at, element.direction, 0.1),
+    rotateDirection(element.direction, -2),
+    0.25,
+  );
+  const paired = element.pairedWith !== undefined;
+  const d = `M${left.x} ${left.y} L${tipPoint.x} ${tipPoint.y} L${right.x} ${right.y} Z`;
+  const labelAt = along(element.at, element.direction, 1);
+  return (
+    <g>
+      {selected && <Halo d={d} />}
+      {/* Unpaired (line not drawn): open arrow; paired: filled (LOOK-3). */}
+      <path
+        d={d}
+        style={{
+          fill: paired ? color.trackFree : 'none',
+          stroke: paired ? color.trackFree : color.connectorUnpaired,
+          strokeWidth: 0.06,
+          strokeLinejoin: 'round',
+        }}
+      />
+      {element.name && (
+        <text
+          x={labelAt.x}
+          y={labelAt.y + 0.18}
+          textAnchor={
+            unit(element.direction).x < -0.1
+              ? 'end'
+              : unit(element.direction).x > 0.1
+                ? 'start'
+                : 'middle'
+          }
+          style={{fill: color.diagramLabel, fontSize: 0.5}}
+        >
+          {element.name}
+        </text>
+      )}
+      <circle
+        cx={element.at.x}
+        cy={element.at.y}
+        r={0.5}
+        data-element-id={element.id}
+        style={{fill: 'transparent'}}
+      />
+    </g>
+  );
+};
+
+const AccessoryShape = ({
+  element,
+  selected,
+}: {
+  element: GenericAccessory;
+  selected: boolean;
+}) => {
+  const {x, y} = element.at;
+  const d = `M${x - 0.3} ${y - 0.3} h0.6 v0.6 h-0.6 Z`;
+  return (
+    <g>
+      {selected && <Halo d={d} />}
+      <path
+        d={d}
+        style={{
+          fill: color.surface,
+          stroke: color.diagramLabel,
+          strokeWidth: 0.05,
+        }}
+      />
+      <text
+        x={x}
+        y={y + 0.17}
+        textAnchor="middle"
+        style={{fill: color.diagramLabel, fontSize: 0.45, fontWeight: 700}}
+      >
+        {element.role === 'uncoupler'
+          ? 'U'
+          : element.role === 'light'
+            ? 'L'
+            : 'A'}
+      </text>
+      <circle
+        cx={x}
+        cy={y}
+        r={0.5}
+        data-element-id={element.id}
+        style={{fill: 'transparent'}}
+      />
+    </g>
+  );
+};
+
+const LABEL_SIZES = {small: 0.5, normal: 0.7, large: 1.1};
+
+const LabelShape = ({
+  element,
+  selected,
+}: {
+  element: Label;
+  selected: boolean;
+}) => {
+  const size = LABEL_SIZES[element.size];
+  const width = Math.max(1, element.text.length * size * 0.55);
+  return (
+    <g>
+      {selected && (
+        <rect
+          x={element.at.x - 0.1}
+          y={element.at.y - size * 0.9}
+          width={width + 0.2}
+          height={size * 1.2}
+          style={{fill: color.accent, fillOpacity: 0.2}}
+        />
+      )}
+      <text
+        x={element.at.x}
+        y={element.at.y}
+        style={{fill: color.diagramLabel, fontSize: size}}
+      >
+        {element.text}
+      </text>
+      <rect
+        x={element.at.x}
+        y={element.at.y - size * 0.9}
+        width={width}
+        height={size * 1.2}
+        data-element-id={element.id}
+        style={{fill: 'transparent'}}
+      />
+    </g>
+  );
+};
+
+const PlatformShape = ({
+  element,
+  selected,
+}: {
+  element: Platform;
+  selected: boolean;
+}) => (
+  <rect
+    x={element.at.x}
+    y={element.at.y}
+    width={element.width}
+    height={element.height}
+    data-element-id={element.id}
+    style={{
+      fill: color.surfaceRaised,
+      stroke: selected ? color.accent : color.border,
+      strokeWidth: selected ? 0.12 : 0.04,
+    }}
+  />
+);
+
+// --- dispatcher ------------------------------------------------------------
+
+export type ElementShapeProps = {
+  element: DiagramElement;
+  selected: boolean;
+  signalCategory?: 'main' | 'distant' | 'shunting';
+  display?: ElementDisplay;
+};
+
+export const ElementShape = memo(function ElementShape({
+  element,
+  selected,
+  signalCategory,
+  display,
+}: ElementShapeProps) {
+  switch (element.kind) {
+    case 'track':
+      return <TrackShape track={element} selected={selected} />;
+    case 'turnout':
+      return (
+        <TurnoutShape
+          turnout={element}
+          selected={selected}
+          display={display?.turnout}
+        />
+      );
+    case 'signal':
+      return (
+        <SignalShape
+          signal={element}
+          selected={selected}
+          category={signalCategory ?? 'main'}
+          aspect={display?.aspect}
+        />
+      );
+    case 'bufferStop':
+      return <BufferStopShape element={element} selected={selected} />;
+    case 'virtualPoint':
+      return <VirtualPointShape element={element} selected={selected} />;
+    case 'connector':
+      return <ConnectorShape element={element} selected={selected} />;
+    case 'accessory':
+      return <AccessoryShape element={element} selected={selected} />;
+    case 'label':
+      return <LabelShape element={element} selected={selected} />;
+    case 'platform':
+      return <PlatformShape element={element} selected={selected} />;
+  }
+});
+
+// Drawing order: decoration first, then track, then everything on top.
+export const LAYER: Record<DiagramElement['kind'], number> = {
+  platform: 0,
+  label: 1,
+  track: 2,
+  turnout: 3,
+  bufferStop: 4,
+  virtualPoint: 4,
+  connector: 4,
+  accessory: 5,
+  signal: 6,
+};

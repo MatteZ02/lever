@@ -4,11 +4,13 @@ import {applyTheme, resolveThemeMode} from '../theme';
 import {App} from './App';
 import {shortcutAction} from './safety/shortcuts';
 import {bindEngineStore, sendCommand} from './store/engineStore';
+import {bindProjectStore} from './store/projectStore';
 import {bindSettingsStore, useSettingsStore} from './store/settingsStore';
 import './styles.css';
 
 bindEngineStore();
 bindSettingsStore();
+bindProjectStore();
 
 // Theme follows the setting, and Windows when set to "system".
 const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
