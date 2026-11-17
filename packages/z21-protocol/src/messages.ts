@@ -1,7 +1,9 @@
 // Decoders for Z21-to-client messages.
+import {TurnoutInfoPosition, turnoutInfoPosition} from './accessories';
 import {decodeLocoAddress} from './address';
 import {CentralStateBit, LanHeader} from './constants';
 import {Dataset, splitDatagram, xorChecksum} from './dataset';
+import {RBUS_MODULES_PER_GROUP} from './feedback';
 import {decodeSpeedByte, SpeedSteps, speedStepsFromLocoInfo} from './speed';
 
 export type CentralState = {
@@ -58,6 +60,31 @@ export type Z21Message =
   | {type: 'xbusVersion'; xbusVersion: number; commandStationId: number}
   | {type: 'firmwareVersion'; firmwareVersion: string}
   | {type: 'locoInfo'; loco: LocoInfo}
+  // Lever additions: accessories (§5) and feedback (§7, §9.5, §10.1).
+  | {type: 'turnoutInfo'; fAdr: number; position: TurnoutInfoPosition}
+  | {
+      type: 'extAccessoryInfo';
+      rawAddress: number;
+      value: number;
+      // false: status 0xFF "data unknown".
+      valid: boolean;
+    }
+  | {type: 'rbusData'; group: number; status: number[]}
+  | {
+      type: 'locoNetDetector';
+      detectorType: number;
+      feedbackAddress: number;
+      info: number[];
+    }
+  | {
+      type: 'canDetector';
+      networkId: number;
+      moduleAddress: number;
+      port: number;
+      detectorType: number;
+      value1: number;
+      value2: number;
+    }
   // Valid dataset that this app does not handle.
   | {type: 'unknown'; header: number; data: Uint8Array}
   // Dataset that is too short or has a wrong checksum.
@@ -65,6 +92,8 @@ export type Z21Message =
 
 const LOCO_INFO_MIN_DATA_BYTES = 8; // DB0..DB7
 const SYSTEM_STATE_LENGTH = 16;
+// NId, Addr (u16 each), Port, Type, Value1, Value2 (u16 each).
+const CAN_DETECTOR_LENGTH = 10;
 
 export const decodeCentralState = (raw: number): CentralState => ({
   raw,
@@ -184,6 +213,25 @@ const decodeXBus = (dataset: Dataset): Z21Message => {
         return {type: 'stopped'};
       }
       break;
+    case 0x43:
+      if (db.length < 3) {
+        return invalid(dataset, 'LAN_X_TURNOUT_INFO too short');
+      }
+      return {
+        type: 'turnoutInfo',
+        fAdr: (db[0] << 8) | db[1],
+        position: turnoutInfoPosition(db[2]),
+      };
+    case 0x44:
+      if (db.length < 4) {
+        return invalid(dataset, 'LAN_X_EXT_ACCESSORY_INFO too short');
+      }
+      return {
+        type: 'extAccessoryInfo',
+        rawAddress: (db[0] << 8) | db[1],
+        value: db[2],
+        valid: db[3] === 0x00,
+      };
     case 0xef:
       if (db.length < LOCO_INFO_MIN_DATA_BYTES) {
         return invalid(dataset, 'LAN_X_LOCO_INFO too short');
@@ -247,6 +295,35 @@ export const decodeDataset = (dataset: Dataset): Z21Message => {
       return data.length >= SYSTEM_STATE_LENGTH
         ? {type: 'systemState', systemState: decodeSystemState(data)}
         : invalid(dataset, 'System state too short');
+    case LanHeader.RMBUS_DATACHANGED:
+      return data.length >= 1 + RBUS_MODULES_PER_GROUP
+        ? {
+            type: 'rbusData',
+            group: data[0],
+            status: Array.from(data.subarray(1, 1 + RBUS_MODULES_PER_GROUP)),
+          }
+        : invalid(dataset, 'LAN_RMBUS_DATACHANGED too short');
+    case LanHeader.LOCONET_DETECTOR:
+      return data.length >= 3
+        ? {
+            type: 'locoNetDetector',
+            detectorType: data[0],
+            feedbackAddress: data[1] | (data[2] << 8),
+            info: Array.from(data.subarray(3)),
+          }
+        : invalid(dataset, 'LAN_LOCONET_DETECTOR too short');
+    case LanHeader.CAN_DETECTOR:
+      return data.length >= CAN_DETECTOR_LENGTH
+        ? {
+            type: 'canDetector',
+            networkId: data[0] | (data[1] << 8),
+            moduleAddress: data[2] | (data[3] << 8),
+            port: data[4],
+            detectorType: data[5],
+            value1: data[6] | (data[7] << 8),
+            value2: data[8] | (data[9] << 8),
+          }
+        : invalid(dataset, 'LAN_CAN_DETECTOR too short');
   }
   return unknown(dataset);
 };

@@ -18,6 +18,11 @@ export const LanHeader = {
   GET_BROADCASTFLAGS: 0x51,
   SYSTEMSTATE_DATACHANGED: 0x84,
   SYSTEMSTATE_GETDATA: 0x85,
+  // Lever additions (feedback, §7, §9.5, §10.1).
+  RMBUS_DATACHANGED: 0x80,
+  RMBUS_GETDATA: 0x81,
+  LOCONET_DETECTOR: 0xa4,
+  CAN_DETECTOR: 0xc4,
 } as const;
 
 // Broadcast flags (§2.16). Only the flags this app may use are listed.
@@ -29,6 +34,13 @@ export const BroadcastFlag = {
   BASIC: 0x00000001,
   // LAN_SYSTEMSTATE_DATACHANGED on every change. Off by default.
   SYSTEM_STATE: 0x00000100,
+  // Lever additions: feedback sources. Subscribe only to those in use.
+  // R-Bus feedback modules: LAN_RMBUS_DATACHANGED.
+  RBUS: 0x00000002,
+  // LocoNet occupancy detectors: LAN_LOCONET_DETECTOR (FW 1.22).
+  LOCONET_DETECTOR: 0x08000000,
+  // CAN occupancy detectors: LAN_CAN_DETECTOR (FW 1.30).
+  CAN_DETECTOR: 0x00080000,
 } as const;
 
 // CentralState bitmask (§2.12, §2.18).

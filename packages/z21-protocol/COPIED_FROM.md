@@ -22,4 +22,22 @@ Source commit: **`789c70e`** (branch `release`, "docs: guides and App Store text
 
 ## Additions since the copy
 
-_None yet (Phase 1 adds accessory and feedback messages)._
+General Z21 protocol, not Lever-specific, so they belong in the shared package (Phase 1,
+2026-11-17):
+
+| File                                                                | Change                                                                                                                                               |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `accessories.ts` (new)                                              | FAdr / extended RawAddress ranges and conversions (Roco numbering), `TurnoutInfoPosition`.                                                           |
+| `feedback.ts` (new)                                                 | R-Bus input expansion, LocoNet detector and CAN detector report decoding.                                                                            |
+| `constants.ts`                                                      | `LanHeader`: `RMBUS_DATACHANGED`, `RMBUS_GETDATA`, `LOCONET_DETECTOR`, `CAN_DETECTOR`. `BroadcastFlag`: `RBUS`, `LOCONET_DETECTOR`, `CAN_DETECTOR`.  |
+| `commands.ts`                                                       | `lanXGetTurnoutInfo`, `lanXSetTurnout`, `lanXSetExtAccessory`, `lanXGetExtAccessoryInfo`, `lanRmbusGetData`, `lanLocoNetDetector`, `lanCanDetector`. |
+| `messages.ts`                                                       | `Z21Message` variants `turnoutInfo`, `extAccessoryInfo`, `rbusData`, `locoNetDetector`, `canDetector`, and their decoding.                           |
+| `index.ts`                                                          | Exports the two new modules.                                                                                                                         |
+| `__tests__/accessories.test.ts`, `__tests__/feedback.test.ts` (new) | Byte-exact tests from the spec examples (§5.2, §5.4, §7.1, §9.5, §10.1) and Z21Sim captures.                                                         |
+| `__tests__/messages.test.ts`                                        | The "unknown dataset" example used header `0x80`, now decoded as R-Bus data; changed to `0x99`.                                                      |
+
+Effect on Throttle when ported back: Throttle sets only the basic flag `0x1`, which also delivers
+`LAN_X_TURNOUT_INFO` (and `LAN_X_EXT_ACCESSORY_INFO`) whenever anyone switches an accessory. These
+used to decode as `unknown` and now decode as `turnoutInfo` / `extAccessoryInfo`; Throttle's
+message handling ignores both (no matching `case`). The feedback messages need flags Throttle never
+sets.

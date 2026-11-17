@@ -214,9 +214,10 @@ describe('robustness', () => {
   });
 
   it('passes unknown datasets through', () => {
-    expect(decodeOne('06 00 80 00 00 01')).toMatchObject({
+    // Lever: was header 0x80, which is now decoded as LAN_RMBUS_DATACHANGED.
+    expect(decodeOne('06 00 99 00 00 01')).toMatchObject({
       type: 'unknown',
-      header: 0x80,
+      header: 0x99,
     });
   });
 
