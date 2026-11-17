@@ -85,6 +85,11 @@ feedback sources (R-Bus, LocoNet, CAN) and lists occupied inputs.
 
 Two copies of Lever, or Lever and the Roco app, should show each other's switching at once.
 
+**Feedback:** Z21Sim does not emulate feedback. Start the test-only fake Z21 instead
+(`npm run fake-z21`, UDP 21107; see [dummy-server.md](dummy-server.md#fake-z21-for-feedback-test-only)),
+set Lever's central unit to `127.0.0.1` port `21107`, tick the feedback sources in the test panel,
+and type e.g. `rbus 3 2 on` in the fake's window. The input appears as occupied in Lever.
+
 Protocol-level tools, which also work against real hardware (see
 [hardware-notes.md](hardware-notes.md)):
 

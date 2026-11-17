@@ -83,6 +83,9 @@ src/interlocking/       PURE: accessoryState.ts (commanded vs reported); later l
 src/shared/             PURE: engine API (Zod, versioned), settings schema, feedback types,
                         strings.ts.
 scripts/z21-probe.mjs   Raw protocol probe with 3 clients; run on Z21Sim, z21 start, DR5000.
+scripts/fake-z21.mjs    TEST-ONLY fake central unit with feedback emulation (Z21Sim has none);
+                        `npm run fake-z21` (UDP 21107) or imported by tests. Independent of
+                        packages/z21-protocol on purpose. Types: fake-z21.d.mts.
 src/renderer/theme/     palette.ts, colors.ts (light/dark tokens incl. diagram), diagram.ts
                         (line patterns), tokens.ts. Exposed as CSS variables.
 src/renderer/src/       React app; Zustand stores mirror engine events; safety/shortcuts.ts.

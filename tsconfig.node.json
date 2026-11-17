@@ -9,6 +9,7 @@
     "electron.vite.config.ts",
     "vitest.config.mts",
     "packages/*/src/**/*",
+    "scripts/**/*.d.mts",
     "src/main/**/*",
     "src/preload/**/*",
     "src/engine/**/*",

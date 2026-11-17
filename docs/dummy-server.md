@@ -41,7 +41,34 @@ Raw output of the run: see the commit that added this file, or run the probe aga
   against Z21Sim, including the two-instance check (MULTI-1).
 - Z21Sim confirms a position on **activate**, so it cannot show whether Lever's deactivate timing is
   right; check that in the protocol log and on the z21 start.
-- **Feedback cannot be tested against Z21Sim** over the protocol, unless its window (web UI on
-  port 6080) has a feedback simulation that was not switched on. Workaround proposed: a small
-  test-only Z21 responder in this repository (`scripts/`), which answers the same subset and can
-  report feedback inputs on request. Waiting for the user's decision.
+- **Feedback cannot be tested against Z21Sim** over the protocol. For that, use the fake Z21 below
+  (decided by the user, 2026-11-17).
+
+## Fake Z21 for feedback (test only)
+
+`scripts/fake-z21.mjs` is a small fake central unit written for Lever's tests. It is **not** a
+simulator of a real Z21 and must never be used on a layout. It answers the subset Lever uses:
+
+| Area                 | Behaviour                                                                                                                                                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clients              | Any number, each with its own broadcast flags; logoff and the 60 s timeout remove a client.                                                                                                                                               |
+| Identity             | `--hardware=0x204 --firmware=1.33` by default (like the user's z21 start); serial, GET_CODE (unlocked), X-Bus version.                                                                                                                    |
+| Track                | Status, power on/off, STOP, and a short circuit sent like the z21 start (short circuit, then power off).                                                                                                                                  |
+| Turnouts             | GET/SET; `LAN_X_TURNOUT_INFO` broadcast on activate (default), deactivate or both (`--turnout-info-on=`). **Records a Q=0 activate while another output is still active** (`violations`).                                                 |
+| Extended accessories | From FW 1.40; older firmware answers `LAN_X_UNKNOWN_COMMAND` (or nothing, `--unsupported=silent`).                                                                                                                                        |
+| Feedback             | R-Bus (flag `0x2`), LocoNet detectors (FW 1.22, flag `0x08000000`), CAN detectors (FW 1.30, flag `0x00080000`), including RailCom loco lists and transponders. Status requests answered; changes broadcast only to clients with the flag. |
+
+It is written independently of `packages/z21-protocol`, so it cannot share an encoding bug with
+Lever. Run it by hand (keyboard commands, `help` lists them):
+
+```sh
+npm run fake-z21            # UDP 21107, so it can run next to Z21Sim on 21105
+```
+
+and point Lever at `127.0.0.1:21107`. Example: `rbus 3 2 on`, `loconet 5 on`, `can 1 4 on`,
+`can-locos 1 4 3+ 210-`, `turnout 7 2`, `short`.
+
+Tests start it directly: `src/engine/__tests__/fakeZ21.test.ts` runs the real engine over UDP
+against it (feedback from all three sources, subscription only to chosen sources, no overlapping
+outputs when six turnouts are thrown at once, turnouts switched elsewhere, no extended accessory
+on FW 1.33, short circuit).
