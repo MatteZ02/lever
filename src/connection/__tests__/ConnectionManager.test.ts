@@ -175,6 +175,35 @@ describe('connecting', () => {
   });
 });
 
+describe('broadcast flags', () => {
+  it('sends changed flags at once and again after reconnecting', async () => {
+    const {manager, transports} = await connected();
+    manager.setBroadcastFlags(0x00000003);
+    expect(transports[0].takeSent()).toEqual(['08 00 50 00 03 00 00 00']);
+
+    manager.setBroadcastFlags(0x00000003);
+    expect(transports[0].takeSent()).toEqual([]);
+
+    vi.advanceTimersByTime(CONNECTION_LOST_AFTER_MS + 5000);
+    await vi.advanceTimersByTimeAsync(RECONNECT_DELAYS_MS[0]);
+    expect(transports[1].sent[0].startsWith('08 00 50 00 03 00 00 00')).toBe(
+      true,
+    );
+  });
+
+  it('refuses the all-locos flag', () => {
+    const {manager} = setup();
+    expect(() => manager.setBroadcastFlags(0x00010001)).toThrow();
+    expect(
+      () =>
+        new ConnectionManager({
+          createTransport: () => new FakeTransport(),
+          broadcastFlags: 0x00010000,
+        }),
+    ).toThrow();
+  });
+});
+
 describe('keepalive and connection loss', () => {
   it('sends LAN_X_GET_STATUS after the idle period', async () => {
     const {current} = await connected();

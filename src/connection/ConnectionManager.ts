@@ -75,12 +75,23 @@ export type ConnectionOptions = {
   combineDatasets?: boolean;
 };
 
+// LOCO_INFO for all locos (§2.16). Never subscribed: it is not meant for
+// clients like this one and would load the network shared with 10 Throttles.
+const ALL_LOCOS_FLAG = 0x00010000;
+
+const checkFlags = (flags: number): number => {
+  if ((flags & ALL_LOCOS_FLAG) !== 0) {
+    throw new Error('Broadcast flag 0x00010000 (all locos) is not allowed');
+  }
+  return flags >>> 0;
+};
+
 // Owns the single UDP socket to the central unit and everything that happens
 // on it: connecting, keepalive, reconnecting and logoff.
 export class ConnectionManager {
   private readonly events = new TypedEmitter<ConnectionEvents>();
   private readonly createTransport: () => UdpTransport;
-  private readonly broadcastFlags: number;
+  private broadcastFlags: number;
   private readonly combineDatasets: boolean;
 
   private host = '';
@@ -108,8 +119,27 @@ export class ConnectionManager {
 
   constructor(options: ConnectionOptions) {
     this.createTransport = options.createTransport;
-    this.broadcastFlags = options.broadcastFlags ?? BroadcastFlag.BASIC;
+    this.broadcastFlags = checkFlags(
+      options.broadcastFlags ?? BroadcastFlag.BASIC,
+    );
     this.combineDatasets = options.combineDatasets ?? true;
+  }
+
+  // Changes the broadcast flags, e.g. when the project's feedback sources
+  // change (LOAD-1). Sent at once when connected, and on every reconnect.
+  setBroadcastFlags(flags: number): void {
+    const checked = checkFlags(flags);
+    if (checked === this.broadcastFlags) {
+      return;
+    }
+    this.broadcastFlags = checked;
+    if (this.state === 'connected') {
+      this.sendNow([lanSetBroadcastFlags(checked)]);
+    }
+  }
+
+  getBroadcastFlags(): number {
+    return this.broadcastFlags;
   }
 
   on<K extends keyof ConnectionEvents>(
