@@ -79,7 +79,7 @@ Versions were checked on 2026-11-17 and are pinned exactly.
 No other runtime dependencies. Diagrams are plain SVG in React (STK-8); undo/redo, pathfinding
 and the grid editor are small enough to write without libraries.
 
-## 4. Data model _(proposed)_
+## 4. Data model (built in Phase 2: `src/model/`)
 
 ### 4.1 Principles
 

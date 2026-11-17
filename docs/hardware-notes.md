@@ -58,6 +58,27 @@ Both switch one accessory output pair both ways; choose an address where that is
 No DR5000 documentation is available. Everything below must be **verified on the club's DR5000 with
 the protocol log**. Anything that may differ is configurable.
 
+### What to change if something differs
+
+All of these are per-layout settings (Edit layout → nothing selected → _Central unit settings_),
+stored in the `.lever` file (`settings.centralUnit`, `src/model/centralUnitProfile.ts`). No code
+change is needed for any of them:
+
+| Observation on the layout                                         | Setting                                                     |
+| ----------------------------------------------------------------- | ----------------------------------------------------------- |
+| Every turnout is off by the same number vs. the Roco app / DR5000 | Address offset (e.g. +4 or −4)                              |
+| Most turnouts move the wrong way                                  | Output for "straight" (one turnout: _Swap outputs 1 and 2_) |
+| Turnouts do not always throw                                      | Pulse length (per project, or per turnout)                  |
+| In a row of commands, some turnouts are skipped                   | Pause between accessory commands                            |
+| The DR5000 wants queued commands                                  | Turnout commands → queued (Q=1)                             |
+| Positions stay "unconfirmed" (no `LAN_X_TURNOUT_INFO`)            | Turnout position confirmed → also after a timeout           |
+| A three-way turnout, slip or signal maps outputs differently      | That element's _Outputs per position_                       |
+| Feedback arrives on another bus than expected                     | Feedback buses used, and the block's input source           |
+
+If a difference cannot be expressed with these, the place to change behaviour is
+`src/model/accessoryCommands.ts` (which outputs are sent) or `src/connection/AccessoryQueue.ts`
+(timing); both are covered by unit tests.
+
 - [ ] Accessory addressing: does `FAdr = number − 1` match what the DR5000's own tools show?
       If not, use the per-project **address offset** (LOAD-5).
 - [ ] `LAN_X_TURNOUT_INFO` broadcasts to all clients with flag `0x00000001`, also for changes made
