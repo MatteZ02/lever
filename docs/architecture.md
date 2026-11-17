@@ -1,6 +1,7 @@
 # Lever architecture
 
-> **Status: Phase 0 proposal, awaiting approval.** Sections marked _proposed_ are not built yet.
+> **Status: approved by the user on 2026-11-17** (data model, project file extension `.lever`).
+> Sections marked _proposed_ are not built yet.
 > Requirement IDs (STK-4, LOOK-1, …) refer to the project brief.
 
 ## 1. Processes
@@ -273,7 +274,8 @@ type Project = {
 };
 ```
 
-Saved as pretty-printed JSON (diffable). Autosave and rotating backups go next to the file in a
+Saved as pretty-printed JSON (diffable) with the extension **`.lever`** (decided by the user).
+Autosave and rotating backups go next to the file in a
 `.lever-backups/` folder; settings stay in the user data folder.
 
 ## 5. Interlocking engine _(proposed)_
@@ -309,13 +311,21 @@ crossing at the right). No addresses are visible. The Z21 app also has a **detti
 no screenshot; the user decided to draft the three stations and fill in addresses later. The
 `.z21` export in `docs/reference/` is an older demo layout and is not used.
 
-Questions for Phase 2 (when drafting the sample project):
+Answers from the user (2026-11-17), for the sample project:
 
-- olten has no tracks 5 and 6: hidden tracks, or numbering only?
-- olten's two unlabelled tracks at the bottom with a crossover: which line are they?
-- Are the black dots on crossings double slips (two addresses?) or plain crossings?
-- _Pun_ / _Kel_ = the red and yellow main lines (Sissach's route rows say _Punainen_ /
-  _Keltainen_)?
+- olten is modelled on Olten (Switzerland). **Tracks 5 and 6 do not exist** on the layout; the
+  numbering follows the real station. Draw tracks 1–4 and 7–12 only.
+- olten's two tracks at the bottom are the **main-line passing tracks**. In reality they join the
+  lines leaving tracks 3–6 and 7–12 through a **spiral** that the Z21 app could not draw (no
+  overpasses). In Lever, this connection can be drawn with station connectors (two views, or two
+  connectors in the same view), so routing knows about it.
+- **Black dots on a crossing = double slip.** All double slips on the layout use **one address**
+  that switches both ends together: both routes straight, or both diverging, at the same time.
+  So a double slip with one address has two states: _straight_ (A1–B1 and A2–B2 straight through)
+  and _diverging_ (both curved routes). The model must allow this one-address mode (ACC-1 allows
+  one or two addresses).
+- _Pun_ / _Kel_ (_Punainen_ / _Keltainen_, red / yellow) are the colour names of the **two main
+  lines**. Exits are named after the line they lead to.
 
 ## 7. Plan
 

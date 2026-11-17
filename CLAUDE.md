@@ -18,15 +18,15 @@ app), which must keep working without Lever.
 
 ## Status
 
-| Phase | Content                                                               | State                                                                                                  |
-| ----- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| 0     | Setup, process model, theme, lint, protocol package, packaged app     | done on Windows 10 against Z21Sim; **awaiting approval**; Windows 11 and low-spec check pending (user) |
-| 1     | Dummy-server probe, accessory/feedback protocol, accessory queue      | not started                                                                                            |
-| 2     | Project files, single-view editor, validation, test mode              | not started                                                                                            |
-| 3     | Operating mode Level 1, feedback monitor, areas                       | not started                                                                                            |
-| 4     | Several views, multiple windows, full layout view, station connectors | not started                                                                                            |
-| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                            |
-| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                            |
+| Phase | Content                                                               | State                                                                                                |
+| ----- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 0     | Setup, process model, theme, lint, protocol package, packaged app     | done on Windows 10 against Z21Sim; approved 2026-11-17; Windows 11 and low-spec check pending (user) |
+| 1     | Dummy-server probe, accessory/feedback protocol, accessory queue      | in progress                                                                                          |
+| 2     | Project files, single-view editor, validation, test mode              | not started                                                                                          |
+| 3     | Operating mode Level 1, feedback monitor, areas                       | not started                                                                                          |
+| 4     | Several views, multiple windows, full layout view, station connectors | not started                                                                                          |
+| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                          |
+| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                          |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
 screenshots (`Z21_control_station_*.PNG`: olten, inselburg-dettingen, Sissach), the JuliaData
@@ -41,6 +41,11 @@ Decisions by the user (2026-11-17):
 - Topology: draft the three stations from the screenshots with addresses left blank; addresses and
   the missing _dettingen_ page come later.
 - **Esc always means STOP**, except while typing in a text field. Dialogs never close with Esc.
+- Data model in `docs/architecture.md` approved; project files use the extension **`.lever`**.
+- Layout facts (sample project): olten has no tracks 5–6 (named after the real Olten); its bottom
+  tracks are the main-line passing tracks, joined to the station exits by an undrawn spiral;
+  **double slips use one address** that switches both ends together; _Pun_/_Kel_ (_Punainen_ /
+  _Keltainen_) are the red and yellow main lines. Details: `docs/architecture.md` section 6.
 
 ## Commands
 
