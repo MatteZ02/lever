@@ -18,15 +18,15 @@ app), which must keep working without Lever.
 
 ## Status
 
-| Phase | Content                                                               | State                                                                                                    |
-| ----- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| 0     | Setup, process model, theme, lint, protocol package, packaged app     | done on Windows 10 against Z21Sim; approved 2026-11-17; Windows 11 and low-spec check pending (user)     |
-| 1     | Dummy-server probe, accessory/feedback protocol, accessory queue      | done against Z21Sim (incl. two engines, MULTI-1); z21 start test and feedback test server pending (user) |
-| 2     | Project files, single-view editor, validation, test mode              | not started                                                                                              |
-| 3     | Operating mode Level 1, feedback monitor, areas                       | not started                                                                                              |
-| 4     | Several views, multiple windows, full layout view, station connectors | not started                                                                                              |
-| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                              |
-| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                              |
+| Phase | Content                                                               | State                                                                                                                            |
+| ----- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | Setup, process model, theme, lint, protocol package, packaged app     | done on Windows 10 against Z21Sim; approved 2026-11-17; Windows 11 and low-spec check pending (user)                             |
+| 1     | Dummy-server probe, accessory/feedback protocol, accessory queue      | done against Z21Sim (incl. two engines, MULTI-1) and the fake Z21 (feedback); z21 start protocol test pending (user connects it) |
+| 2     | Project files, single-view editor, validation, test mode              | not started                                                                                                                      |
+| 3     | Operating mode Level 1, feedback monitor, areas                       | not started                                                                                                                      |
+| 4     | Several views, multiple windows, full layout view, station connectors | not started                                                                                                                      |
+| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                                                      |
+| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                                                      |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
 screenshots (`Z21_control_station_*.PNG`: olten, inselburg-dettingen, Sissach), the JuliaData
