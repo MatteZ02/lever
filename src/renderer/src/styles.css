@@ -1,0 +1,289 @@
+/* Layout and type only. Colours come from theme variables (--color-*); see
+   src/renderer/theme. `npm run lint` rejects colour values here. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focusRing);
+  outline-offset: 2px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* --- Status bar (always visible) --------------------------------------- */
+
+.status-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.status-bar-centre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.connection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.connection-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+/* Shape cue in addition to colour: hollow while not connected. */
+.connection-dot--connecting,
+.connection-dot--reconnecting {
+  border: 3px solid var(--color-surface);
+  outline: 2px solid var(--color-connectionBusy);
+}
+
+.connection-state {
+  font-weight: 600;
+}
+
+.connection-detail {
+  font-size: 13px;
+  color: var(--color-textMuted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 220px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-textOnStatus);
+  justify-content: center;
+}
+
+.track-status--shortCircuit {
+  color: var(--color-textOnShortCircuit);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  animation: short-circuit-pulse 1s ease-in-out infinite alternate;
+}
+
+.track-status-icon {
+  font-size: 1.2em;
+}
+
+@keyframes short-circuit-pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track-status--shortCircuit {
+    animation: none;
+  }
+}
+
+.stop-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 56px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-stopButton);
+  color: var(--color-textOnStopButton);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.stop-button:hover {
+  background: var(--color-stopButtonHover);
+}
+
+.stop-button-key {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  opacity: 0.85;
+}
+
+.power-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* --- Common controls ---------------------------------------------------- */
+
+.button {
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surfaceRaised);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  min-height: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  min-width: 320px;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+label.choice {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+input[type='text'],
+input[type='number'] {
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--color-statusShortCircuit);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--color-textMuted);
+}
+
+/* --- Protocol log ------------------------------------------------------- */
+
+.protocol-log {
+  flex: 1;
+  min-height: 0;
+}
+
+.log-lines {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  font-family: Consolas, 'Cascadia Mono', monospace;
+  font-size: 13px;
+}
+
+.log-line {
+  white-space: pre-wrap;
+}
+
+.log-line--out {
+  color: var(--color-logOut);
+}
+
+.log-line--in {
+  color: var(--color-logIn);
+}
+
+.log-line--info {
+  color: var(--color-logInfo);
+}
+
+.log-time {
+  color: var(--color-textMuted);
+}
