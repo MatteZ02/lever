@@ -6,10 +6,12 @@
 // with these schemas, because they cross a process boundary (STK-11).
 import {z} from 'zod';
 import {ENGINE_API_VERSION} from './apiVersion';
+import {feedbackInputStateSchema, feedbackSourceSchema} from './feedback';
 
 export {ENGINE_API_VERSION};
 
 const version = z.literal(ENGINE_API_VERSION);
+const fAdrSchema = z.number().int().min(0).max(2047);
 
 // --- Commands (renderer → engine) -------------------------------------------
 
@@ -21,6 +23,31 @@ export const engineCommandSchema = z.discriminatedUnion('type', [
     v: version,
     type: z.literal('setProtocolLog'),
     enabled: z.boolean(),
+  }),
+  // Accessories, by function address (FAdr, spec §5). Converting the
+  // project's displayed address and offset to FAdr is the model's job.
+  // Queued (LOAD-2).
+  z.object({
+    v: version,
+    type: z.literal('switchAccessory'),
+    fAdr: fAdrSchema,
+    output: z.union([z.literal(0), z.literal(1)]),
+    pulseMs: z.number().int().positive().optional(),
+  }),
+  z.object({v: version, type: z.literal('queryAccessory'), fAdr: fAdrSchema}),
+  // Extended accessory (FW 1.40+). Refused when the firmware is known to be
+  // older.
+  z.object({
+    v: version,
+    type: z.literal('setExtAccessory'),
+    rawAddress: z.number().int().min(4).max(2047),
+    value: z.number().int().min(0).max(255),
+  }),
+  // Which feedback buses to subscribe to and query (LOAD-1, BLK-1).
+  z.object({
+    v: version,
+    type: z.literal('setFeedbackSources'),
+    sources: z.array(feedbackSourceSchema),
   }),
 ]);
 export type EngineCommand = z.infer<typeof engineCommandSchema>;
@@ -67,6 +94,29 @@ export const protocolLogEntrySchema = z.object({
 });
 export type ProtocolLogEntryValue = z.infer<typeof protocolLogEntrySchema>;
 
+export const accessoryStateSchema = z.object({
+  fAdr: z.number().int(),
+  reported: z.enum(['unknown', 'notSwitched', 'output1', 'output2', 'invalid']),
+  commanded: z.union([z.literal(0), z.literal(1), z.null()]),
+  updatedAt: z.number(),
+});
+export type AccessoryStateValue = z.infer<typeof accessoryStateSchema>;
+
+export const extAccessoryStateSchema = z.object({
+  rawAddress: z.number().int(),
+  value: z.number().int().optional(),
+  updatedAt: z.number(),
+});
+export type ExtAccessoryStateValue = z.infer<typeof extAccessoryStateSchema>;
+
+// Things the operator should know that are not errors in Lever, e.g. a
+// command the central unit cannot do. The renderer words them (strings.ts).
+export const engineNoticeSchema = z.object({
+  code: z.enum(['extAccessoryUnsupported']),
+  time: z.number(),
+});
+export type EngineNotice = z.infer<typeof engineNoticeSchema>;
+
 export const engineSnapshotSchema = z.object({
   connection: z.object({
     state: connectionStateSchema,
@@ -76,6 +126,12 @@ export const engineSnapshotSchema = z.object({
   trackStatus: trackStatusSchema,
   deviceInfo: deviceInfoSchema,
   protocolLog: z.boolean(),
+  accessories: z.array(accessoryStateSchema),
+  extAccessories: z.array(extAccessoryStateSchema),
+  feedbackSources: z.array(feedbackSourceSchema),
+  feedbackInputs: z.array(feedbackInputStateSchema),
+  // Accessory commands waiting in the queue.
+  accessoryQueueLength: z.number().int(),
 });
 export type EngineSnapshot = z.infer<typeof engineSnapshotSchema>;
 
@@ -108,6 +164,28 @@ export const engineEventSchema = z.discriminatedUnion('type', [
     type: z.literal('log'),
     entry: protocolLogEntrySchema,
   }),
+  z.object({
+    v: version,
+    type: z.literal('accessory'),
+    state: accessoryStateSchema,
+  }),
+  z.object({
+    v: version,
+    type: z.literal('extAccessory'),
+    state: extAccessoryStateSchema,
+  }),
+  // Only inputs that changed.
+  z.object({
+    v: version,
+    type: z.literal('feedback'),
+    changes: z.array(feedbackInputStateSchema),
+  }),
+  z.object({
+    v: version,
+    type: z.literal('accessoryQueue'),
+    length: z.number().int(),
+  }),
+  z.object({v: version, type: z.literal('notice'), notice: engineNoticeSchema}),
 ]);
 export type EngineEvent = z.infer<typeof engineEventSchema>;
 export type EngineEventInput = DistributiveOmit<EngineEvent, 'v'>;

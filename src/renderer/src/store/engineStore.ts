@@ -3,16 +3,22 @@
 // cross a process boundary.
 import {create} from 'zustand';
 import {
+  AccessoryStateValue,
   ConnectionStateValue,
   DeviceInfoValue,
   EngineCommandInput,
   engineEventSchema,
+  EngineNotice,
+  ExtAccessoryStateValue,
   ProtocolLogEntryValue,
   TrackStatusValue,
 } from '../../../shared/engineApi';
+import {FeedbackInputState, FeedbackSource} from '../../../shared/feedback';
 
 // The log view keeps this many entries; older ones are dropped.
 export const PROTOCOL_LOG_LIMIT = 2000;
+// Notices shown at once.
+const NOTICE_LIMIT = 5;
 
 type EngineState = {
   // False until the first snapshot arrives from the engine.
@@ -22,7 +28,15 @@ type EngineState = {
   deviceInfo: DeviceInfoValue;
   protocolLog: boolean;
   logEntries: ProtocolLogEntryValue[];
+  // Keyed by FAdr / RawAddress / feedback input key.
+  accessories: Record<number, AccessoryStateValue>;
+  extAccessories: Record<number, ExtAccessoryStateValue>;
+  feedbackSources: FeedbackSource[];
+  feedbackInputs: Record<string, FeedbackInputState>;
+  accessoryQueueLength: number;
+  notices: EngineNotice[];
   clearLog: () => void;
+  dismissNotice: (time: number) => void;
 };
 
 export const useEngineStore = create<EngineState>()((set) => ({
@@ -32,12 +46,28 @@ export const useEngineStore = create<EngineState>()((set) => ({
   deviceInfo: {},
   protocolLog: false,
   logEntries: [],
+  accessories: {},
+  extAccessories: {},
+  feedbackSources: [],
+  feedbackInputs: {},
+  accessoryQueueLength: 0,
+  notices: [],
   clearLog: () => set({logEntries: []}),
+  dismissNotice: (time) =>
+    set((state) => ({
+      notices: state.notices.filter((notice) => notice.time !== time),
+    })),
 }));
 
 export const sendCommand = (command: EngineCommandInput): void => {
   window.lever.engine.send(command);
 };
+
+const byKey = <T, K extends string | number>(
+  items: T[],
+  key: (item: T) => K,
+): Record<K, T> =>
+  Object.fromEntries(items.map((item) => [key(item), item])) as Record<K, T>;
 
 const handleEvent = (data: unknown): void => {
   const parsed = engineEventSchema.safeParse(data);
@@ -47,15 +77,25 @@ const handleEvent = (data: unknown): void => {
   }
   const event = parsed.data;
   switch (event.type) {
-    case 'snapshot':
+    case 'snapshot': {
+      const {snapshot} = event;
       useEngineStore.setState({
         ready: true,
-        connection: event.snapshot.connection,
-        trackStatus: event.snapshot.trackStatus,
-        deviceInfo: event.snapshot.deviceInfo,
-        protocolLog: event.snapshot.protocolLog,
+        connection: snapshot.connection,
+        trackStatus: snapshot.trackStatus,
+        deviceInfo: snapshot.deviceInfo,
+        protocolLog: snapshot.protocolLog,
+        accessories: byKey(snapshot.accessories, (state) => state.fAdr),
+        extAccessories: byKey(
+          snapshot.extAccessories,
+          (state) => state.rawAddress,
+        ),
+        feedbackSources: snapshot.feedbackSources,
+        feedbackInputs: byKey(snapshot.feedbackInputs, (state) => state.key),
+        accessoryQueueLength: snapshot.accessoryQueueLength,
       });
       break;
+    }
     case 'connection':
       useEngineStore.setState({
         connection: {state: event.state, host: event.host, port: event.port},
@@ -72,6 +112,35 @@ const handleEvent = (data: unknown): void => {
         logEntries: [...state.logEntries, event.entry].slice(
           -PROTOCOL_LOG_LIMIT,
         ),
+      }));
+      break;
+    case 'accessory':
+      useEngineStore.setState((state) => ({
+        accessories: {...state.accessories, [event.state.fAdr]: event.state},
+      }));
+      break;
+    case 'extAccessory':
+      useEngineStore.setState((state) => ({
+        extAccessories: {
+          ...state.extAccessories,
+          [event.state.rawAddress]: event.state,
+        },
+      }));
+      break;
+    case 'feedback':
+      useEngineStore.setState((state) => ({
+        feedbackInputs: {
+          ...state.feedbackInputs,
+          ...byKey(event.changes, (change) => change.key),
+        },
+      }));
+      break;
+    case 'accessoryQueue':
+      useEngineStore.setState({accessoryQueueLength: event.length});
+      break;
+    case 'notice':
+      useEngineStore.setState((state) => ({
+        notices: [...state.notices, event.notice].slice(-NOTICE_LIMIT),
       }));
       break;
   }

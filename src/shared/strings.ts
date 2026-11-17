@@ -81,5 +81,66 @@ export const strings = {
   errors: {
     invalidPort: 'Enter a port between 1 and 65535.',
     invalidHost: 'Enter the central unit’s IP address.',
+    invalidTurnoutNumber: 'Enter a turnout number between 1 and 2048.',
+  },
+
+  notices: {
+    extAccessoryUnsupported:
+      'The central unit’s firmware is too old for extended accessories (needs 1.40). Nothing was sent.',
+    dismiss: 'Dismiss',
+  },
+
+  // Developer tools: test accessories and feedback without a layout.
+  developer: {
+    title: 'Accessory and feedback test',
+    turnoutNumber: 'Turnout number (as in the Roco app)',
+    output1: 'Output 1',
+    output2: 'Output 2',
+    askPosition: 'Ask position',
+    dccAddress: (dccAddress: number, port: number) =>
+      `DCC decoder address ${dccAddress}, port ${port}`,
+    queue: (count: number) =>
+      count === 0
+        ? 'No accessory commands waiting'
+        : `${count} accessory command${count === 1 ? '' : 's'} waiting`,
+    accessoriesHeading: 'Accessories seen',
+    noAccessories: 'None yet. Switch one here, or from another app.',
+    feedbackHeading: 'Feedback',
+    noFeedback: 'No feedback inputs reported.',
+    feedbackSources: {
+      rbus: 'R-Bus',
+      loconet: 'LocoNet detectors',
+      can: 'CAN detectors',
+    },
+    occupiedOnly: 'Occupied inputs',
+  },
+
+  accessoryState: {
+    unknown: 'Unknown',
+    notSwitched: 'Not switched since power-up',
+    output1: 'Output 1',
+    output2: 'Output 2',
+    invalid: 'Invalid report',
+    waiting: (output: number) => `Waiting for output ${output}…`,
+  },
+
+  feedback: {
+    occupied: 'Occupied',
+    free: 'Free',
+    overload: (level: number) => `Overload ${level}`,
+    input: (key: string) => {
+      const [source, a, b] = key.split(':');
+      switch (source) {
+        case 'rbus':
+          return `R-Bus module ${a}, input ${b}`;
+        case 'loconet':
+          return `LocoNet address ${a}`;
+        case 'can':
+          return `CAN module ${a}, port ${b}`;
+        default:
+          return key;
+      }
+    },
+    locos: (addresses: number[]) => `Locos: ${addresses.join(', ')}`,
   },
 } as const;

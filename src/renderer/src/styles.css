@@ -287,3 +287,48 @@ input[type='number'] {
 .log-time {
   color: var(--color-textMuted);
 }
+
+/* --- Developer panel and notices ---------------------------------------- */
+
+.panel h3 {
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.plain-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: auto;
+}
+
+.workspace > .panel {
+  overflow: auto;
+}
+
+.notices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 16px 0;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 2px solid var(--color-statusEmergencyStop);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.notice-text {
+  flex: 1;
+}
