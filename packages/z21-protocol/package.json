@@ -1,0 +1,13 @@
+{
+  "name": "@lever/z21-protocol",
+  "version": "0.1.0",
+  "description": "Z21 LAN protocol encoding and decoding. Pure TypeScript, no Node, Electron, React or React Native imports.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
