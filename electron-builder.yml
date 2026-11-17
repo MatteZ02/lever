@@ -1,0 +1,40 @@
+# Packaging for Windows (DST-1): NSIS installer and portable zip, x64.
+# Unsigned (DST-3). To sign later, add the certificate settings under `win`
+# (see docs/development.md, "Code signing"); nothing else changes.
+appId: fi.alppirautatiet.lever
+productName: Lever
+copyright: Copyright © 2026 Alppirautatieharrastajat ry
+directories:
+  output: release-builds/${version}
+  buildResources: assets
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+asar: true
+# No auto-updater (DST-2).
+publish: null
+electronLanguages:
+  - en-US
+win:
+  icon: assets/icon.ico
+  executableName: Lever
+  # Used by the zip; the nsis section names the installer.
+  artifactName: Lever-${version}-portable-${arch}.${ext}
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: zip
+      arch: [x64]
+  # Signing is a configuration change only, e.g.:
+  # signtoolOptions:
+  #   certificateSubjectName: <name on the certificate>
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Lever
+  artifactName: Lever-${version}-setup-${arch}.${ext}
+  uninstallDisplayName: Lever

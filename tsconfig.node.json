@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.node.tsbuildinfo",
+    "lib": ["ES2023"],
+    "types": ["node", "vitest/globals", "electron-vite/node"]
+  },
+  "include": [
+    "electron.vite.config.ts",
+    "vitest.config.ts",
+    "packages/*/src/**/*",
+    "src/main/**/*",
+    "src/preload/**/*",
+    "src/engine/**/*",
+    "src/connection/**/*",
+    "src/interlocking/**/*",
+    "src/model/**/*",
+    "src/shared/**/*"
+  ]
+}

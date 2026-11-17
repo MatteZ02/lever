@@ -25,7 +25,7 @@ npm-debug.*
 .DS_Store
 Thumbs.db
 
-# Local reference material (decided by the user): never commit
+# Local reference material
 docs/reference/*.zip
 docs/reference/*.png
 docs/reference/*.PNG
