@@ -130,6 +130,25 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
       return categories;
     }, [view.elements, project.signalTypes]);
 
+    // The element layer depends only on the elements and their state, not on
+    // the viewport: zooming and panning then only change the viewBox, and
+    // React does not walk thousands of elements per step (STK-8).
+    const layer = useMemo(
+      () =>
+        sorted.map((element: DiagramElement) =>
+          hidden?.has(element.id) ? null : (
+            <ElementShape
+              key={element.id}
+              element={element}
+              selected={selection?.has(element.id) ?? false}
+              signalCategory={signalCategories.get(element.id)}
+              display={displays?.[element.id]}
+            />
+          ),
+        ),
+      [sorted, hidden, selection, signalCategories, displays],
+    );
+
     const toPointer = (event: PointerEvent<SVGSVGElement>): DiagramPointer => {
       const rect = svgRef.current!.getBoundingClientRect();
       const x = viewport.x + (event.clientX - rect.left) / viewport.scale;
@@ -247,17 +266,7 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
             fill="url(#grid-dots)"
           />
         )}
-        {sorted.map((element: DiagramElement) =>
-          hidden?.has(element.id) ? null : (
-            <ElementShape
-              key={element.id}
-              element={element}
-              selected={selection?.has(element.id) ?? false}
-              signalCategory={signalCategories.get(element.id)}
-              display={displays?.[element.id]}
-            />
-          ),
-        )}
+        {layer}
         {children}
       </svg>
     );
@@ -282,8 +291,8 @@ export const fitViewport = (
   if (points.length === 0) {
     return {x: -2, y: -2, scale: 24};
   }
-  const minX = Math.min(...points.map((p) => p.x)) - 2;
-  const maxX = Math.max(...points.map((p) => p.x)) + 2;
+  const minX = Math.min(...points.map((p) => p.x)) - 6;
+  const maxX = Math.max(...points.map((p) => p.x)) + 6;
   const minY = Math.min(...points.map((p) => p.y)) - 2;
   const maxY = Math.max(...points.map((p) => p.y)) + 2;
   const scale = Math.min(

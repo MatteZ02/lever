@@ -30,15 +30,27 @@ type Step =
   // return [x, y] in page coordinates.
   | {clickAtJs: string}
   | {drag: [[number, number], [number, number]]}
+  // Like drag; the expression returns [[x1, y1], [x2, y2]].
+  | {dragJs: string}
   | {key: string; ctrl?: boolean; shift?: boolean}
   | {type: string}
   | {capture: string}
-  | {js: string};
+  | {js: string}
+  // Mouse wheel at [x, y] (page coordinates) with deltaY, `times` times.
+  | {wheel: [number, number, number]; times?: number}
+  // Slows the renderer's CPU by this factor (Chromium DevTools emulation), to
+  // approximate a low-spec PC. 1 = off.
+  | {cpuThrottle: number}
+  // Prints the renderer's main-thread work (DevTools Performance metrics:
+  // task, script, layout, style time) since the previous metrics step.
+  | {metrics: string};
 
 export const uiScriptPath = (): string | undefined =>
   app.isPackaged ? undefined : process.env['LEVER_UI_SCRIPT'];
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+let lastMetrics: Record<string, number> = {};
 
 export const runUiScript = async (
   window: BrowserWindow,
@@ -115,8 +127,14 @@ const runSteps = async (window: BrowserWindow, scriptPath: string) => {
         contents.sendInputEvent({type: 'mouseUp', x, y, button, clickCount: n});
       }
       await sleep(120);
-    } else if ('drag' in step) {
-      const [[x1, y1], [x2, y2]] = step.drag;
+    } else if ('drag' in step || 'dragJs' in step) {
+      const [[x1, y1], [x2, y2]] =
+        'drag' in step
+          ? step.drag
+          : ((await contents.executeJavaScript(step.dragJs)) as [
+              [number, number],
+              [number, number],
+            ]);
       contents.sendInputEvent({type: 'mouseMove', x: x1, y: y1});
       contents.sendInputEvent({
         type: 'mouseDown',
@@ -131,6 +149,8 @@ const runSteps = async (window: BrowserWindow, scriptPath: string) => {
           x: Math.round(x1 + ((x2 - x1) * i) / 8),
           y: Math.round(y1 + ((y2 - y1) * i) / 8),
           button: 'left',
+          // Without this the page sees a move with no button held.
+          modifiers: ['leftbuttondown'],
         });
         await sleep(15);
       }
@@ -170,6 +190,43 @@ const runSteps = async (window: BrowserWindow, scriptPath: string) => {
       const image = await contents.capturePage();
       await writeFile(join(out, step.capture), image.toPNG());
       console.log(`[ui] captured ${step.capture}`);
+    } else if ('wheel' in step) {
+      const [x, y, deltaY] = step.wheel;
+      for (let i = 0; i < (step.times ?? 1); i++) {
+        contents.sendInputEvent({type: 'mouseWheel', x, y, deltaX: 0, deltaY});
+        await sleep(16);
+      }
+    } else if ('metrics' in step) {
+      if (!contents.debugger.isAttached()) {
+        contents.debugger.attach('1.3');
+      }
+      await contents.debugger.sendCommand('Performance.enable');
+      const {metrics} = (await contents.debugger.sendCommand(
+        'Performance.getMetrics',
+      )) as {metrics: {name: string; value: number}[]};
+      const now = Object.fromEntries(metrics.map((m) => [m.name, m.value]));
+      const keys = [
+        'TaskDuration',
+        'ScriptDuration',
+        'LayoutDuration',
+        'RecalcStyleDuration',
+      ];
+      const delta = Object.fromEntries(
+        keys.map((key) => [
+          key.replace('Duration', 'Ms'),
+          Math.round(((now[key] ?? 0) - (lastMetrics[key] ?? 0)) * 1000),
+        ]),
+      );
+      lastMetrics = now;
+      console.log(`[ui] ${step.metrics}: ${JSON.stringify(delta)}`);
+    } else if ('cpuThrottle' in step) {
+      if (!contents.debugger.isAttached()) {
+        contents.debugger.attach('1.3');
+      }
+      await contents.debugger.sendCommand('Emulation.setCPUThrottlingRate', {
+        rate: step.cpuThrottle,
+      });
+      console.log(`[ui] CPU throttling ×${step.cpuThrottle}`);
     } else if ('js' in step) {
       const result: unknown = await contents.executeJavaScript(step.js);
       console.log(`[ui] ${JSON.stringify(result)}`);

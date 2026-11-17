@@ -2,10 +2,10 @@
 // diagram, and in edit mode the toolbox, properties and problem/address
 // panels. Settings, the accessory test panel and the protocol log open in a
 // side drawer.
-import {useCallback, useState} from 'react';
+import {useCallback, useDeferredValue, useState} from 'react';
 import {deleteElements, rotateElements} from '../../model/editing';
 import {GridPoint} from '../../model/geometry';
-import {createView} from '../../model/project';
+import {createView, Project, StationView} from '../../model/project';
 import {strings} from '../../shared/strings';
 import {DeveloperPanel} from './components/DeveloperPanel';
 import {Modal} from './components/Modal';
@@ -54,7 +54,6 @@ export const Workspace = () => {
   const canUndo = useProjectStore((state) => state.past.length > 0);
   const canRedo = useProjectStore((state) => state.future.length > 0);
   useProjectStore((state) => state.activeViewId);
-  const viewports = useProjectStore((state) => state.viewports);
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [bottom, setBottom] = useState<BottomPanel>('problems');
   const [drawing, setDrawing] = useState<GridPoint[]>([]);
@@ -71,7 +70,10 @@ export const Workspace = () => {
   const rotatePlacement = useCallback(() => setPlaceRotation((r) => r + 1), []);
   useEditorKeys({drawing, setDrawing, rotatePlacement, fit});
 
-  const problems = useProblems(project ?? emptyProject);
+  // Validation runs at low priority: the diagram updates at once after an
+  // edit, the problem list a moment later (STK-8, large layouts).
+  const deferredProject = useDeferredValue(project);
+  const problems = useProblems(mode === 'edit' ? deferredProject : null);
   const warningCount = problems.filter((p) => p.severity !== 'info').length;
 
   if (!project || !document) {
@@ -223,13 +225,7 @@ export const Workspace = () => {
                 onDrawingChange={setDrawing}
               />
             ) : (
-              <DiagramView
-                className="diagram"
-                project={project}
-                view={view}
-                viewport={viewports[view.id] ?? DEFAULT_VIEWPORT}
-                onViewportChange={(next) => setViewport(view.id, next)}
-              />
+              <OperateCanvas project={project} view={view} />
             ))}
           {hint && (
             <div className="hint" role="status">
@@ -287,7 +283,7 @@ export const Workspace = () => {
           </div>
           <div className="bottom-content">
             {bottom === 'problems' ? (
-              <ProblemsPanel project={project} />
+              <ProblemsPanel project={project} problems={problems} />
             ) : (
               <AddressTable project={project} />
             )}
@@ -335,30 +331,25 @@ export const Workspace = () => {
   );
 };
 
-const emptyProject = {
-  format: 'lever-project',
-  schemaVersion: 1,
-  id: 'empty',
-  name: '',
-  settings: {
-    defaultLevel: 1,
-    centralUnit: {
-      addressOffset: 0,
-      straightOutput: 1,
-      pulseMs: 150,
-      accessoryGapMs: 150,
-      turnoutCommandMode: 'pulse',
-      confirmation: 'report',
-      confirmTimeoutMs: 2000,
-      feedbackSources: [],
-    },
-    blockReleaseDelayMs: 1000,
-    autoSignalsOnRoute: true,
-  },
-  views: [],
-  arrangements: [],
-  areas: [],
-  blocks: [],
-  signalTypes: [],
-  routes: [],
-} as const satisfies Parameters<typeof useProblems>[0];
+// The operating-mode diagram. Only this component follows the viewport, so
+// zooming and panning do not re-render the rest of the window (STK-8).
+const OperateCanvas = ({
+  project,
+  view,
+}: {
+  project: Project;
+  view: StationView;
+}) => {
+  const viewport = useProjectStore(
+    (state) => state.viewports[view.id] ?? DEFAULT_VIEWPORT,
+  );
+  return (
+    <DiagramView
+      className="diagram"
+      project={project}
+      view={view}
+      viewport={viewport}
+      onViewportChange={(next) => setViewport(view.id, next)}
+    />
+  );
+};

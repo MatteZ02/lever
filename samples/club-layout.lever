@@ -1,0 +1,2401 @@
+{
+  "format": "lever-project",
+  "schemaVersion": 1,
+  "id": "club-layout-draft",
+  "name": "Club layout (draft)",
+  "settings": {
+    "defaultLevel": 1
+  },
+  "views": [
+    {
+      "id": "view-1",
+      "name": "olten",
+      "areaId": "area-1",
+      "elements": [
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-001",
+          "at": {
+            "x": 0,
+            "y": -3
+          },
+          "text": "Olten (draft from the Z21 screenshot)",
+          "size": "normal"
+        },
+        {
+          "name": "Line west",
+          "kind": "connector",
+          "id": "exit-002",
+          "at": {
+            "x": 0,
+            "y": 8
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-003",
+          "points": [
+            {
+              "x": 0,
+              "y": 8
+            },
+            {
+              "x": 2,
+              "y": 8
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-004",
+          "type": "right",
+          "at": {
+            "x": 3,
+            "y": 8
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-005",
+          "points": [
+            {
+              "x": 2,
+              "y": 7
+            },
+            {
+              "x": 0,
+              "y": 5
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-006",
+          "at": {
+            "x": 0,
+            "y": 5
+          },
+          "direction": "SE"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-007",
+          "at": {
+            "x": 0,
+            "y": 4
+          },
+          "text": "Nebenbahn",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-008",
+          "type": "left",
+          "at": {
+            "x": 5,
+            "y": 8
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-009",
+          "points": [
+            {
+              "x": 6,
+              "y": 7
+            },
+            {
+              "x": 10,
+              "y": 3
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-00a",
+          "type": "right",
+          "at": {
+            "x": 11,
+            "y": 2
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00b",
+          "points": [
+            {
+              "x": 12,
+              "y": 1
+            },
+            {
+              "x": 13,
+              "y": 0
+            },
+            {
+              "x": 40,
+              "y": 0
+            },
+            {
+              "x": 42,
+              "y": -2
+            }
+          ]
+        },
+        {
+          "name": "Nebenbahn (north)",
+          "kind": "connector",
+          "id": "exit-00c",
+          "at": {
+            "x": 42,
+            "y": -2
+          },
+          "direction": "NE"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00d",
+          "points": [
+            {
+              "x": 12,
+              "y": 2
+            },
+            {
+              "x": 48,
+              "y": 2
+            }
+          ]
+        },
+        {
+          "name": "Nebenbahn",
+          "kind": "connector",
+          "id": "exit-00e",
+          "at": {
+            "x": 48,
+            "y": 2
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00f",
+          "points": [
+            {
+              "x": 6,
+              "y": 8
+            },
+            {
+              "x": 13,
+              "y": 8
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-00g",
+          "type": "doubleSlip",
+          "at": {
+            "x": 14,
+            "y": 8
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00h",
+          "points": [
+            {
+              "x": 15,
+              "y": 8
+            },
+            {
+              "x": 34,
+              "y": 8
+            },
+            {
+              "x": 41,
+              "y": 15
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00i",
+          "points": [
+            {
+              "x": 15,
+              "y": 7
+            },
+            {
+              "x": 16,
+              "y": 6
+            },
+            {
+              "x": 40,
+              "y": 6
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-00j",
+          "at": {
+            "x": 40,
+            "y": 6
+          },
+          "direction": "W"
+        },
+        {
+          "name": "Päärata Pun",
+          "kind": "connector",
+          "id": "exit-00k",
+          "at": {
+            "x": 0,
+            "y": 18
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00l",
+          "points": [
+            {
+              "x": 0,
+              "y": 18
+            },
+            {
+              "x": 3,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-00m",
+          "type": "left",
+          "at": {
+            "x": 4,
+            "y": 18
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00n",
+          "points": [
+            {
+              "x": 5,
+              "y": 17
+            },
+            {
+              "x": 7,
+              "y": 15
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-00o",
+          "type": "right",
+          "at": {
+            "x": 8,
+            "y": 14
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00p",
+          "points": [
+            {
+              "x": 9,
+              "y": 13
+            },
+            {
+              "x": 13,
+              "y": 9
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00q",
+          "points": [
+            {
+              "x": 9,
+              "y": 14
+            },
+            {
+              "x": 10,
+              "y": 14
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-00r",
+          "type": "right",
+          "at": {
+            "x": 11,
+            "y": 14
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00s",
+          "points": [
+            {
+              "x": 12,
+              "y": 14
+            },
+            {
+              "x": 36,
+              "y": 14
+            },
+            {
+              "x": 37,
+              "y": 15
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00t",
+          "points": [
+            {
+              "x": 12,
+              "y": 15
+            },
+            {
+              "x": 13,
+              "y": 16
+            },
+            {
+              "x": 37,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-00u",
+          "type": "right",
+          "at": {
+            "x": 38,
+            "y": 16
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00v",
+          "points": [
+            {
+              "x": 39,
+              "y": 16
+            },
+            {
+              "x": 41,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-00w",
+          "type": "right",
+          "at": {
+            "x": 42,
+            "y": 16
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00x",
+          "points": [
+            {
+              "x": 43,
+              "y": 16
+            },
+            {
+              "x": 48,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "name": "Päärata Pun",
+          "kind": "connector",
+          "id": "exit-00y",
+          "at": {
+            "x": 48,
+            "y": 16
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-00z",
+          "points": [
+            {
+              "x": 5,
+              "y": 18
+            },
+            {
+              "x": 7,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-010",
+          "type": "left",
+          "at": {
+            "x": 8,
+            "y": 18
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-011",
+          "points": [
+            {
+              "x": 9,
+              "y": 18
+            },
+            {
+              "x": 41,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-012",
+          "type": "left",
+          "at": {
+            "x": 42,
+            "y": 18
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-013",
+          "points": [
+            {
+              "x": 43,
+              "y": 18
+            },
+            {
+              "x": 48,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "id": "exit-014",
+          "at": {
+            "x": 48,
+            "y": 18
+          },
+          "direction": "E"
+        },
+        {
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "id": "exit-015",
+          "at": {
+            "x": 0,
+            "y": 20
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-016",
+          "points": [
+            {
+              "x": 0,
+              "y": 20
+            },
+            {
+              "x": 5,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-017",
+          "type": "left",
+          "at": {
+            "x": 6,
+            "y": 20
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-018",
+          "points": [
+            {
+              "x": 7,
+              "y": 20
+            },
+            {
+              "x": 9,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-019",
+          "type": "right",
+          "at": {
+            "x": 10,
+            "y": 20
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01a",
+          "points": [
+            {
+              "x": 11,
+              "y": 20
+            },
+            {
+              "x": 39,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-01b",
+          "type": "left",
+          "at": {
+            "x": 40,
+            "y": 20
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01c",
+          "points": [
+            {
+              "x": 41,
+              "y": 20
+            },
+            {
+              "x": 42,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-01d",
+          "at": {
+            "x": 42,
+            "y": 20
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01e",
+          "points": [
+            {
+              "x": 11,
+              "y": 21
+            },
+            {
+              "x": 13,
+              "y": 23
+            }
+          ]
+        },
+        {
+          "name": "Nebenbahn",
+          "kind": "connector",
+          "id": "exit-01f",
+          "at": {
+            "x": 0,
+            "y": 24
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01g",
+          "points": [
+            {
+              "x": 0,
+              "y": 24
+            },
+            {
+              "x": 13,
+              "y": 24
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-01h",
+          "type": "doubleSlip",
+          "at": {
+            "x": 14,
+            "y": 24
+          },
+          "orientation": "NW",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01i",
+          "points": [
+            {
+              "x": 15,
+              "y": 24
+            },
+            {
+              "x": 43,
+              "y": 24
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-01j",
+          "type": "left",
+          "at": {
+            "x": 44,
+            "y": 24
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01k",
+          "points": [
+            {
+              "x": 45,
+              "y": 24
+            },
+            {
+              "x": 48,
+              "y": 24
+            }
+          ]
+        },
+        {
+          "name": "Nebenbahn",
+          "kind": "connector",
+          "id": "exit-01l",
+          "at": {
+            "x": 48,
+            "y": 24
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01m",
+          "points": [
+            {
+              "x": 15,
+              "y": 25
+            },
+            {
+              "x": 16,
+              "y": 26
+            },
+            {
+              "x": 41,
+              "y": 26
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-01n",
+          "type": "left",
+          "at": {
+            "x": 42,
+            "y": 26
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01o",
+          "points": [
+            {
+              "x": 43,
+              "y": 26
+            },
+            {
+              "x": 44,
+              "y": 26
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-01p",
+          "at": {
+            "x": 44,
+            "y": 26
+          },
+          "direction": "W"
+        },
+        {
+          "name": "Main line (spiral)",
+          "kind": "connector",
+          "id": "exit-01q",
+          "at": {
+            "x": 0,
+            "y": 32
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01r",
+          "points": [
+            {
+              "x": 0,
+              "y": 32
+            },
+            {
+              "x": 21,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-01s",
+          "type": "left",
+          "at": {
+            "x": 22,
+            "y": 32
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01t",
+          "points": [
+            {
+              "x": 23,
+              "y": 32
+            },
+            {
+              "x": 25,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-01u",
+          "type": "right",
+          "at": {
+            "x": 26,
+            "y": 32
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01v",
+          "points": [
+            {
+              "x": 27,
+              "y": 32
+            },
+            {
+              "x": 48,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "name": "Main line (spiral)",
+          "kind": "connector",
+          "id": "exit-01w",
+          "at": {
+            "x": 48,
+            "y": 32
+          },
+          "direction": "E"
+        },
+        {
+          "name": "Main line (spiral)",
+          "kind": "connector",
+          "id": "exit-01x",
+          "at": {
+            "x": 0,
+            "y": 34
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-01y",
+          "points": [
+            {
+              "x": 0,
+              "y": 34
+            },
+            {
+              "x": 19,
+              "y": 34
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-01z",
+          "type": "left",
+          "at": {
+            "x": 20,
+            "y": 34
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-020",
+          "points": [
+            {
+              "x": 21,
+              "y": 34
+            },
+            {
+              "x": 27,
+              "y": 34
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-021",
+          "type": "right",
+          "at": {
+            "x": 28,
+            "y": 34
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-022",
+          "points": [
+            {
+              "x": 29,
+              "y": 34
+            },
+            {
+              "x": 48,
+              "y": 34
+            }
+          ]
+        },
+        {
+          "name": "Main line (spiral)",
+          "kind": "connector",
+          "id": "exit-023",
+          "at": {
+            "x": 48,
+            "y": 34
+          },
+          "direction": "E"
+        },
+        {
+          "name": "Signal 3",
+          "kind": "signal",
+          "id": "signal-024",
+          "at": {
+            "x": 34,
+            "y": 6
+          },
+          "facing": "W",
+          "side": "right",
+          "signalTypeId": "builtin:main2",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "Signal 4",
+          "kind": "signal",
+          "id": "signal-025",
+          "at": {
+            "x": 33,
+            "y": 8
+          },
+          "facing": "W",
+          "side": "right",
+          "signalTypeId": "builtin:main2",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-026",
+          "at": {
+            "x": 24,
+            "y": 0
+          },
+          "text": "1",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-027",
+          "at": {
+            "x": 24,
+            "y": 2
+          },
+          "text": "2",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-028",
+          "at": {
+            "x": 24,
+            "y": 6
+          },
+          "text": "3",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-029",
+          "at": {
+            "x": 24,
+            "y": 8
+          },
+          "text": "4",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-02a",
+          "at": {
+            "x": 24,
+            "y": 14
+          },
+          "text": "7",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-02b",
+          "at": {
+            "x": 24,
+            "y": 16
+          },
+          "text": "8",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-02c",
+          "at": {
+            "x": 24,
+            "y": 18
+          },
+          "text": "9",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-02d",
+          "at": {
+            "x": 24,
+            "y": 20
+          },
+          "text": "10",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-02e",
+          "at": {
+            "x": 24,
+            "y": 24
+          },
+          "text": "11",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-02f",
+          "at": {
+            "x": 24,
+            "y": 26
+          },
+          "text": "12",
+          "size": "small"
+        }
+      ]
+    },
+    {
+      "id": "view-2",
+      "name": "inselburg-dettingen",
+      "areaId": "area-2",
+      "elements": [
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-02g",
+          "at": {
+            "x": 0,
+            "y": -6
+          },
+          "text": "Inselburg-Dettingen (draft from the Z21 screenshot)",
+          "size": "normal"
+        },
+        {
+          "name": "Päärata Pun (south)",
+          "kind": "connector",
+          "id": "exit-02h",
+          "at": {
+            "x": 16,
+            "y": 18
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-02i",
+          "points": [
+            {
+              "x": 16,
+              "y": 18
+            },
+            {
+              "x": 10,
+              "y": 18
+            },
+            {
+              "x": 8,
+              "y": 20
+            },
+            {
+              "x": 3,
+              "y": 20
+            },
+            {
+              "x": 2,
+              "y": 19
+            },
+            {
+              "x": 2,
+              "y": 9
+            },
+            {
+              "x": 3,
+              "y": 8
+            },
+            {
+              "x": 11,
+              "y": 8
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-02j",
+          "type": "left",
+          "at": {
+            "x": 12,
+            "y": 8
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-02k",
+          "points": [
+            {
+              "x": 13,
+              "y": 8
+            },
+            {
+              "x": 40,
+              "y": 8
+            }
+          ]
+        },
+        {
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "id": "exit-02l",
+          "at": {
+            "x": 40,
+            "y": 8
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-02m",
+          "points": [
+            {
+              "x": 13,
+              "y": 7
+            },
+            {
+              "x": 16,
+              "y": 4
+            },
+            {
+              "x": 20,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-02n",
+          "type": "left",
+          "at": {
+            "x": 21,
+            "y": 4
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-02o",
+          "points": [
+            {
+              "x": 22,
+              "y": 4
+            },
+            {
+              "x": 34,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-02p",
+          "at": {
+            "x": 34,
+            "y": 4
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-02q",
+          "type": "right",
+          "at": {
+            "x": 23,
+            "y": 2
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-02r",
+          "points": [
+            {
+              "x": 24,
+              "y": 2
+            },
+            {
+              "x": 34,
+              "y": 2
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-02s",
+          "at": {
+            "x": 34,
+            "y": 2
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-02t",
+          "type": "right",
+          "at": {
+            "x": 25,
+            "y": 0
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-02u",
+          "points": [
+            {
+              "x": 26,
+              "y": 0
+            },
+            {
+              "x": 34,
+              "y": 0
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-02v",
+          "at": {
+            "x": 34,
+            "y": 0
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-02w",
+          "type": "right",
+          "at": {
+            "x": 27,
+            "y": -2
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-02x",
+          "points": [
+            {
+              "x": 28,
+              "y": -2
+            },
+            {
+              "x": 34,
+              "y": -2
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-02y",
+          "at": {
+            "x": 34,
+            "y": -2
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-02z",
+          "points": [
+            {
+              "x": 28,
+              "y": -3
+            },
+            {
+              "x": 29,
+              "y": -4
+            },
+            {
+              "x": 34,
+              "y": -4
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-030",
+          "at": {
+            "x": 34,
+            "y": -4
+          },
+          "direction": "W"
+        },
+        {
+          "name": "Päärata Kel (south)",
+          "kind": "connector",
+          "id": "exit-031",
+          "at": {
+            "x": 16,
+            "y": 20
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-032",
+          "points": [
+            {
+              "x": 16,
+              "y": 20
+            },
+            {
+              "x": 10,
+              "y": 20
+            },
+            {
+              "x": 8,
+              "y": 18
+            },
+            {
+              "x": 5,
+              "y": 18
+            },
+            {
+              "x": 4,
+              "y": 17
+            },
+            {
+              "x": 4,
+              "y": 11
+            },
+            {
+              "x": 5,
+              "y": 10
+            },
+            {
+              "x": 9,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-033",
+          "type": "right",
+          "at": {
+            "x": 10,
+            "y": 10
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-034",
+          "points": [
+            {
+              "x": 11,
+              "y": 10
+            },
+            {
+              "x": 29,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-035",
+          "type": "left",
+          "at": {
+            "x": 30,
+            "y": 10
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-036",
+          "points": [
+            {
+              "x": 31,
+              "y": 10
+            },
+            {
+              "x": 40,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "name": "Päärata Pun",
+          "kind": "connector",
+          "id": "exit-037",
+          "at": {
+            "x": 40,
+            "y": 10
+          },
+          "direction": "E"
+        },
+        {
+          "name": "Päärata Pun (west)",
+          "kind": "connector",
+          "id": "exit-038",
+          "at": {
+            "x": 6,
+            "y": 12
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-039",
+          "points": [
+            {
+              "x": 6,
+              "y": 12
+            },
+            {
+              "x": 11,
+              "y": 12
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03a",
+          "type": "right",
+          "at": {
+            "x": 12,
+            "y": 12
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03b",
+          "points": [
+            {
+              "x": 13,
+              "y": 12
+            },
+            {
+              "x": 27,
+              "y": 12
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03c",
+          "type": "left",
+          "at": {
+            "x": 28,
+            "y": 12
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03d",
+          "points": [
+            {
+              "x": 29,
+              "y": 12
+            },
+            {
+              "x": 32,
+              "y": 12
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-03e",
+          "at": {
+            "x": 32,
+            "y": 12
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-03f",
+          "at": {
+            "x": 20,
+            "y": 12
+          },
+          "text": "1",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-03g",
+          "at": {
+            "x": 20,
+            "y": 10
+          },
+          "text": "2",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-03h",
+          "at": {
+            "x": 20,
+            "y": 8
+          },
+          "text": "3",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-03i",
+          "at": {
+            "x": 20,
+            "y": 4
+          },
+          "text": "4",
+          "size": "small"
+        }
+      ]
+    },
+    {
+      "id": "view-3",
+      "name": "Sissach",
+      "areaId": "area-3",
+      "elements": [
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-03j",
+          "at": {
+            "x": 0,
+            "y": -3
+          },
+          "text": "Sissach (draft from the Z21 screenshot)",
+          "size": "normal"
+        },
+        {
+          "name": "Päärata Pun",
+          "kind": "connector",
+          "id": "exit-03k",
+          "at": {
+            "x": 0,
+            "y": 2
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03l",
+          "points": [
+            {
+              "x": 0,
+              "y": 2
+            },
+            {
+              "x": 7,
+              "y": 2
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03m",
+          "type": "left",
+          "at": {
+            "x": 8,
+            "y": 2
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03n",
+          "points": [
+            {
+              "x": 9,
+              "y": 2
+            },
+            {
+              "x": 31,
+              "y": 2
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03o",
+          "type": "right",
+          "at": {
+            "x": 32,
+            "y": 2
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03p",
+          "points": [
+            {
+              "x": 33,
+              "y": 2
+            },
+            {
+              "x": 37,
+              "y": 2
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03q",
+          "type": "left",
+          "at": {
+            "x": 38,
+            "y": 2
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03r",
+          "type": "right",
+          "at": {
+            "x": 40,
+            "y": 2
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03s",
+          "points": [
+            {
+              "x": 41,
+              "y": 2
+            },
+            {
+              "x": 46,
+              "y": 2
+            }
+          ]
+        },
+        {
+          "name": "Päärata Pun",
+          "kind": "connector",
+          "id": "exit-03t",
+          "at": {
+            "x": 46,
+            "y": 2
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-03u",
+          "at": {
+            "x": 5,
+            "y": 0
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03v",
+          "points": [
+            {
+              "x": 5,
+              "y": 0
+            },
+            {
+              "x": 9,
+              "y": 0
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03w",
+          "type": "left",
+          "at": {
+            "x": 10,
+            "y": 0
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03x",
+          "points": [
+            {
+              "x": 11,
+              "y": 0
+            },
+            {
+              "x": 29,
+              "y": 0
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03y",
+          "type": "right",
+          "at": {
+            "x": 30,
+            "y": 0
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-03z",
+          "points": [
+            {
+              "x": 31,
+              "y": 0
+            },
+            {
+              "x": 35,
+              "y": 0
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-040",
+          "at": {
+            "x": 35,
+            "y": 0
+          },
+          "direction": "W"
+        },
+        {
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "id": "exit-041",
+          "at": {
+            "x": 0,
+            "y": 4
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-042",
+          "points": [
+            {
+              "x": 0,
+              "y": 4
+            },
+            {
+              "x": 7,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-043",
+          "type": "right",
+          "at": {
+            "x": 8,
+            "y": 4
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-044",
+          "points": [
+            {
+              "x": 9,
+              "y": 4
+            },
+            {
+              "x": 31,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-045",
+          "type": "left",
+          "at": {
+            "x": 32,
+            "y": 4
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-046",
+          "points": [
+            {
+              "x": 33,
+              "y": 4
+            },
+            {
+              "x": 35,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-047",
+          "type": "left",
+          "at": {
+            "x": 36,
+            "y": 4
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-048",
+          "points": [
+            {
+              "x": 37,
+              "y": 4
+            },
+            {
+              "x": 41,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-049",
+          "type": "right",
+          "at": {
+            "x": 42,
+            "y": 4
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-04a",
+          "points": [
+            {
+              "x": 43,
+              "y": 4
+            },
+            {
+              "x": 46,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "id": "exit-04b",
+          "at": {
+            "x": 46,
+            "y": 4
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-04c",
+          "at": {
+            "x": 5,
+            "y": 6
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-04d",
+          "points": [
+            {
+              "x": 5,
+              "y": 6
+            },
+            {
+              "x": 9,
+              "y": 6
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-04e",
+          "type": "right",
+          "at": {
+            "x": 10,
+            "y": 6
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-04f",
+          "points": [
+            {
+              "x": 11,
+              "y": 6
+            },
+            {
+              "x": 29,
+              "y": 6
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-04g",
+          "type": "left",
+          "at": {
+            "x": 30,
+            "y": 6
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-04h",
+          "points": [
+            {
+              "x": 31,
+              "y": 6
+            },
+            {
+              "x": 35,
+              "y": 6
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "bufferStop",
+          "id": "stop-04i",
+          "at": {
+            "x": 35,
+            "y": 6
+          },
+          "direction": "W"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-04j",
+          "at": {
+            "x": 20,
+            "y": 0
+          },
+          "text": "1",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-04k",
+          "at": {
+            "x": 20,
+            "y": 2
+          },
+          "text": "2",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-04l",
+          "at": {
+            "x": 20,
+            "y": 4
+          },
+          "text": "3",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-04m",
+          "at": {
+            "x": 20,
+            "y": 6
+          },
+          "text": "4",
+          "size": "small"
+        }
+      ]
+    }
+  ],
+  "areas": [
+    {
+      "id": "area-1",
+      "name": "olten",
+      "level": 1
+    },
+    {
+      "id": "area-2",
+      "name": "inselburg-dettingen",
+      "level": 1
+    },
+    {
+      "id": "area-3",
+      "name": "Sissach",
+      "level": 1
+    }
+  ]
+}

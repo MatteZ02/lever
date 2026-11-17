@@ -15,11 +15,18 @@ const message = (problem: Problem) =>
     ) => string
   )(problem.params);
 
-export const useProblems = (project: Project) =>
-  useMemo(() => validateProject(project), [project]);
+// Validation of the whole project; only while editing (null = not editing).
+export const useProblems = (project: Project | null) =>
+  useMemo(() => (project ? validateProject(project) : []), [project]);
 
-export const ProblemsPanel = ({project}: {project: Project}) => {
-  const problems = useProblems(project);
+export const ProblemsPanel = ({
+  project,
+  problems,
+}: {
+  project: Project;
+  // Computed once by the workspace (validation is the costly part).
+  problems: Problem[];
+}) => {
   const [showNotes, setShowNotes] = useState(true);
   const shown = problems.filter(
     (problem) => showNotes || problem.severity !== 'info',
