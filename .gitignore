@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+
+# build output
+out/
+dist/
+release-builds/
+coverage/
+*.tsbuildinfo
+
+# signing material (DST-3): never commit
+*.pfx
+*.p12
+*.key
+*.pem
+*.cer
+
+# debug
+npm-debug.*
+
+# local env files
+.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local reference material (decided by the user): never commit
+docs/reference/*.zip
+docs/reference/*.png
+docs/reference/*.PNG
+docs/reference/*.jpg
+docs/reference/*.pdf
+docs/reference/*.z21
+CONTROL_STATION_PROMPT.md
+
+# Claude Code local settings
+.claude/settings.local.json
