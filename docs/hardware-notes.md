@@ -23,15 +23,25 @@ Firmware levels that matter for Lever (spec revision history, §5):
 Note on `Q`: the spec says never to mix `Q=0` and `Q=1` commands. Lever serialises accessory commands
 itself (LOAD-2), so it uses `Q=0` everywhere; that also works on central units without the queue.
 
-To check on the z21 start (with the user; tools below):
+The user's z21 start has **no accessories connected** (2026-11-17), so its checks are protocol-only:
+it answers for addresses with nothing behind them, which is harmless. Checks that need real
+turnouts are done later on the layout (on another PC).
+
+On the z21 start, protocol only (tools below):
 
 - [ ] Accessory broadcasts reach a second client (MULTI-1): run the live test.
 - [ ] Is `LAN_X_TURNOUT_INFO` sent on activate (as Z21Sim does), on deactivate, or both?
 - [ ] `LAN_X_TURNOUT_INFO` after power-up reports `ZZ=00` ("not switched yet") until switched.
+- [ ] Replies to extended-accessory and feedback requests on FW 1.33 (silence, or
+      `LAN_X_UNKNOWN_COMMAND`?).
+- [ ] Extended accessories are refused by Lever on FW 1.33 (a notice, nothing sent).
+
+On the layout, with real turnouts (later):
+
 - [ ] Turnout numbering in the Roco app matches `FAdr = number − 1` (spec §5, option 2): switch
       turnout #N in Lever's developer panel and check that the same turnout moves as in the Roco app.
 - [ ] Default pulse 150 ms and gap 150 ms throw the club's turnouts reliably.
-- [ ] Extended accessories are refused by Lever on FW 1.33 (a notice, nothing sent).
+- [ ] Double slips with one address switch both ends together.
 
 Tools, the same for every central unit:
 
