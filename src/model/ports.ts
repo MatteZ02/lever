@@ -159,3 +159,17 @@ export const turnoutPorts = (turnout: Turnout): PlacedPort[] =>
 
 export const turnoutPositions = (turnout: Pick<Turnout, 'type'>): string[] =>
   turnoutGeometry(turnout.type, 'E').positions;
+
+// For the operator: the next position when a turnout is clicked, in the
+// order of its positions. Undefined for crossings (nothing to switch).
+export const nextTurnoutPosition = (
+  turnout: Pick<Turnout, 'type'>,
+  current?: string,
+): string | undefined => {
+  const positions = turnoutPositions(turnout);
+  if (positions.length === 0) {
+    return undefined;
+  }
+  const index = current ? positions.indexOf(current) : -1;
+  return positions[(index + 1) % positions.length];
+};

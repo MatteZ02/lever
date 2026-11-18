@@ -4,7 +4,12 @@
 import {useState} from 'react';
 import {CentralUnitProfile} from '../../../../model/centralUnitProfile';
 import {updateView} from '../../../../model/editing';
-import {AutomationLevel, Project, StationView} from '../../../../model/project';
+import {
+  AutomationLevel,
+  newId,
+  Project,
+  StationView,
+} from '../../../../model/project';
 import {FeedbackSource} from '../../../../shared/feedback';
 import {strings} from '../../../../shared/strings';
 import {edit} from '../../store/projectStore';
@@ -215,6 +220,8 @@ export const ProjectProperties = ({
         ))}
       </Section>
 
+      <AreasSection project={project} />
+
       <PasswordSection project={project} />
     </>
   );
@@ -270,6 +277,96 @@ const PasswordSection = ({project}: {project: Project}) => {
           </button>
         )}
       </div>
+    </Section>
+  );
+};
+
+// Automation areas (MIX-1): each station has one; more can be added for
+// parts of a station or for the line between stations, and assigned to
+// elements in their properties.
+const AreasSection = ({project}: {project: Project}) => {
+  const isViewDefault = (id: string) =>
+    project.views.some((view) => view.areaId === id);
+  return (
+    <Section title={strings.properties.areas}>
+      <p className="muted small">{strings.properties.areasHelp}</p>
+      {project.areas.map((area) => (
+        <div key={area.id} className="area-edit-row">
+          <TextField
+            label={strings.properties.areaName}
+            value={area.name}
+            onCommit={(name) =>
+              name.trim() &&
+              edit((p) => ({
+                ...p,
+                areas: p.areas.map((a) =>
+                  a.id === area.id ? {...a, name: name.trim()} : a,
+                ),
+              }))
+            }
+          />
+          <SelectField
+            label={strings.properties.areaLevel}
+            value={String(area.level)}
+            options={LEVELS.map((level) => ({
+              value: String(level),
+              label: strings.properties.level(level),
+            }))}
+            onCommit={(value) =>
+              edit((p) => ({
+                ...p,
+                areas: p.areas.map((a) =>
+                  a.id === area.id
+                    ? {...a, level: Number(value) as AutomationLevel}
+                    : a,
+                ),
+              }))
+            }
+          />
+          {!isViewDefault(area.id) && (
+            <button
+              type="button"
+              className="button button--small"
+              onClick={() =>
+                edit((p) => ({
+                  ...p,
+                  areas: p.areas.filter((a) => a.id !== area.id),
+                  // Elements of a removed area go back to their station's.
+                  views: p.views.map((view) => ({
+                    ...view,
+                    elements: view.elements.map((element) =>
+                      element.areaId === area.id
+                        ? {...element, areaId: undefined}
+                        : element,
+                    ),
+                  })),
+                }))
+              }
+            >
+              {strings.properties.removeArea}
+            </button>
+          )}
+        </div>
+      ))}
+      <button
+        type="button"
+        className="button button--small"
+        onClick={() =>
+          edit((p) => ({
+            ...p,
+            areas: [
+              ...p.areas,
+              {
+                id: newId('area'),
+                name: strings.properties.newAreaName,
+                level: p.settings.defaultLevel,
+              },
+            ],
+          }))
+        }
+      >
+        {strings.properties.addArea}
+      </button>
     </Section>
   );
 };

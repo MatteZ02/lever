@@ -124,6 +124,29 @@ export const strings = {
     invalidTurnoutNumber: 'Enter a turnout number between 1 and 2048.',
   },
 
+  operate: {
+    trainNumber: 'Train number or name',
+    setLabel: 'Show',
+    clearLabel: 'Remove',
+    feedbackMonitor: 'Feedback monitor',
+    feedbackShort: 'Feedback',
+    noFeedbackSources:
+      'No feedback bus is switched on for this layout (Edit layout → nothing selected → Central unit settings).',
+    feedbackSources: (list: string) => `Listening to: ${list}.`,
+    input: 'Input',
+    state: 'State',
+    usedBy: 'Used by',
+    notReported: 'Not reported yet',
+    notUsed: '—',
+    areas: 'Automation levels',
+    areasShort: 'Levels',
+    areasHelp:
+      'Level 1: switch turnouts and signals by hand. Level 2: also set routes (coming). Changing a level never moves a turnout or changes a signal.',
+    stationDefault: 'whole station',
+    levelLater: (level: number) => `Level ${level} (later)`,
+    levelBadge: (level: number) => `Level ${level}`,
+  },
+
   modes: {
     operate: 'Operate',
     edit: 'Edit layout',
@@ -196,6 +219,15 @@ export const strings = {
     selectedCount: (count: number) => `${count} elements selected`,
     name: 'Name',
     area: 'Automation area',
+    areas: 'Automation areas',
+    areasHelp:
+      'Every station is one area. Add areas for parts of a station or for the line between stations, then choose the area in an element’s properties (or for several selected elements at once).',
+    areaName: 'Area name',
+    areaLevel: 'Level',
+    addArea: 'Add area',
+    removeArea: 'Remove area',
+    newAreaName: 'New area',
+    mixedAreas: 'Different areas',
     areaDefault: (name: string, level: number) =>
       `Station default (${name}, Level ${level})`,
     level: (level: number) => `Level ${level}`,

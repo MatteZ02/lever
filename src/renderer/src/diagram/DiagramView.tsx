@@ -29,6 +29,9 @@ export type DiagramPointer = {
   grid: {x: number; y: number};
   elementId?: string;
   event: PointerEvent<SVGSVGElement>;
+  // On pointer up: the pointer moved more than a few pixels since it went
+  // down (a drag or pan, not a click).
+  moved?: boolean;
 };
 
 export type DiagramViewHandle = {
@@ -49,6 +52,8 @@ type Props = {
   onPointerUp?: (pointer: DiagramPointer) => void;
   onDoubleClick?: () => void;
   onContextMenu?: () => void;
+  // Operating mode: dragging empty space with the left button pans.
+  panOnEmpty?: boolean;
   // Extra SVG in grid units (previews, handles).
   children?: ReactNode;
   className?: string;
@@ -82,6 +87,7 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
       onPointerUp,
       onDoubleClick,
       onContextMenu,
+      panOnEmpty,
       children,
       className,
       cursor,
@@ -91,6 +97,11 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
     const svgRef = useRef<SVGSVGElement>(null);
     const [size, setSize] = useState({width: 800, height: 600});
     const panning = useRef<{x: number; y: number; viewport: Viewport} | null>(
+      null,
+    );
+    // Where the left button went down, and on which element: the pointer is
+    // captured, so the release itself always targets the SVG.
+    const pressedAt = useRef<{x: number; y: number; elementId?: string} | null>(
       null,
     );
 
@@ -203,14 +214,26 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
         }}
         onWheel={handleWheel}
         onPointerDown={(event) => {
-          if (event.button === 1 || (event.button === 0 && event.altKey)) {
+          const pointer = toPointer(event);
+          if (event.button === 0) {
+            pressedAt.current = {
+              x: event.clientX,
+              y: event.clientY,
+              elementId: pointer.elementId,
+            };
+          }
+          if (
+            event.button === 1 ||
+            (event.button === 0 && event.altKey) ||
+            (event.button === 0 && panOnEmpty && !pointer.elementId)
+          ) {
             event.preventDefault();
             startPan(event);
             return;
           }
           if (event.button === 0) {
             svgRef.current?.setPointerCapture(event.pointerId);
-            onPointerDown?.(toPointer(event));
+            onPointerDown?.(pointer);
           }
         }}
         onPointerMove={(event) => {
@@ -226,12 +249,23 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
           onPointerMove?.(toPointer(event));
         }}
         onPointerUp={(event) => {
-          if (panning.current) {
-            panning.current = null;
+          const pressed = pressedAt.current;
+          pressedAt.current = null;
+          const moved =
+            pressed !== null &&
+            Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) >
+              5;
+          const wasPanning = panning.current !== null;
+          panning.current = null;
+          if (wasPanning && (moved || event.button !== 0)) {
             return;
           }
           if (event.button === 0) {
-            onPointerUp?.(toPointer(event));
+            onPointerUp?.({
+              ...toPointer(event),
+              elementId: pressed?.elementId,
+              moved,
+            });
           }
         }}
         onDoubleClick={onDoubleClick}

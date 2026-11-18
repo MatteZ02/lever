@@ -5,23 +5,25 @@
 import {useCallback, useDeferredValue, useState} from 'react';
 import {deleteElements, rotateElements} from '../../model/editing';
 import {GridPoint} from '../../model/geometry';
-import {createView, Project, StationView} from '../../model/project';
+import {createView} from '../../model/project';
 import {strings} from '../../shared/strings';
 import {DeveloperPanel} from './components/DeveloperPanel';
 import {Modal} from './components/Modal';
 import {ModeSwitch} from './components/ModeSwitch';
 import {ProtocolLog} from './components/ProtocolLog';
 import {SettingsPanel} from './components/SettingsPanel';
-import {DiagramView, fitViewport} from './diagram/DiagramView';
+import {fitViewport} from './diagram/DiagramView';
 import {AddressTable} from './editor/AddressTable';
 import {EditorCanvas} from './editor/EditorCanvas';
 import {ProblemsPanel, useProblems} from './editor/ProblemsPanel';
 import {PropertiesPanel} from './editor/properties/PropertiesPanel';
 import {Toolbox} from './editor/Toolbox';
 import {useEditorKeys} from './editor/useEditorKeys';
+import {AreasPanel} from './operate/AreasPanel';
+import {FeedbackMonitor} from './operate/FeedbackMonitor';
+import {OperateCanvas} from './operate/OperateCanvas';
 import {
   activeView,
-  DEFAULT_VIEWPORT,
   edit,
   redo,
   select,
@@ -33,8 +35,16 @@ import {
   useProjectStore,
 } from './store/projectStore';
 
-type Drawer = 'settings' | 'developer' | 'log' | null;
+type Drawer = 'areas' | 'feedback' | 'settings' | 'developer' | 'log' | null;
 type BottomPanel = 'problems' | 'addresses';
+
+const DRAWER_LABELS: Record<Exclude<Drawer, null>, string> = {
+  areas: strings.operate.areasShort,
+  feedback: strings.operate.feedbackShort,
+  settings: strings.settings.title,
+  developer: strings.developer.short,
+  log: strings.protocolLog.title,
+};
 
 const canvasSize = () => {
   const canvas = document.querySelector('.diagram');
@@ -80,6 +90,10 @@ export const Workspace = () => {
     return null;
   }
   const editing = mode === 'edit';
+  const viewLevel = view
+    ? (project.areas.find((area) => area.id === view.areaId)?.level ??
+      project.settings.defaultLevel)
+    : undefined;
   const saveStatus = document.unsaved
     ? document.path
       ? strings.editor.unsaved
@@ -103,6 +117,16 @@ export const Workspace = () => {
               ` · ${strings.editor.migrated(document.migratedFrom)}`}
           </span>
         </div>
+        {viewLevel !== undefined && (
+          <button
+            type="button"
+            className={`level-badge level-badge--${viewLevel}`}
+            title={strings.operate.areas}
+            onClick={() => setDrawer(drawer === 'areas' ? null : 'areas')}
+          >
+            {strings.operate.levelBadge(viewLevel)}
+          </button>
+        )}
         <div className="view-tabs" role="tablist">
           {project.views.map((candidate) => (
             <button
@@ -194,21 +218,19 @@ export const Workspace = () => {
           <button type="button" className="button" onClick={fit} title="F">
             {strings.editor.fit}
           </button>
-          {(['settings', 'developer', 'log'] as const).map((name) => (
-            <button
-              key={name}
-              type="button"
-              className={`button${drawer === name ? ' button--active' : ''}`}
-              aria-pressed={drawer === name}
-              onClick={() => setDrawer(drawer === name ? null : name)}
-            >
-              {name === 'settings'
-                ? strings.settings.title
-                : name === 'developer'
-                  ? strings.developer.short
-                  : strings.protocolLog.title}
-            </button>
-          ))}
+          {(['areas', 'feedback', 'settings', 'developer', 'log'] as const).map(
+            (name) => (
+              <button
+                key={name}
+                type="button"
+                className={`button${drawer === name ? ' button--active' : ''}`}
+                aria-pressed={drawer === name}
+                onClick={() => setDrawer(drawer === name ? null : name)}
+              >
+                {DRAWER_LABELS[name]}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
@@ -243,6 +265,8 @@ export const Workspace = () => {
         {editing && <PropertiesPanel project={project} view={view} />}
         {drawer && (
           <div className="drawer">
+            {drawer === 'areas' && <AreasPanel project={project} />}
+            {drawer === 'feedback' && <FeedbackMonitor project={project} />}
             {drawer === 'settings' && <SettingsPanel />}
             {drawer === 'developer' && <DeveloperPanel />}
             {drawer === 'log' && <ProtocolLog />}
@@ -328,28 +352,5 @@ export const Workspace = () => {
         </Modal>
       )}
     </div>
-  );
-};
-
-// The operating-mode diagram. Only this component follows the viewport, so
-// zooming and panning do not re-render the rest of the window (STK-8).
-const OperateCanvas = ({
-  project,
-  view,
-}: {
-  project: Project;
-  view: StationView;
-}) => {
-  const viewport = useProjectStore(
-    (state) => state.viewports[view.id] ?? DEFAULT_VIEWPORT,
-  );
-  return (
-    <DiagramView
-      className="diagram"
-      project={project}
-      view={view}
-      viewport={viewport}
-      onViewportChange={(next) => setViewport(view.id, next)}
-    />
   );
 };

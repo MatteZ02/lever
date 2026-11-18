@@ -57,6 +57,7 @@ export const PropertiesPanel = ({
       {elements.length > 1 && view && (
         <>
           <p>{strings.properties.selectedCount(elements.length)}</p>
+          <SelectionArea project={project} view={view} elements={elements} />
           <SelectionButtons viewId={view.id} ids={selection} />
         </>
       )}
@@ -69,6 +70,62 @@ export const PropertiesPanel = ({
         />
       )}
     </aside>
+  );
+};
+
+// Puts every selected track, turnout and signal into one area (MIX-1).
+const SelectionArea = ({
+  project,
+  view,
+  elements,
+}: {
+  project: Project;
+  view: StationView;
+  elements: DiagramElement[];
+}) => {
+  const areaElements = elements.filter((element) =>
+    ['track', 'turnout', 'signal'].includes(element.kind),
+  );
+  if (areaElements.length === 0) {
+    return null;
+  }
+  const areaIds = new Set(areaElements.map((element) => element.areaId ?? ''));
+  const viewArea = project.areas.find((area) => area.id === view.areaId);
+  return (
+    <SelectField
+      label={strings.properties.area}
+      value={areaIds.size === 1 ? [...areaIds][0] : '__mixed'}
+      options={[
+        ...(areaIds.size > 1
+          ? [{value: '__mixed', label: strings.properties.mixedAreas}]
+          : []),
+        {
+          value: '',
+          label: strings.properties.areaDefault(
+            viewArea?.name ?? view.name,
+            viewArea?.level ?? 1,
+          ),
+        },
+        ...project.areas
+          .filter((area) => area.id !== view.areaId)
+          .map((area) => ({
+            value: area.id,
+            label: `${area.name} (${strings.properties.level(area.level)})`,
+          })),
+      ]}
+      onCommit={(areaId) => {
+        if (areaId === '__mixed') {
+          return;
+        }
+        edit((p) =>
+          areaElements.reduce(
+            (next, element) =>
+              replaceElement(next, {...element, areaId: areaId || undefined}),
+            p,
+          ),
+        );
+      }}
+    />
   );
 };
 

@@ -21,6 +21,7 @@ import {placeElement} from '../../../model/placement';
 import {newId, Project, StationView} from '../../../model/project';
 import {strings} from '../../../shared/strings';
 import {color, diagramStroke} from '../../theme';
+import {AreaBoundaries} from '../diagram/AreaBoundaries';
 import {
   DiagramPointer,
   DiagramView,
@@ -390,6 +391,7 @@ export const EditorCanvas = ({
             />
           );
         })}
+      <AreaBoundaries project={project} view={view} />
       {drag?.kind === 'rubber' && (
         <rect
           x={Math.min(drag.start.x, drag.current.x)}

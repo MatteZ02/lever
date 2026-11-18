@@ -26,6 +26,7 @@ import {
 } from '../../../model/geometry';
 import {turnoutGeometry, turnoutPorts} from '../../../model/ports';
 import {AspectIcon} from '../../../model/signalTypes';
+import {LiveStatus} from '../../../shared/liveState';
 import {color, diagramDash, diagramStroke} from '../../theme';
 
 // --- live state (Phase 3 fills these in) -----------------------------------
@@ -33,12 +34,18 @@ import {color, diagramDash, diagramStroke} from '../../theme';
 export type TurnoutDisplay = {
   // Undefined: position unknown.
   position?: string;
-  status: 'confirmed' | 'unconfirmed' | 'unknown';
+  status: LiveStatus;
 };
 
 export type ElementDisplay = {
   turnout?: TurnoutDisplay;
   aspect?: AspectIcon | 'unknown';
+  // Track: its block is occupied (LOOK-2: always solid red).
+  occupied?: boolean;
+  // Track: train number shown on it (BLK-4), once per block.
+  trainLabel?: string;
+  // Generic accessory switched on.
+  accessoryOn?: boolean;
 };
 
 // --- helpers ---------------------------------------------------------------
@@ -80,18 +87,83 @@ const polylinePath = (list: GridPoint[]) =>
 
 // --- track -----------------------------------------------------------------
 
-const TrackShape = ({track, selected}: {track: Track; selected: boolean}) => {
+const TrackShape = ({
+  track,
+  selected,
+  display,
+}: {
+  track: Track;
+  selected: boolean;
+  display?: ElementDisplay;
+}) => {
   const d = polylinePath(track.points);
+  const occupied = display?.occupied ?? false;
   return (
     <g>
       {selected && <Halo d={d} />}
-      <path d={d} style={trackStroke} />
+      <path
+        d={d}
+        style={
+          occupied
+            ? {
+                ...trackStroke,
+                stroke: color.trackOccupied,
+                strokeWidth: diagramStroke.trackOccupied,
+              }
+            : trackStroke
+        }
+      />
+      {display?.trainLabel && (
+        <TrainLabel points={track.points} text={display.trainLabel} />
+      )}
       <path
         d={d}
         data-element-id={track.id}
         style={{stroke: 'transparent', strokeWidth: HIT_WIDTH, fill: 'none'}}
         pointerEvents="stroke"
       />
+    </g>
+  );
+};
+
+// Train number on its block (BLK-4): a small box in the middle of the track.
+const TrainLabel = ({points, text}: {points: GridPoint[]; text: string}) => {
+  // Middle of the longest straight piece.
+  let best = {a: points[0], b: points[1], length: 0};
+  for (let i = 1; i < points.length; i++) {
+    const length = Math.hypot(
+      points[i].x - points[i - 1].x,
+      points[i].y - points[i - 1].y,
+    );
+    if (length > best.length) {
+      best = {a: points[i - 1], b: points[i], length};
+    }
+  }
+  const x = (best.a.x + best.b.x) / 2;
+  const y = (best.a.y + best.b.y) / 2;
+  const width = Math.max(1.2, text.length * 0.32 + 0.4);
+  return (
+    <g pointerEvents="none">
+      <rect
+        x={x - width / 2}
+        y={y - 0.33}
+        width={width}
+        height={0.66}
+        rx={0.1}
+        style={{
+          fill: color.trainNumberBackground,
+          stroke: color.trackOccupied,
+          strokeWidth: 0.05,
+        }}
+      />
+      <text
+        x={x}
+        y={y + 0.17}
+        textAnchor="middle"
+        style={{fill: color.trainNumberText, fontSize: 0.48, fontWeight: 700}}
+      >
+        {text}
+      </text>
     </g>
   );
 };
@@ -125,7 +197,10 @@ const TurnoutShape = ({
         activePorts.add(transition.to);
       });
   }
-  const unknown = display !== undefined && display.status === 'unknown';
+  const status = display?.status;
+  const unknown = status === 'unknown' || status === 'inconsistent';
+  const problem = status === 'failed' || status === 'mismatch';
+  const waiting = status === 'commanded' || status === 'retrying';
   const manual = turnout.control.kind === 'manual';
   const legsPath = ports
     .map((port) => `M${centre.x} ${centre.y} L${port.at.x} ${port.at.y}`)
@@ -146,14 +221,23 @@ const TurnoutShape = ({
             y2={port.at.y}
             style={{
               ...trackStroke,
-              stroke: active ? color.trackFree : color.trackInactiveLeg,
+              stroke: !active
+                ? color.trackInactiveLeg
+                : waiting
+                  ? color.turnoutUnconfirmed
+                  : color.trackFree,
               strokeWidth: active
                 ? diagramStroke.track
                 : diagramStroke.inactiveLeg,
-              strokeDasharray:
-                display?.status === 'unconfirmed' && active
+              // Dots: commanded, waiting for the report. Fine dashes: only
+              // reported at start-up, not seen switching (LOOK-3).
+              strokeDasharray: !active
+                ? undefined
+                : waiting
                   ? diagramDash.turnoutUnconfirmed
-                  : undefined,
+                  : status === 'reported'
+                    ? diagramDash.turnoutReported
+                    : undefined,
             }}
           />
         );
@@ -184,14 +268,18 @@ const TurnoutShape = ({
           M
         </text>
       )}
-      {unknown && (
+      {(unknown || problem) && (
         <text
           x={centre.x}
-          y={centre.y + 0.55}
+          y={centre.y + 0.6}
           textAnchor="middle"
-          style={{fill: color.turnoutUnknown, fontSize: 0.5, fontWeight: 700}}
+          style={{
+            fill: problem ? color.trackRouteBroken : color.turnoutUnknown,
+            fontSize: 0.55,
+            fontWeight: 800,
+          }}
         >
-          ?
+          {problem ? '!' : '?'}
         </text>
       )}
       <circle
@@ -453,9 +541,11 @@ const ConnectorShape = ({
 const AccessoryShape = ({
   element,
   selected,
+  on,
 }: {
   element: GenericAccessory;
   selected: boolean;
+  on: boolean;
 }) => {
   const {x, y} = element.at;
   const d = `M${x - 0.3} ${y - 0.3} h0.6 v0.6 h-0.6 Z`;
@@ -465,7 +555,7 @@ const AccessoryShape = ({
       <path
         d={d}
         style={{
-          fill: color.surface,
+          fill: on ? color.accent : color.surface,
           stroke: color.diagramLabel,
           strokeWidth: 0.05,
         }}
@@ -572,7 +662,9 @@ export const ElementShape = memo(function ElementShape({
 }: ElementShapeProps) {
   switch (element.kind) {
     case 'track':
-      return <TrackShape track={element} selected={selected} />;
+      return (
+        <TrackShape track={element} selected={selected} display={display} />
+      );
     case 'turnout':
       return (
         <TurnoutShape
@@ -597,7 +689,13 @@ export const ElementShape = memo(function ElementShape({
     case 'connector':
       return <ConnectorShape element={element} selected={selected} />;
     case 'accessory':
-      return <AccessoryShape element={element} selected={selected} />;
+      return (
+        <AccessoryShape
+          element={element}
+          selected={selected}
+          on={display?.accessoryOn ?? false}
+        />
+      );
     case 'label':
       return <LabelShape element={element} selected={selected} />;
     case 'platform':

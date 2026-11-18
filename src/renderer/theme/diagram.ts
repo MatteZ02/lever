@@ -13,6 +13,8 @@
 // | Turnout inactive leg (LOOK-5)    | trackInactiveLeg      | interrupted near the switch point, dimmed  |
 // | Turnout position unknown         | turnoutUnknown        | both legs interrupted, "?" marker          |
 // | Turnout commanded, unconfirmed   | turnoutUnconfirmed    | new leg drawn dotted until confirmed       |
+// | Turnout only reported at start   | trackFree             | active leg in fine dashes                  |
+// | Turnout failed / mismatch        | trackRouteBroken      | "!" marker                                 |
 // | Manual turnout (ACC-5)           | turnoutManual         | hand marker; position text "recorded"      |
 // | Unpaired station connector       | connectorUnpaired     | open arrow head (paired: filled)           |
 // | Area boundary, per level (MIX-3) | areaLevel1…areaLevel4 | boundary tick with the level number badge  |
@@ -34,6 +36,9 @@ export const diagramDash = {
   routeSetting: '0.45 0.25',
   routeBroken: '0.3 0.15 0.05 0.15',
   turnoutUnconfirmed: '0.08 0.12',
+  // Position only reported at start-up, not seen switching (z21 start reports
+  // output 1 for never-switched turnouts).
+  turnoutReported: '0.22 0.1',
   // Gap left in an inactive turnout leg next to the switch point.
   inactiveLegGap: 0.3,
 } as const;

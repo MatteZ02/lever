@@ -14,6 +14,11 @@ import {
   TrackStatusValue,
 } from '../../../shared/engineApi';
 import {FeedbackInputState, FeedbackSource} from '../../../shared/feedback';
+import {
+  emptyLayoutLive,
+  LayoutLive,
+  LayoutLiveChanges,
+} from '../../../shared/liveState';
 
 // The log view keeps this many entries; older ones are dropped.
 export const PROTOCOL_LOG_LIMIT = 2000;
@@ -34,6 +39,8 @@ type EngineState = {
   feedbackSources: FeedbackSource[];
   feedbackInputs: Record<string, FeedbackInputState>;
   accessoryQueueLength: number;
+  // Live state of the open layout (turnouts, signals, blocks, accessories).
+  layout: LayoutLive;
   notices: EngineNotice[];
   clearLog: () => void;
   dismissNotice: (time: number) => void;
@@ -51,6 +58,7 @@ export const useEngineStore = create<EngineState>()((set) => ({
   feedbackSources: [],
   feedbackInputs: {},
   accessoryQueueLength: 0,
+  layout: emptyLayoutLive(),
   notices: [],
   clearLog: () => set({logEntries: []}),
   dismissNotice: (time) =>
@@ -93,6 +101,7 @@ const handleEvent = (data: unknown): void => {
         feedbackSources: snapshot.feedbackSources,
         feedbackInputs: byKey(snapshot.feedbackInputs, (state) => state.key),
         accessoryQueueLength: snapshot.accessoryQueueLength,
+        layout: snapshot.layout,
       });
       break;
     }
@@ -138,6 +147,11 @@ const handleEvent = (data: unknown): void => {
     case 'accessoryQueue':
       useEngineStore.setState({accessoryQueueLength: event.length});
       break;
+    case 'layout':
+      useEngineStore.setState((state) => ({
+        layout: mergeLayout(state.layout, event.changes),
+      }));
+      break;
     case 'notice':
       useEngineStore.setState((state) => ({
         notices: [...state.notices, event.notice].slice(-NOTICE_LIMIT),
@@ -145,6 +159,26 @@ const handleEvent = (data: unknown): void => {
       break;
   }
 };
+
+// Applies changed elements and blocks. Unchanged parts keep their identity,
+// so only the changed shapes re-render.
+const mergeLayout = (
+  layout: LayoutLive,
+  changes: LayoutLiveChanges,
+): LayoutLive => ({
+  turnouts: changes.turnouts
+    ? {...layout.turnouts, ...changes.turnouts}
+    : layout.turnouts,
+  signals: changes.signals
+    ? {...layout.signals, ...changes.signals}
+    : layout.signals,
+  accessories: changes.accessories
+    ? {...layout.accessories, ...changes.accessories}
+    : layout.accessories,
+  blocks: changes.blocks
+    ? {...layout.blocks, ...changes.blocks}
+    : layout.blocks,
+});
 
 // Connects the store to the engine. Call once at start-up.
 export const bindEngineStore = (): (() => void) =>

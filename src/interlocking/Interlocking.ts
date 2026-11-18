@@ -24,7 +24,6 @@ import {
   Signal,
   Turnout,
 } from '../model/elements';
-import {turnoutPositions} from '../model/ports';
 import {Block, Project, StationView} from '../model/project';
 import {OutputReport, reconstructState} from '../model/reconstruct';
 import {findSignalType, SignalType} from '../model/signalTypes';
@@ -722,16 +721,3 @@ const accessoryStates = (
 
 const sameJson = (a: unknown, b: unknown) =>
   JSON.stringify(a) === JSON.stringify(b);
-
-// For the operator: the positions a turnout can take, in click order.
-export const nextTurnoutPosition = (
-  turnout: Turnout,
-  current?: string,
-): string | undefined => {
-  const positions = turnoutPositions(turnout);
-  if (positions.length === 0) {
-    return undefined;
-  }
-  const index = current ? positions.indexOf(current) : -1;
-  return positions[(index + 1) % positions.length];
-};

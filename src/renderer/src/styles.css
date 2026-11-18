@@ -782,3 +782,95 @@ select {
 .bottom-panel {
   flex: none;
 }
+
+/* --- Operating mode -------------------------------------------------------- */
+
+.popup {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: 0 4px 16px var(--color-modalBackdrop);
+}
+
+.popup .button {
+  min-height: 44px;
+  text-align: left;
+}
+
+/* Level badges carry the number as text, so they do not rely on colour. */
+.level-badge {
+  min-height: 32px;
+  padding: 2px 10px;
+  border: 2px solid var(--color-areaLevel1);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.level-badge--2 {
+  border-color: var(--color-areaLevel2);
+}
+
+.level-badge--3 {
+  border-color: var(--color-areaLevel3);
+}
+
+.level-badge--4 {
+  border-color: var(--color-areaLevel4);
+}
+
+span.level-badge {
+  cursor: default;
+  display: inline-flex;
+  align-items: center;
+}
+
+.area-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.area-name {
+  flex: 1;
+}
+
+.monitor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.monitor-table th,
+.monitor-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.monitor-table tr.occupied td {
+  color: var(--color-trackOccupied);
+  font-weight: 700;
+}
+
+.area-edit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
