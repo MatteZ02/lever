@@ -108,6 +108,41 @@ If a difference cannot be expressed with these, the place to change behaviour is
 - [ ] `LAN_X_UNKNOWN_COMMAND` for unsupported commands, or silence.
 - [ ] Minimum gap between accessory commands it handles reliably (LOAD-2 default 100–150 ms).
 
+## Z21 app export (.z21 file)
+
+Not documented by Roco. Worked out on 2026-11-18 from the club's export (Z21 app, control station
+type `schematic`) by comparing it with the screenshots; read by `src/main/z21File.ts` and
+converted by `src/model/z21Import.ts`.
+
+- A `.z21` file is a ZIP: `export/<uuid>/Loco.sqlite` plus PNG images (locos).
+- `control_station_pages` (id, position, name), `control_station_controls` (page_id, x, y, angle,
+  type, address1–3), `control_station_control_states` (control_id, state 0/1, address1_value),
+  `control_station_notes` (text; type 1 = caption, type 2 = small rotated track number placed
+  _in_ a track tile), `control_station_routes` + `control_station_route_list` (route buttons and
+  their turnout states). Response modules, rails, signals (extended) tables were empty.
+- Tiles on a grid, `angle` clockwise from north (0 = N, 90 = E), steps of 45°.
+
+| Type | Tile                     | Geometry                                                      |
+| ---- | ------------------------ | ------------------------------------------------------------- |
+| 0    | straight                 | angle and its opposite                                        |
+| 28   | curve (45°)              | joins angle+135° to angle                                     |
+| 24   | sharp curve (90°)        | joins angle to angle+90°                                      |
+| 1    | right turnout            | tip opposite angle, straight along angle, diverging 45° right |
+| 2    | left turnout             | as 1, diverging 45° left                                      |
+| 23   | double slip, one address | one line along angle, the other 45° to its left               |
+| 11   | two-aspect signal        | on a straight, facing angle                                   |
+| 14   | track end (bar)          | track towards angle+180°; angle points out                    |
+
+- States: **state 0 = straight** (all "straight through" and main-line routes use 0);
+  `address1_value` 0/1 = output 1/2, set per turnout (about half the club's turnouts are
+  "swapped"). For signals Lever assumes state 0 = Stop (not confirmed).
+- A double crossover is drawn as an X in four tiles with no crossing tile.
+
+The checks below need the layout:
+
+- [ ] Output mapping: a turnout imported as "straight = output 1" really goes straight.
+- [ ] Signals 803 / 804: Z21 state 0 is Stop (red).
+
 ## Club control station PCs
 
 - [ ] Hardware (CPU, RAM, graphics) of the club PCs, for the low-spec performance check (STK-5,

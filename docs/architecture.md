@@ -312,7 +312,27 @@ interface LevelModule {
 - Everything here is pure and deterministic, with an injected clock, and tested as scenarios:
   "given this layout and state, when X, then Y" (ARC-L2, MIX-8).
 
-## 6. Our layout from the screenshots _(for Phase 2)_
+## 6. Our layout
+
+**Since 2026-11-18 the sample is imported** from the user's Z21 app export
+(`docs/reference/z21-layout-import_control-station.z21`, local only) with File → Import from Z21
+app, so it has the real addresses. The format and how it is read are in
+[hardware-notes.md](hardware-notes.md#z21-app-export-z21-file). What the import showed:
+
+- The _dettingen_ page only repeats the four turnouts (201–204) of the double crossover on
+  inselburg-dettingen, so it is skipped, as the user decided below.
+- The Z21 app draws both double crossovers (Dettingen 201–204, Sissach 309–312) as an X in four
+  tiles; Lever draws each as two crossovers in a row with the same connections.
+- Sissach has a **yard on the right** (turnouts 316–322, double slip 317) that the screenshot did
+  not show. The tip of turnout 316 is open in the Z21 drawing too (to check with the user).
+- One olten turnout has address **9999** in the Z21 app (between track 4 and the west crossovers;
+  the Z21 routes use it). It is imported without an address (to check with the user).
+- The two olten signals are 803 (track 3) and 804 (track 4). The Z21 app's first state is taken as
+  Stop; to be tested.
+- The 26 Z21 route buttons are not imported (Lever calculates routes, Level 2). Their turnout lists
+  are a useful check for the Level 2 router (Phase 5).
+
+The rest of this section is the earlier draft from the screenshots, kept for the user's answers.
 
 Three Z21 control-station pages are available: **olten** (main station: platform tracks 1–4 and
 7–12, several crossings or double slips, two signals, exits labelled _Nebenbahn_, _Päärata Pun_,
@@ -320,7 +340,8 @@ _Päärata Kel_), **inselburg-dettingen** (tracks 1–4, two return loops on the
 the top right) and **Sissach** (four tracks, both main lines through, crossovers each end and a
 crossing at the right). No addresses are visible. The Z21 app also has a **dettingen** page with
 no screenshot; the user decided to draft the three stations and fill in addresses later. The
-`.z21` export in `docs/reference/` is an older demo layout and is not used.
+older `.z21` export in `docs/reference/` (`z21_layout_import.z21`) is a demo layout and is not
+used.
 
 Answers from the user (2026-11-17), for the sample project:
 

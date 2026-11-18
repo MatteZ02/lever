@@ -12,6 +12,10 @@ A layout is one file with the extension `.lever`. **File** menu:
   open file.
 - **Import as new copy…**: opens someone else's layout as a new, unsaved copy, so their file is
   never changed.
+- **Import from Z21 app…**: reads a control station exported from the Roco Z21 app (a `.z21`
+  file) into a new, unsaved layout: tracks, turnouts with their addresses, double slips, signals,
+  exits and notes. Route buttons are not imported, because Lever finds routes itself. Lever then
+  lists what it could not take over. Check the result under **Problems** before operating.
 - **Restore a backup…**: Lever saves your changes automatically a moment after each edit, and keeps
   automatic backups (at most one every 10 minutes, the last 20) in a `.lever-backups` folder next
   to the layout file. Restoring first backs up the current state, so it can be undone.
@@ -20,8 +24,8 @@ Lever reopens the last layout when it starts. If the layout is already open for 
 copy of Lever (on this PC or another one on the network share), it opens **read-only** and says
 where it is open.
 
-A sample is included: `samples/club-layout.lever`, a **draft** of olten, inselburg-dettingen and
-Sissach drawn from the Z21 app screenshots. Its turnouts have no addresses yet.
+A sample is included: `samples/club-layout.lever`, the club's olten, inselburg-dettingen and
+Sissach, imported from the Z21 app with their addresses.
 
 ## Operating and editing
 

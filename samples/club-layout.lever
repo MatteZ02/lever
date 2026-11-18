@@ -1,338 +1,159 @@
 {
   "format": "lever-project",
   "schemaVersion": 1,
-  "id": "club-layout-draft",
-  "name": "Club layout (draft)",
+  "id": "club-layout",
+  "name": "Club layout",
   "settings": {
-    "defaultLevel": 1
+    "defaultLevel": 1,
+    "centralUnit": {
+      "addressOffset": 0,
+      "straightOutput": 1,
+      "pulseMs": 150,
+      "accessoryGapMs": 150,
+      "turnoutCommandMode": "pulse",
+      "confirmation": "report",
+      "confirmTimeoutMs": 2000,
+      "feedbackSources": []
+    },
+    "blockReleaseDelayMs": 1000,
+    "autoSignalsOnRoute": true,
+    "restoreTurnoutsOnStartup": false
   },
   "views": [
     {
-      "id": "view-1",
+      "id": "view-vjzaj3un",
       "name": "olten",
-      "areaId": "area-1",
+      "areaId": "area-y3jx4plk",
       "elements": [
         {
-          "name": "",
-          "kind": "label",
-          "id": "label-001",
-          "at": {
-            "x": 0,
-            "y": -3
-          },
-          "text": "Olten (draft from the Z21 screenshot)",
-          "size": "normal"
-        },
-        {
-          "name": "Line west",
-          "kind": "connector",
-          "id": "exit-002",
-          "at": {
-            "x": 0,
-            "y": 8
-          },
-          "direction": "W"
-        },
-        {
+          "id": "track-o436injw",
           "name": "",
           "kind": "track",
-          "id": "track-003",
           "points": [
             {
-              "x": 0,
-              "y": 8
-            },
-            {
-              "x": 2,
-              "y": 8
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-004",
-          "type": "right",
-          "at": {
-            "x": 3,
-            "y": 8
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-005",
-          "points": [
-            {
-              "x": 2,
-              "y": 7
-            },
-            {
-              "x": 0,
-              "y": 5
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-006",
-          "at": {
-            "x": 0,
-            "y": 5
-          },
-          "direction": "SE"
-        },
-        {
-          "name": "",
-          "kind": "label",
-          "id": "label-007",
-          "at": {
-            "x": 0,
-            "y": 4
-          },
-          "text": "Nebenbahn",
-          "size": "small"
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-008",
-          "type": "left",
-          "at": {
-            "x": 5,
-            "y": 8
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-009",
-          "points": [
-            {
-              "x": 6,
-              "y": 7
-            },
-            {
-              "x": 10,
-              "y": 3
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-00a",
-          "type": "right",
-          "at": {
-            "x": 11,
-            "y": 2
-          },
-          "orientation": "NE",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-00b",
-          "points": [
-            {
-              "x": 12,
+              "x": 59,
               "y": 1
             },
             {
-              "x": 13,
-              "y": 0
-            },
-            {
-              "x": 40,
-              "y": 0
-            },
-            {
-              "x": 42,
-              "y": -2
-            }
-          ]
-        },
-        {
-          "name": "Nebenbahn (north)",
-          "kind": "connector",
-          "id": "exit-00c",
-          "at": {
-            "x": 42,
-            "y": -2
-          },
-          "direction": "NE"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-00d",
-          "points": [
-            {
-              "x": 12,
-              "y": 2
-            },
-            {
-              "x": 48,
-              "y": 2
-            }
-          ]
-        },
-        {
-          "name": "Nebenbahn",
-          "kind": "connector",
-          "id": "exit-00e",
-          "at": {
-            "x": 48,
-            "y": 2
-          },
-          "direction": "E"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-00f",
-          "points": [
-            {
-              "x": 6,
-              "y": 8
-            },
-            {
-              "x": 13,
-              "y": 8
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-00g",
-          "type": "doubleSlip",
-          "at": {
-            "x": 14,
-            "y": 8
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-00h",
-          "points": [
-            {
-              "x": 15,
-              "y": 8
-            },
-            {
-              "x": 34,
-              "y": 8
-            },
-            {
-              "x": 41,
-              "y": 15
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-00i",
-          "points": [
-            {
-              "x": 15,
+              "x": 53,
               "y": 7
-            },
-            {
-              "x": 16,
-              "y": 6
-            },
-            {
-              "x": 40,
-              "y": 6
             }
           ]
         },
         {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-00j",
-          "at": {
-            "x": 40,
-            "y": 6
-          },
-          "direction": "W"
-        },
-        {
-          "name": "Päärata Pun",
-          "kind": "connector",
-          "id": "exit-00k",
-          "at": {
-            "x": 0,
-            "y": 18
-          },
-          "direction": "W"
-        },
-        {
+          "id": "track-kx0m9r23",
           "name": "",
           "kind": "track",
-          "id": "track-00l",
           "points": [
             {
-              "x": 0,
-              "y": 18
+              "x": 61,
+              "y": 1
             },
             {
-              "x": 3,
-              "y": 18
+              "x": 55,
+              "y": 7
             }
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-00m",
-          "type": "left",
-          "at": {
-            "x": 4,
-            "y": 18
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-4cat3e9e",
           "name": "",
           "kind": "track",
-          "id": "track-00n",
           "points": [
             {
-              "x": 5,
-              "y": 17
+              "x": 61,
+              "y": 3
+            },
+            {
+              "x": 56,
+              "y": 8
+            },
+            {
+              "x": 55,
+              "y": 8
+            }
+          ]
+        },
+        {
+          "id": "track-f8tymfyp",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 47,
+              "y": 8
+            },
+            {
+              "x": 20,
+              "y": 8
+            },
+            {
+              "x": 18,
+              "y": 10
+            },
+            {
+              "x": 18,
+              "y": 11
+            }
+          ]
+        },
+        {
+          "id": "track-xtvgwi6g",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 49,
+              "y": 8
+            },
+            {
+              "x": 51,
+              "y": 8
+            }
+          ]
+        },
+        {
+          "id": "track-s9pt3ccr",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 19,
+              "y": 11
+            },
+            {
+              "x": 20,
+              "y": 10
+            },
+            {
+              "x": 49,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "id": "track-crj5zlxx",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 53,
+              "y": 10
+            },
+            {
+              "x": 62,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "id": "track-pqsrr9o4",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 4,
+              "y": 12
             },
             {
               "x": 7,
@@ -341,678 +162,483 @@
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-00o",
-          "type": "right",
-          "at": {
-            "x": 8,
-            "y": 14
-          },
-          "orientation": "NE",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-fjkh8ngk",
           "name": "",
           "kind": "track",
-          "id": "track-00p",
           "points": [
             {
-              "x": 9,
+              "x": 51,
+              "y": 11
+            },
+            {
+              "x": 49,
+              "y": 13
+            }
+          ]
+        },
+        {
+          "id": "track-zl9f3298",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 17,
               "y": 13
             },
             {
-              "x": 13,
-              "y": 9
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-00q",
-          "points": [
-            {
-              "x": 9,
-              "y": 14
-            },
-            {
-              "x": 10,
-              "y": 14
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-00r",
-          "type": "right",
-          "at": {
-            "x": 11,
-            "y": 14
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-00s",
-          "points": [
-            {
-              "x": 12,
-              "y": 14
-            },
-            {
-              "x": 36,
-              "y": 14
-            },
-            {
-              "x": 37,
+              "x": 15,
               "y": 15
             }
           ]
         },
         {
+          "id": "track-3aav116t",
           "name": "",
           "kind": "track",
-          "id": "track-00t",
           "points": [
             {
-              "x": 12,
+              "x": 19,
               "y": 15
             },
             {
-              "x": 13,
-              "y": 16
+              "x": 20,
+              "y": 14
             },
             {
-              "x": 37,
-              "y": 16
+              "x": 47,
+              "y": 14
             }
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-00u",
-          "type": "right",
-          "at": {
-            "x": 38,
-            "y": 16
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-lglxu1zs",
           "name": "",
           "kind": "track",
-          "id": "track-00v",
           "points": [
             {
-              "x": 39,
-              "y": 16
+              "x": 49,
+              "y": 14
             },
             {
-              "x": 41,
-              "y": 16
+              "x": 59,
+              "y": 14
             }
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-00w",
-          "type": "right",
-          "at": {
-            "x": 42,
-            "y": 16
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-qwc22wfp",
           "name": "",
           "kind": "track",
-          "id": "track-00x",
           "points": [
             {
-              "x": 43,
+              "x": 1,
               "y": 16
-            },
-            {
-              "x": 48,
-              "y": 16
-            }
-          ]
-        },
-        {
-          "name": "Päärata Pun",
-          "kind": "connector",
-          "id": "exit-00y",
-          "at": {
-            "x": 48,
-            "y": 16
-          },
-          "direction": "E"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-00z",
-          "points": [
-            {
-              "x": 5,
-              "y": 18
             },
             {
               "x": 7,
-              "y": 18
+              "y": 16
             }
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-010",
-          "type": "left",
-          "at": {
-            "x": 8,
-            "y": 18
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-ksrifi8c",
           "name": "",
           "kind": "track",
-          "id": "track-011",
           "points": [
             {
               "x": 9,
-              "y": 18
-            },
-            {
-              "x": 41,
-              "y": 18
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-012",
-          "type": "left",
-          "at": {
-            "x": 42,
-            "y": 18
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-013",
-          "points": [
-            {
-              "x": 43,
-              "y": 18
-            },
-            {
-              "x": 48,
-              "y": 18
-            }
-          ]
-        },
-        {
-          "name": "Päärata Kel",
-          "kind": "connector",
-          "id": "exit-014",
-          "at": {
-            "x": 48,
-            "y": 18
-          },
-          "direction": "E"
-        },
-        {
-          "name": "Päärata Kel",
-          "kind": "connector",
-          "id": "exit-015",
-          "at": {
-            "x": 0,
-            "y": 20
-          },
-          "direction": "W"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-016",
-          "points": [
-            {
-              "x": 0,
-              "y": 20
-            },
-            {
-              "x": 5,
-              "y": 20
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-017",
-          "type": "left",
-          "at": {
-            "x": 6,
-            "y": 20
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-018",
-          "points": [
-            {
-              "x": 7,
-              "y": 20
-            },
-            {
-              "x": 9,
-              "y": 20
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-019",
-          "type": "right",
-          "at": {
-            "x": 10,
-            "y": 20
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-01a",
-          "points": [
-            {
-              "x": 11,
-              "y": 20
-            },
-            {
-              "x": 39,
-              "y": 20
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-01b",
-          "type": "left",
-          "at": {
-            "x": 40,
-            "y": 20
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-01c",
-          "points": [
-            {
-              "x": 41,
-              "y": 20
-            },
-            {
-              "x": 42,
-              "y": 20
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-01d",
-          "at": {
-            "x": 42,
-            "y": 20
-          },
-          "direction": "W"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-01e",
-          "points": [
-            {
-              "x": 11,
-              "y": 21
+              "y": 16
             },
             {
               "x": 13,
-              "y": 23
+              "y": 16
             }
           ]
         },
         {
-          "name": "Nebenbahn",
-          "kind": "connector",
-          "id": "exit-01f",
-          "at": {
-            "x": 0,
-            "y": 24
-          },
-          "direction": "W"
-        },
-        {
+          "id": "track-zabufypx",
           "name": "",
           "kind": "track",
-          "id": "track-01g",
-          "points": [
-            {
-              "x": 0,
-              "y": 24
-            },
-            {
-              "x": 13,
-              "y": 24
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-01h",
-          "type": "doubleSlip",
-          "at": {
-            "x": 14,
-            "y": 24
-          },
-          "orientation": "NW",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-01i",
           "points": [
             {
               "x": 15,
-              "y": 24
+              "y": 16
             },
             {
-              "x": 43,
-              "y": 24
+              "x": 17,
+              "y": 16
             }
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-01j",
-          "type": "left",
-          "at": {
-            "x": 44,
-            "y": 24
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-6uy81m8m",
           "name": "",
           "kind": "track",
-          "id": "track-01k",
           "points": [
             {
-              "x": 45,
-              "y": 24
+              "x": 21,
+              "y": 16
             },
             {
-              "x": 48,
-              "y": 24
+              "x": 50,
+              "y": 16
+            },
+            {
+              "x": 51,
+              "y": 17
             }
           ]
         },
         {
-          "name": "Nebenbahn",
-          "kind": "connector",
-          "id": "exit-01l",
-          "at": {
-            "x": 48,
-            "y": 24
-          },
-          "direction": "E"
-        },
-        {
+          "id": "track-fbwnvah1",
           "name": "",
           "kind": "track",
-          "id": "track-01m",
           "points": [
+            {
+              "x": 1,
+              "y": 18
+            },
             {
               "x": 15,
-              "y": 25
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-afjzz8mv",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 19,
+              "y": 17
             },
             {
               "x": 16,
+              "y": 20
+            },
+            {
+              "x": 15,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "id": "track-cpfp58am",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 53,
+              "y": 18
+            },
+            {
+              "x": 59,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-iskoa988",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 53,
+              "y": 19
+            },
+            {
+              "x": 55,
+              "y": 21
+            }
+          ]
+        },
+        {
+          "id": "track-uepr6kqu",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 13,
+              "y": 22
+            },
+            {
+              "x": 17,
+              "y": 22
+            }
+          ]
+        },
+        {
+          "id": "track-w6iwldm5",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 19,
+              "y": 22
+            },
+            {
+              "x": 55,
+              "y": 22
+            }
+          ]
+        },
+        {
+          "id": "track-txqkqpfd",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 11,
+              "y": 23
+            },
+            {
+              "x": 8,
               "y": 26
             },
             {
-              "x": 41,
+              "x": 6,
               "y": 26
             }
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-01n",
-          "type": "left",
-          "at": {
-            "x": 42,
-            "y": 26
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-cbbpwhnt",
           "name": "",
           "kind": "track",
-          "id": "track-01o",
           "points": [
             {
-              "x": 43,
+              "x": 19,
+              "y": 23
+            },
+            {
+              "x": 20,
+              "y": 24
+            },
+            {
+              "x": 57,
+              "y": 24
+            }
+          ]
+        },
+        {
+          "id": "track-hf3381ki",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 59,
+              "y": 24
+            },
+            {
+              "x": 62,
+              "y": 24
+            }
+          ]
+        },
+        {
+          "id": "track-f1rck7d4",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 13,
               "y": 26
             },
             {
-              "x": 44,
+              "x": 10,
+              "y": 26
+            },
+            {
+              "x": 8,
+              "y": 28
+            },
+            {
+              "x": 6,
+              "y": 28
+            }
+          ]
+        },
+        {
+          "id": "track-w2sddlm3",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 15,
+              "y": 26
+            },
+            {
+              "x": 17,
               "y": 26
             }
           ]
         },
         {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-01p",
-          "at": {
-            "x": 44,
-            "y": 26
-          },
-          "direction": "W"
-        },
-        {
-          "name": "Main line (spiral)",
-          "kind": "connector",
-          "id": "exit-01q",
-          "at": {
-            "x": 0,
-            "y": 32
-          },
-          "direction": "W"
-        },
-        {
+          "id": "track-9cjti7pc",
           "name": "",
           "kind": "track",
-          "id": "track-01r",
           "points": [
             {
-              "x": 0,
+              "x": 19,
+              "y": 26
+            },
+            {
+              "x": 57,
+              "y": 26
+            }
+          ]
+        },
+        {
+          "id": "track-rtol2dws",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 59,
+              "y": 26
+            },
+            {
+              "x": 62,
+              "y": 26
+            }
+          ]
+        },
+        {
+          "id": "track-d3y2ttuc",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 15,
+              "y": 27
+            },
+            {
+              "x": 17,
+              "y": 29
+            }
+          ]
+        },
+        {
+          "id": "track-5hvsefy7",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 19,
+              "y": 27
+            },
+            {
+              "x": 20,
+              "y": 28
+            },
+            {
+              "x": 55,
+              "y": 28
+            }
+          ]
+        },
+        {
+          "id": "track-slddlm2e",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 11,
+              "y": 30
+            },
+            {
+              "x": 17,
+              "y": 30
+            }
+          ]
+        },
+        {
+          "id": "track-u9ksigqs",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 55,
+              "y": 29
+            },
+            {
+              "x": 53,
+              "y": 31
+            }
+          ]
+        },
+        {
+          "id": "track-ee3g7lbm",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 55,
+              "y": 31
+            },
+            {
+              "x": 56,
+              "y": 30
+            },
+            {
+              "x": 61,
+              "y": 30
+            }
+          ]
+        },
+        {
+          "id": "track-nr58lz4r",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 6,
               "y": 32
             },
+            {
+              "x": 17,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "id": "track-86fzse32",
+          "name": "",
+          "kind": "track",
+          "points": [
             {
               "x": 21,
               "y": 32
+            },
+            {
+              "x": 51,
+              "y": 32
             }
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-01s",
-          "type": "left",
-          "at": {
-            "x": 22,
-            "y": 32
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-m5nqz210",
           "name": "",
           "kind": "track",
-          "id": "track-01t",
           "points": [
             {
-              "x": 23,
+              "x": 55,
               "y": 32
             },
             {
-              "x": 25,
+              "x": 62,
               "y": 32
             }
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-01u",
-          "type": "right",
-          "at": {
-            "x": 26,
-            "y": 32
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-1a8xjdwf",
           "name": "",
           "kind": "track",
-          "id": "track-01v",
           "points": [
             {
-              "x": 27,
-              "y": 32
-            },
-            {
-              "x": 48,
-              "y": 32
-            }
-          ]
-        },
-        {
-          "name": "Main line (spiral)",
-          "kind": "connector",
-          "id": "exit-01w",
-          "at": {
-            "x": 48,
-            "y": 32
-          },
-          "direction": "E"
-        },
-        {
-          "name": "Main line (spiral)",
-          "kind": "connector",
-          "id": "exit-01x",
-          "at": {
-            "x": 0,
-            "y": 34
-          },
-          "direction": "W"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-01y",
-          "points": [
-            {
-              "x": 0,
+              "x": 11,
               "y": 34
             },
             {
@@ -1022,44 +648,332 @@
           ]
         },
         {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-01z",
-          "type": "left",
-          "at": {
-            "x": 20,
-            "y": 34
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
+          "id": "track-q9t45gse",
           "name": "",
           "kind": "track",
-          "id": "track-020",
           "points": [
             {
-              "x": 21,
+              "x": 23,
               "y": 34
             },
             {
-              "x": 27,
+              "x": 51,
               "y": 34
             }
           ]
         },
         {
+          "id": "track-5sy9juyt",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 53,
+              "y": 34
+            },
+            {
+              "x": 61,
+              "y": 34
+            }
+          ]
+        },
+        {
+          "id": "track-mnc38ltt",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 5,
+              "y": 38
+            },
+            {
+              "x": 29,
+              "y": 38
+            }
+          ]
+        },
+        {
+          "id": "track-5ttzufa0",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 31,
+              "y": 38
+            },
+            {
+              "x": 37,
+              "y": 38
+            }
+          ]
+        },
+        {
+          "id": "track-1l91sduc",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 39,
+              "y": 38
+            },
+            {
+              "x": 63,
+              "y": 38
+            }
+          ]
+        },
+        {
+          "id": "track-vbkfe7fk",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 5,
+              "y": 40
+            },
+            {
+              "x": 31,
+              "y": 40
+            }
+          ]
+        },
+        {
+          "id": "track-5enbcjn0",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 33,
+              "y": 40
+            },
+            {
+              "x": 35,
+              "y": 40
+            }
+          ]
+        },
+        {
+          "id": "track-8ftwt1rr",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 37,
+              "y": 40
+            },
+            {
+              "x": 63,
+              "y": 40
+            }
+          ]
+        },
+        {
+          "id": "turnout-1kqof4b4",
           "name": "",
           "kind": "turnout",
-          "id": "turnout-021",
           "type": "right",
           "at": {
-            "x": 28,
-            "y": 34
+            "x": 48,
+            "y": 8
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              13
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-6yn0bixc",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 52,
+            "y": 8
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              17
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-r9brtvn7",
+          "name": "",
+          "kind": "turnout",
+          "type": "doubleSlip",
+          "at": {
+            "x": 54,
+            "y": 8
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              19
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-9y9uuaq9",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 50,
+            "y": 10
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              20
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-di0mltei",
+          "name": "",
+          "kind": "turnout",
+          "type": "doubleSlip",
+          "at": {
+            "x": 52,
+            "y": 10
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              1
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-1e6sed09",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 18,
+            "y": 12
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              2
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "signal-abrn1rf9",
+          "name": "",
+          "kind": "signal",
+          "at": {
+            "x": 46,
+            "y": 14
+          },
+          "facing": "E",
+          "side": "right",
+          "signalTypeId": "builtin:main2",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              803
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-pq07rf8z",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 48,
+            "y": 14
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              14
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-2kb446di",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 8,
+            "y": 16
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              23
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-c3yygldg",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 14,
+            "y": 16
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              18
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-9lnsnuzx",
+          "name": "",
+          "kind": "turnout",
+          "type": "doubleSlip",
+          "at": {
+            "x": 18,
+            "y": 16
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              3
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-0jal7sn6",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 20,
+            "y": 16
           },
           "orientation": "W",
           "control": {
@@ -1069,1448 +983,2646 @@
           }
         },
         {
+          "id": "signal-lj6ovv2y",
           "name": "",
-          "kind": "track",
-          "id": "track-022",
-          "points": [
-            {
-              "x": 29,
-              "y": 34
-            },
-            {
-              "x": 48,
-              "y": 34
-            }
-          ]
-        },
-        {
-          "name": "Main line (spiral)",
-          "kind": "connector",
-          "id": "exit-023",
+          "kind": "signal",
           "at": {
             "x": 48,
+            "y": 16
+          },
+          "facing": "E",
+          "side": "right",
+          "signalTypeId": "builtin:main2",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              804
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-yrxfv5we",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 16,
+            "y": 18
+          },
+          "orientation": "SW",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              32
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-wjnzrjuh",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 52,
+            "y": 18
+          },
+          "orientation": "SE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              16
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-jjcwu91a",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 14,
+            "y": 20
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              15
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-fumdildc",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 12,
+            "y": 22
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              21
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-5q0swvtb",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 18,
+            "y": 22
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              22
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-3gvslg6c",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 56,
+            "y": 22
+          },
+          "orientation": "NW",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              34
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-f8vszo2i",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 58,
+            "y": 24
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              35
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-egk4j2yu",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 14,
+            "y": 26
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              5
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-giuzmh5g",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 18,
+            "y": 26
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              11
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-3njzb0nb",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 58,
+            "y": 26
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              36
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-5rzwou8o",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 56,
+            "y": 28
+          },
+          "orientation": "SW",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              33
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-3ncjfeaa",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 18,
+            "y": 30
+          },
+          "orientation": "NW",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              7
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-lusx8634",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 18,
+            "y": 32
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              8
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-2hhq4mmc",
+          "name": "",
+          "kind": "turnout",
+          "type": "doubleSlip",
+          "at": {
+            "x": 20,
+            "y": 32
+          },
+          "orientation": "SE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              10
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-l2wkc4ey",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 52,
+            "y": 32
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              26
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-mp6xcbpu",
+          "name": "",
+          "kind": "turnout",
+          "type": "doubleSlip",
+          "at": {
+            "x": 54,
+            "y": 32
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              28
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-y63nfg9i",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 20,
             "y": 34
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              6
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-70h1ivjl",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 22,
+            "y": 34
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              12
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-3e3lg4sc",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 52,
+            "y": 34
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              27
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-z8fmgyj4",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 30,
+            "y": 38
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              40
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-jb05zpyc",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 38,
+            "y": 38
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              37
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-59awz6xz",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 32,
+            "y": 40
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              39
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-c8aplaea",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 36,
+            "y": 40
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              38
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "connector-5dbvnv2j",
+          "name": "Nebenbahn",
+          "kind": "connector",
+          "at": {
+            "x": 62,
+            "y": 10
           },
           "direction": "E"
         },
         {
-          "name": "Signal 3",
-          "kind": "signal",
-          "id": "signal-024",
+          "id": "connector-z4wr27uu",
+          "name": "Nebenbahn",
+          "kind": "connector",
           "at": {
-            "x": 34,
-            "y": 6
+            "x": 4,
+            "y": 12
           },
-          "facing": "E",
-          "side": "right",
-          "signalTypeId": "builtin:main2",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
+          "direction": "NW"
         },
         {
-          "name": "Signal 4",
-          "kind": "signal",
-          "id": "signal-025",
+          "id": "connector-xclnsk2t",
+          "name": "Päärata Pun",
+          "kind": "connector",
           "at": {
-            "x": 33,
-            "y": 8
+            "x": 62,
+            "y": 24
           },
-          "facing": "E",
-          "side": "right",
-          "signalTypeId": "builtin:main2",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
+          "direction": "E"
         },
         {
+          "id": "connector-aw4rv09q",
+          "name": "Päärata Pun",
+          "kind": "connector",
+          "at": {
+            "x": 6,
+            "y": 26
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-mst2sslu",
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "at": {
+            "x": 62,
+            "y": 26
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-7g4zx1d3",
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "at": {
+            "x": 6,
+            "y": 28
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-8s2xcufu",
+          "name": "Nebenbahn",
+          "kind": "connector",
+          "at": {
+            "x": 6,
+            "y": 32
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-y0xxqa0e",
+          "name": "Nebenbahn",
+          "kind": "connector",
+          "at": {
+            "x": 62,
+            "y": 32
+          },
+          "direction": "E"
+        },
+        {
+          "id": "label-3n6mitrx",
           "name": "",
           "kind": "label",
-          "id": "label-026",
           "at": {
-            "x": 24,
-            "y": 0
+            "x": 34,
+            "y": 7
           },
           "text": "1",
           "size": "small"
         },
         {
+          "id": "label-ub1wvfh3",
           "name": "",
           "kind": "label",
-          "id": "label-027",
           "at": {
-            "x": 24,
-            "y": 2
+            "x": 34,
+            "y": 9
           },
           "text": "2",
           "size": "small"
         },
         {
+          "id": "label-l16ya66h",
           "name": "",
           "kind": "label",
-          "id": "label-028",
           "at": {
-            "x": 24,
-            "y": 6
+            "x": 34,
+            "y": 13
           },
           "text": "3",
           "size": "small"
         },
         {
+          "id": "label-u6gdf1ky",
           "name": "",
           "kind": "label",
-          "id": "label-029",
           "at": {
-            "x": 24,
-            "y": 8
+            "x": 34,
+            "y": 15
           },
           "text": "4",
           "size": "small"
         },
         {
+          "id": "label-3jjob4bf",
           "name": "",
           "kind": "label",
-          "id": "label-02a",
           "at": {
-            "x": 24,
-            "y": 14
+            "x": 34,
+            "y": 21
           },
           "text": "7",
           "size": "small"
         },
         {
+          "id": "label-c1fi7tb6",
           "name": "",
           "kind": "label",
-          "id": "label-02b",
           "at": {
-            "x": 24,
-            "y": 16
+            "x": 34,
+            "y": 23
           },
           "text": "8",
           "size": "small"
         },
         {
+          "id": "label-jqgfavjl",
           "name": "",
           "kind": "label",
-          "id": "label-02c",
           "at": {
-            "x": 24,
-            "y": 18
+            "x": 34,
+            "y": 25
           },
           "text": "9",
           "size": "small"
         },
         {
+          "id": "label-wqfb6c4x",
           "name": "",
           "kind": "label",
-          "id": "label-02d",
           "at": {
-            "x": 24,
-            "y": 20
+            "x": 34,
+            "y": 27
           },
           "text": "10",
           "size": "small"
         },
         {
+          "id": "label-7olhrv2n",
           "name": "",
           "kind": "label",
-          "id": "label-02e",
           "at": {
-            "x": 24,
-            "y": 24
+            "x": 34,
+            "y": 31
           },
           "text": "11",
           "size": "small"
         },
         {
+          "id": "label-qpvookyt",
           "name": "",
           "kind": "label",
-          "id": "label-02f",
           "at": {
-            "x": 24,
-            "y": 26
+            "x": 34,
+            "y": 33
           },
           "text": "12",
           "size": "small"
-        }
-      ]
-    },
-    {
-      "id": "view-2",
-      "name": "inselburg-dettingen",
-      "areaId": "area-2",
-      "elements": [
-        {
-          "name": "",
-          "kind": "label",
-          "id": "label-02g",
-          "at": {
-            "x": 0,
-            "y": -6
-          },
-          "text": "Inselburg-Dettingen (draft from the Z21 screenshot)",
-          "size": "normal"
         },
         {
+          "id": "connector-6ib2mha7",
           "name": "",
-          "kind": "track",
-          "id": "track-02h",
-          "points": [
-            {
-              "x": 8,
-              "y": 20
-            },
-            {
-              "x": 3,
-              "y": 20
-            },
-            {
-              "x": 2,
-              "y": 19
-            },
-            {
-              "x": 2,
-              "y": 9
-            },
-            {
-              "x": 3,
-              "y": 8
-            },
-            {
-              "x": 11,
-              "y": 8
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-02i",
-          "type": "left",
-          "at": {
-            "x": 12,
-            "y": 8
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-02j",
-          "points": [
-            {
-              "x": 13,
-              "y": 8
-            },
-            {
-              "x": 40,
-              "y": 8
-            }
-          ]
-        },
-        {
-          "name": "Päärata Kel",
           "kind": "connector",
-          "id": "exit-02k",
           "at": {
-            "x": 40,
-            "y": 8
+            "x": 59,
+            "y": 1
+          },
+          "direction": "NE"
+        },
+        {
+          "id": "connector-7f9bl6pf",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 61,
+            "y": 1
+          },
+          "direction": "NE"
+        },
+        {
+          "id": "connector-w402ykrk",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 61,
+            "y": 3
+          },
+          "direction": "NE"
+        },
+        {
+          "id": "connector-p199vcn5",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 59,
+            "y": 14
           },
           "direction": "E"
         },
         {
+          "id": "connector-8q8hepmj",
           "name": "",
-          "kind": "track",
-          "id": "track-02l",
-          "points": [
-            {
-              "x": 13,
-              "y": 7
-            },
-            {
-              "x": 16,
-              "y": 4
-            },
-            {
-              "x": 20,
-              "y": 4
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-02m",
-          "type": "left",
+          "kind": "connector",
           "at": {
-            "x": 21,
-            "y": 4
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-02n",
-          "points": [
-            {
-              "x": 22,
-              "y": 4
-            },
-            {
-              "x": 34,
-              "y": 4
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-02o",
-          "at": {
-            "x": 34,
-            "y": 4
+            "x": 1,
+            "y": 16
           },
           "direction": "W"
         },
         {
+          "id": "connector-7ncd816w",
           "name": "",
-          "kind": "turnout",
-          "id": "turnout-02p",
-          "type": "right",
+          "kind": "connector",
           "at": {
-            "x": 23,
-            "y": 2
-          },
-          "orientation": "NE",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-02q",
-          "points": [
-            {
-              "x": 24,
-              "y": 2
-            },
-            {
-              "x": 34,
-              "y": 2
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-02r",
-          "at": {
-            "x": 34,
-            "y": 2
+            "x": 1,
+            "y": 18
           },
           "direction": "W"
         },
         {
+          "id": "connector-l78r6ezg",
           "name": "",
-          "kind": "turnout",
-          "id": "turnout-02s",
-          "type": "right",
+          "kind": "connector",
           "at": {
-            "x": 25,
-            "y": 0
+            "x": 59,
+            "y": 18
           },
-          "orientation": "NE",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
+          "direction": "E"
         },
         {
+          "id": "connector-ey2c9hex",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 11,
+            "y": 30
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-x3niw4j7",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 61,
+            "y": 30
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-pglancmr",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 11,
+            "y": 34
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-f0xnxw3d",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 61,
+            "y": 34
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-b7g5n8es",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 5,
+            "y": 38
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-43htub70",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 63,
+            "y": 38
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-axwu7tfl",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 5,
+            "y": 40
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-xedg3alo",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 63,
+            "y": 40
+          },
+          "direction": "E"
+        }
+      ]
+    },
+    {
+      "id": "view-r1tq8f4s",
+      "name": "inselburg-dettingen",
+      "areaId": "area-m5u112x6",
+      "elements": [
+        {
+          "id": "track-2u95t8h8",
           "name": "",
           "kind": "track",
-          "id": "track-02t",
           "points": [
+            {
+              "x": 47,
+              "y": 2
+            },
+            {
+              "x": 40,
+              "y": 2
+            },
+            {
+              "x": 37,
+              "y": 5
+            }
+          ]
+        },
+        {
+          "id": "track-vfrn09sj",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 39,
+              "y": 5
+            },
+            {
+              "x": 40,
+              "y": 4
+            },
+            {
+              "x": 43,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "id": "track-29h5guk9",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 31,
+              "y": 6
+            },
+            {
+              "x": 35,
+              "y": 6
+            }
+          ]
+        },
+        {
+          "id": "track-suzn4fvx",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 39,
+              "y": 6
+            },
+            {
+              "x": 43,
+              "y": 6
+            }
+          ]
+        },
+        {
+          "id": "track-5ml1iji0",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 25,
+              "y": 9
+            },
             {
               "x": 26,
-              "y": 0
-            },
-            {
-              "x": 34,
-              "y": 0
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-02u",
-          "at": {
-            "x": 34,
-            "y": 0
-          },
-          "direction": "W"
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-02v",
-          "type": "right",
-          "at": {
-            "x": 27,
-            "y": -2
-          },
-          "orientation": "NE",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-02w",
-          "points": [
-            {
-              "x": 28,
-              "y": -2
-            },
-            {
-              "x": 34,
-              "y": -2
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-02x",
-          "at": {
-            "x": 34,
-            "y": -2
-          },
-          "direction": "W"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-02y",
-          "points": [
-            {
-              "x": 28,
-              "y": -3
+              "y": 8
             },
             {
               "x": 29,
-              "y": -4
-            },
-            {
-              "x": 34,
-              "y": -4
+              "y": 8
             }
           ]
         },
         {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-02z",
-          "at": {
-            "x": 34,
-            "y": -4
-          },
-          "direction": "W"
-        },
-        {
+          "id": "track-9v1iwi7j",
           "name": "",
           "kind": "track",
-          "id": "track-030",
           "points": [
             {
-              "x": 10,
-              "y": 18
+              "x": 31,
+              "y": 8
             },
             {
-              "x": 5,
-              "y": 18
+              "x": 35,
+              "y": 8
+            }
+          ]
+        },
+        {
+          "id": "track-swaccf98",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 39,
+              "y": 8
             },
             {
-              "x": 4,
-              "y": 17
+              "x": 43,
+              "y": 8
+            }
+          ]
+        },
+        {
+          "id": "track-sthmzfyz",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 25,
+              "y": 10
             },
             {
-              "x": 4,
+              "x": 33,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "id": "track-3mfd2fgi",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 35,
+              "y": 10
+            },
+            {
+              "x": 39,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "id": "track-pegvs4sc",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 41,
+              "y": 10
+            },
+            {
+              "x": 47,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "id": "track-stg7y3jf",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 11,
+              "y": 12
+            },
+            {
+              "x": 21,
+              "y": 12
+            }
+          ]
+        },
+        {
+          "id": "track-xeouiuhs",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 41,
               "y": 11
             },
             {
-              "x": 5,
-              "y": 10
-            },
-            {
-              "x": 9,
-              "y": 10
+              "x": 43,
+              "y": 13
             }
           ]
         },
         {
-          "name": "Dettingen 1",
+          "id": "track-pn9c9td7",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 21,
+              "y": 14
+            },
+            {
+              "x": 43,
+              "y": 14
+            }
+          ]
+        },
+        {
+          "id": "track-bpu9f8d3",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 45,
+              "y": 14
+            },
+            {
+              "x": 52,
+              "y": 14
+            }
+          ]
+        },
+        {
+          "id": "track-rgbghdmh",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 21,
+              "y": 16
+            },
+            {
+              "x": 41,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "id": "track-ct5n1m11",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 43,
+              "y": 16
+            },
+            {
+              "x": 52,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "id": "track-lylu96yo",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 13,
+              "y": 18
+            },
+            {
+              "x": 21,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-1udn6p16",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 23,
+              "y": 18
+            },
+            {
+              "x": 39,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-vi0kpmi8",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 41,
+              "y": 18
+            },
+            {
+              "x": 45,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-swh448t4",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 13,
+              "y": 24
+            },
+            {
+              "x": 4,
+              "y": 24
+            },
+            {
+              "x": 4,
+              "y": 16
+            },
+            {
+              "x": 19,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "id": "track-tqqwxv4p",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 21,
+              "y": 24
+            },
+            {
+              "x": 26,
+              "y": 24
+            }
+          ]
+        },
+        {
+          "id": "track-2091i6g2",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 26,
+              "y": 26
+            },
+            {
+              "x": 19,
+              "y": 26
+            }
+          ]
+        },
+        {
+          "id": "track-0jmuqrfs",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 15,
+              "y": 24
+            },
+            {
+              "x": 19,
+              "y": 24
+            }
+          ]
+        },
+        {
+          "id": "track-k1kng3j7",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 15,
+              "y": 26
+            },
+            {
+              "x": 4,
+              "y": 26
+            },
+            {
+              "x": 2,
+              "y": 24
+            },
+            {
+              "x": 2,
+              "y": 16
+            },
+            {
+              "x": 4,
+              "y": 14
+            },
+            {
+              "x": 19,
+              "y": 14
+            }
+          ]
+        },
+        {
+          "id": "turnout-gov3s15h",
+          "name": "",
           "kind": "turnout",
-          "id": "turnout-031",
           "type": "left",
           "at": {
-            "x": 9,
-            "y": 20
+            "x": 36,
+            "y": 6
           },
           "orientation": "E",
           "control": {
             "kind": "dcc",
-            "addresses": [],
+            "addresses": [
+              197
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-v1si5yzw",
+          "name": "",
+          "kind": "turnout",
+          "type": "doubleSlip",
+          "at": {
+            "x": 38,
+            "y": 6
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              198
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-58jbwgo0",
+          "name": "",
+          "kind": "turnout",
+          "type": "doubleSlip",
+          "at": {
+            "x": 36,
+            "y": 8
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              195
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-1ld3u8za",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 38,
+            "y": 8
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              196
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-f9ryvkcs",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 24,
+            "y": 10
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              193
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-ecbipytt",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 34,
+            "y": 10
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              106
+            ],
             "invert": false
           }
         },
         {
-          "name": "Dettingen 2",
+          "id": "turnout-5wmh0vl9",
+          "name": "",
           "kind": "turnout",
-          "id": "turnout-032",
+          "type": "doubleSlip",
+          "at": {
+            "x": 40,
+            "y": 10
+          },
+          "orientation": "SE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              194
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-qpctmpaz",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 22,
+            "y": 12
+          },
+          "orientation": "SW",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              101
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-mbgf1jk9",
+          "name": "",
+          "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 11,
+            "x": 20,
+            "y": 14
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              103
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-abph7vhm",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 44,
+            "y": 14
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              105
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-iyy6clhv",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 20,
+            "y": 16
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              102
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-ubt8y9yp",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 42,
+            "y": 16
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              107
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-shv1ur2v",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 22,
             "y": 18
           },
           "orientation": "W",
           "control": {
             "kind": "dcc",
-            "addresses": [],
+            "addresses": [
+              190
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-sknue4fm",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 40,
+            "y": 18
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              191
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-433pg38b",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 14,
+            "y": 24
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              202
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-1av0o8yj",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 20,
+            "y": 24
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              201
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-5u986owz",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 18,
+            "y": 26
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              204
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-hhcf04r5",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 16,
+            "y": 26
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              203
+            ],
             "invert": false
           }
         },
         {
-          "name": "Dettingen 3",
-          "kind": "turnout",
-          "id": "turnout-033",
-          "type": "right",
+          "id": "connector-hmdrbqqd",
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "at": {
+            "x": 52,
+            "y": 14
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-kxrkx2fn",
+          "name": "Päärata Pun",
+          "kind": "connector",
+          "at": {
+            "x": 52,
+            "y": 16
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-26eozpdb",
+          "name": "Päärata Pun",
+          "kind": "connector",
+          "at": {
+            "x": 26,
+            "y": 24
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-9yqpyfr1",
+          "name": "Päärata Kel",
+          "kind": "connector",
+          "at": {
+            "x": 26,
+            "y": 26
+          },
+          "direction": "E"
+        },
+        {
+          "id": "label-tcvzsy4v",
+          "name": "",
+          "kind": "label",
+          "at": {
+            "x": 32,
+            "y": 9
+          },
+          "text": "4",
+          "size": "small"
+        },
+        {
+          "id": "label-lswt4y53",
+          "name": "",
+          "kind": "label",
+          "at": {
+            "x": 7,
+            "y": 12
+          },
+          "text": "Päärata Kel",
+          "size": "normal"
+        },
+        {
+          "id": "label-6w3d530l",
+          "name": "",
+          "kind": "label",
+          "at": {
+            "x": 32,
+            "y": 13
+          },
+          "text": "3",
+          "size": "small"
+        },
+        {
+          "id": "label-ctuda0oj",
+          "name": "",
+          "kind": "label",
+          "at": {
+            "x": 32,
+            "y": 15
+          },
+          "text": "2",
+          "size": "small"
+        },
+        {
+          "id": "label-odcxteun",
+          "name": "",
+          "kind": "label",
+          "at": {
+            "x": 7,
+            "y": 18
+          },
+          "text": "Päärata Pun",
+          "size": "normal"
+        },
+        {
+          "id": "label-myr9reyr",
+          "name": "",
+          "kind": "label",
+          "at": {
+            "x": 32,
+            "y": 17
+          },
+          "text": "1",
+          "size": "small"
+        },
+        {
+          "id": "connector-zhnx6rfm",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 47,
+            "y": 2
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-021yh6ox",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 43,
+            "y": 4
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-md21uo6z",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 31,
+            "y": 6
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-ua0md5rw",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 43,
+            "y": 6
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-vg0g0h4l",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 29,
+            "y": 8
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-f0v6oca8",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 31,
+            "y": 8
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-9e7krjpt",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 43,
+            "y": 8
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-zfka3c6e",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 47,
+            "y": 10
+          },
+          "direction": "E"
+        },
+        {
+          "id": "connector-dur27lpr",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 11,
+            "y": 12
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-8nz65k1y",
+          "name": "",
+          "kind": "connector",
           "at": {
             "x": 13,
             "y": 18
           },
+          "direction": "W"
+        },
+        {
+          "id": "connector-kgpx8uyx",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 45,
+            "y": 18
+          },
+          "direction": "E"
+        }
+      ]
+    },
+    {
+      "id": "view-78aa6la2",
+      "name": "Sissach",
+      "areaId": "area-r5qestfp",
+      "elements": [
+        {
+          "id": "track-w4bnq160",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 76,
+              "y": 2
+            },
+            {
+              "x": 74,
+              "y": 2
+            },
+            {
+              "x": 67,
+              "y": 9
+            }
+          ]
+        },
+        {
+          "id": "track-4da0w1l7",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 67,
+              "y": 10
+            },
+            {
+              "x": 78,
+              "y": 10
+            }
+          ]
+        },
+        {
+          "id": "track-zrtq1zp7",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 65,
+              "y": 12
+            },
+            {
+              "x": 76,
+              "y": 12
+            },
+            {
+              "x": 77,
+              "y": 13
+            }
+          ]
+        },
+        {
+          "id": "track-esuu74ph",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 59,
+              "y": 14
+            },
+            {
+              "x": 61,
+              "y": 14
+            }
+          ]
+        },
+        {
+          "id": "track-kwkr2ce9",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 63,
+              "y": 14
+            },
+            {
+              "x": 77,
+              "y": 14
+            }
+          ]
+        },
+        {
+          "id": "track-u5ty8476",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 9,
+              "y": 16
+            },
+            {
+              "x": 13,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "id": "track-bzj7sxub",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 15,
+              "y": 16
+            },
+            {
+              "x": 35,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "id": "track-p50gpzdq",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 37,
+              "y": 16
+            },
+            {
+              "x": 41,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "id": "track-c8yo3tw5",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 61,
+              "y": 16
+            },
+            {
+              "x": 79,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "id": "track-i3o9g6m9",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 6,
+              "y": 18
+            },
+            {
+              "x": 11,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-rwr5w4aj",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 13,
+              "y": 18
+            },
+            {
+              "x": 37,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-h5zvsh17",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 41,
+              "y": 18
+            },
+            {
+              "x": 39,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-mqmzg7qy",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 49,
+              "y": 18
+            },
+            {
+              "x": 52,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-nrcbyvbq",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 59,
+              "y": 18
+            },
+            {
+              "x": 77,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "track-99m5wuac",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 82,
+              "y": 18
+            },
+            {
+              "x": 81,
+              "y": 17
+            }
+          ]
+        },
+        {
+          "id": "track-dxj2eook",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 6,
+              "y": 20
+            },
+            {
+              "x": 11,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "id": "track-ujhscwmg",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 13,
+              "y": 20
+            },
+            {
+              "x": 37,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "id": "track-sicj4ojm",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 39,
+              "y": 20
+            },
+            {
+              "x": 43,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "id": "track-i1yvzs40",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 52,
+              "y": 20
+            },
+            {
+              "x": 47,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "id": "track-f8plaob2",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 59,
+              "y": 20
+            },
+            {
+              "x": 77,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "id": "track-f6nwzbeh",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 9,
+              "y": 22
+            },
+            {
+              "x": 13,
+              "y": 22
+            }
+          ]
+        },
+        {
+          "id": "track-309uzmew",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 15,
+              "y": 22
+            },
+            {
+              "x": 35,
+              "y": 22
+            }
+          ]
+        },
+        {
+          "id": "track-qvzq35af",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 37,
+              "y": 22
+            },
+            {
+              "x": 41,
+              "y": 22
+            }
+          ]
+        },
+        {
+          "id": "track-ehdyvyb9",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": 43,
+              "y": 18
+            },
+            {
+              "x": 47,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "id": "turnout-2kozcsr5",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 66,
+            "y": 10
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              319
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-9yibrbt2",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 64,
+            "y": 12
+          },
+          "orientation": "NE",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              318
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-3q1asaog",
+          "name": "",
+          "kind": "turnout",
+          "type": "doubleSlip",
+          "at": {
+            "x": 62,
+            "y": 14
+          },
           "orientation": "E",
           "control": {
             "kind": "dcc",
-            "addresses": [],
+            "addresses": [
+              317
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-iktmen0c",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 78,
+            "y": 14
+          },
+          "orientation": "NW",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              321
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-jie7iyfk",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 14,
+            "y": 16
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              304
+            ],
             "invert": false
           }
         },
         {
-          "name": "Dettingen 4",
+          "id": "turnout-721ke1bw",
+          "name": "",
           "kind": "turnout",
-          "id": "turnout-034",
           "type": "right",
           "at": {
-            "x": 15,
+            "x": 36,
+            "y": 16
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              307
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-cthzrjtt",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 60,
+            "y": 16
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              316
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-05uwufd3",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 80,
+            "y": 16
+          },
+          "orientation": "NW",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              322
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-ksu7r9n7",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 12,
+            "y": 18
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              303
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-sfhnxnl2",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 38,
+            "y": 18
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              305
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-b88c3du0",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 42,
+            "y": 18
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              310
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-mrpz8l7q",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 48,
+            "y": 18
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              312
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-p1jjhdlw",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 12,
+            "y": 20
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              302
+            ],
+            "invert": false
+          }
+        },
+        {
+          "id": "turnout-2w7tjjua",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 38,
             "y": 20
           },
           "orientation": "W",
           "control": {
             "kind": "dcc",
-            "addresses": [],
+            "addresses": [
+              306
+            ],
             "invert": false
           }
         },
         {
+          "id": "turnout-qzi2w4cb",
           "name": "",
-          "kind": "track",
-          "id": "track-035",
-          "points": [
-            {
-              "x": 10,
-              "y": 20
-            },
-            {
-              "x": 14,
-              "y": 20
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-036",
-          "points": [
-            {
-              "x": 16,
-              "y": 20
-            },
-            {
-              "x": 22,
-              "y": 20
-            }
-          ]
-        },
-        {
-          "name": "Päärata Kel (south)",
-          "kind": "connector",
-          "id": "exit-037",
+          "kind": "turnout",
+          "type": "left",
           "at": {
-            "x": 22,
+            "x": 46,
             "y": 20
           },
-          "direction": "E"
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              309
+            ],
+            "invert": false
+          }
         },
         {
+          "id": "turnout-8zulhvoh",
           "name": "",
-          "kind": "track",
-          "id": "track-038",
-          "points": [
-            {
-              "x": 14,
-              "y": 18
-            },
-            {
-              "x": 22,
-              "y": 18
-            }
-          ]
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": 44,
+            "y": 20
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              311
+            ],
+            "invert": false
+          }
         },
         {
-          "name": "Päärata Pun (south)",
-          "kind": "connector",
-          "id": "exit-039",
+          "id": "turnout-c06iaplh",
+          "name": "",
+          "kind": "turnout",
+          "type": "right",
           "at": {
-            "x": 22,
+            "x": 14,
+            "y": 22
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              301
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "turnout-p0l36lbj",
+          "name": "",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": 36,
+            "y": 22
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [
+              308
+            ],
+            "invert": true
+          }
+        },
+        {
+          "id": "stop-o9x0hhg5",
+          "name": "",
+          "kind": "bufferStop",
+          "at": {
+            "x": 76,
+            "y": 2
+          },
+          "direction": "W"
+        },
+        {
+          "id": "stop-4bhkhfpr",
+          "name": "",
+          "kind": "bufferStop",
+          "at": {
+            "x": 78,
+            "y": 10
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-yn33ydjv",
+          "name": "Päärata pun ->",
+          "kind": "connector",
+          "at": {
+            "x": 6,
+            "y": 18
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-5e2emubv",
+          "name": "Päärata pun ->",
+          "kind": "connector",
+          "at": {
+            "x": 52,
             "y": 18
           },
           "direction": "E"
         },
         {
+          "id": "stop-3e3g0z3z",
           "name": "",
-          "kind": "label",
-          "id": "label-03a",
+          "kind": "bufferStop",
           "at": {
-            "x": 10,
-            "y": 23
+            "x": 82,
+            "y": 18
           },
-          "text": "Dettingen",
-          "size": "small"
+          "direction": "NW"
         },
         {
-          "name": "",
-          "kind": "label",
-          "id": "label-03b",
-          "at": {
-            "x": 4,
-            "y": 6
-          },
-          "text": "Päärata Kel",
-          "size": "small"
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-03c",
-          "type": "right",
-          "at": {
-            "x": 10,
-            "y": 10
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-03d",
-          "points": [
-            {
-              "x": 11,
-              "y": 10
-            },
-            {
-              "x": 29,
-              "y": 10
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-03e",
-          "type": "left",
-          "at": {
-            "x": 30,
-            "y": 10
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-03f",
-          "points": [
-            {
-              "x": 31,
-              "y": 10
-            },
-            {
-              "x": 40,
-              "y": 10
-            }
-          ]
-        },
-        {
-          "name": "Päärata Pun",
+          "id": "connector-f2ifo6yj",
+          "name": "Päärata kel <-",
           "kind": "connector",
-          "id": "exit-03g",
-          "at": {
-            "x": 40,
-            "y": 10
-          },
-          "direction": "E"
-        },
-        {
-          "name": "Päärata Pun (west)",
-          "kind": "connector",
-          "id": "exit-03h",
           "at": {
             "x": 6,
-            "y": 12
+            "y": 20
           },
           "direction": "W"
         },
         {
-          "name": "",
-          "kind": "track",
-          "id": "track-03i",
-          "points": [
-            {
-              "x": 6,
-              "y": 12
-            },
-            {
-              "x": 11,
-              "y": 12
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-03j",
-          "type": "right",
+          "id": "connector-zww25x5u",
+          "name": "Päärata kel <-",
+          "kind": "connector",
           "at": {
-            "x": 12,
-            "y": 12
+            "x": 52,
+            "y": 20
           },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
+          "direction": "E"
         },
         {
-          "name": "",
-          "kind": "track",
-          "id": "track-03k",
-          "points": [
-            {
-              "x": 13,
-              "y": 12
-            },
-            {
-              "x": 27,
-              "y": 12
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-03l",
-          "type": "left",
-          "at": {
-            "x": 28,
-            "y": 12
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-03m",
-          "points": [
-            {
-              "x": 29,
-              "y": 12
-            },
-            {
-              "x": 32,
-              "y": 12
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-03n",
-          "at": {
-            "x": 32,
-            "y": 12
-          },
-          "direction": "W"
-        },
-        {
+          "id": "label-ei4kzy1e",
           "name": "",
           "kind": "label",
-          "id": "label-03o",
           "at": {
-            "x": 20,
-            "y": 12
+            "x": 24,
+            "y": 15
           },
           "text": "1",
           "size": "small"
         },
         {
+          "id": "label-w1m9dfrf",
           "name": "",
           "kind": "label",
-          "id": "label-03p",
           "at": {
-            "x": 20,
-            "y": 10
+            "x": 24,
+            "y": 17
           },
           "text": "2",
           "size": "small"
         },
         {
+          "id": "label-yqp0o06t",
           "name": "",
           "kind": "label",
-          "id": "label-03q",
           "at": {
-            "x": 20,
-            "y": 8
+            "x": 24,
+            "y": 19
           },
           "text": "3",
           "size": "small"
         },
         {
+          "id": "label-sm1n7zd3",
           "name": "",
           "kind": "label",
-          "id": "label-03r",
           "at": {
-            "x": 20,
-            "y": 4
+            "x": 24,
+            "y": 21
           },
           "text": "4",
           "size": "small"
-        }
-      ]
-    },
-    {
-      "id": "view-3",
-      "name": "Sissach",
-      "areaId": "area-3",
-      "elements": [
-        {
-          "name": "",
-          "kind": "label",
-          "id": "label-03s",
-          "at": {
-            "x": 0,
-            "y": -3
-          },
-          "text": "Sissach (draft from the Z21 screenshot)",
-          "size": "normal"
         },
         {
-          "name": "Päärata Pun",
+          "id": "connector-n8el47lh",
+          "name": "",
           "kind": "connector",
-          "id": "exit-03t",
           "at": {
-            "x": 0,
-            "y": 2
+            "x": 59,
+            "y": 14
           },
           "direction": "W"
         },
         {
+          "id": "connector-wj4ozc7c",
           "name": "",
-          "kind": "track",
-          "id": "track-03u",
-          "points": [
-            {
-              "x": 0,
-              "y": 2
-            },
-            {
-              "x": 7,
-              "y": 2
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-03v",
-          "type": "left",
-          "at": {
-            "x": 8,
-            "y": 2
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-03w",
-          "points": [
-            {
-              "x": 9,
-              "y": 2
-            },
-            {
-              "x": 31,
-              "y": 2
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-03x",
-          "type": "right",
-          "at": {
-            "x": 32,
-            "y": 2
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-03y",
-          "points": [
-            {
-              "x": 33,
-              "y": 2
-            },
-            {
-              "x": 37,
-              "y": 2
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-03z",
-          "type": "left",
-          "at": {
-            "x": 38,
-            "y": 2
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-040",
-          "type": "right",
-          "at": {
-            "x": 40,
-            "y": 2
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-041",
-          "points": [
-            {
-              "x": 41,
-              "y": 2
-            },
-            {
-              "x": 46,
-              "y": 2
-            }
-          ]
-        },
-        {
-          "name": "Päärata Pun",
           "kind": "connector",
-          "id": "exit-042",
           "at": {
-            "x": 46,
-            "y": 2
-          },
-          "direction": "E"
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-043",
-          "at": {
-            "x": 5,
-            "y": 0
-          },
-          "direction": "E"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-044",
-          "points": [
-            {
-              "x": 5,
-              "y": 0
-            },
-            {
-              "x": 9,
-              "y": 0
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-045",
-          "type": "left",
-          "at": {
-            "x": 10,
-            "y": 0
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-046",
-          "points": [
-            {
-              "x": 11,
-              "y": 0
-            },
-            {
-              "x": 29,
-              "y": 0
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-047",
-          "type": "right",
-          "at": {
-            "x": 30,
-            "y": 0
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-048",
-          "points": [
-            {
-              "x": 31,
-              "y": 0
-            },
-            {
-              "x": 35,
-              "y": 0
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-049",
-          "at": {
-            "x": 35,
-            "y": 0
+            "x": 9,
+            "y": 16
           },
           "direction": "W"
         },
         {
-          "name": "Päärata Kel",
+          "id": "connector-47oizp2i",
+          "name": "",
           "kind": "connector",
-          "id": "exit-04a",
           "at": {
-            "x": 0,
-            "y": 4
-          },
-          "direction": "W"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-04b",
-          "points": [
-            {
-              "x": 0,
-              "y": 4
-            },
-            {
-              "x": 7,
-              "y": 4
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-04c",
-          "type": "right",
-          "at": {
-            "x": 8,
-            "y": 4
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-04d",
-          "points": [
-            {
-              "x": 9,
-              "y": 4
-            },
-            {
-              "x": 31,
-              "y": 4
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-04e",
-          "type": "left",
-          "at": {
-            "x": 32,
-            "y": 4
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-04f",
-          "points": [
-            {
-              "x": 33,
-              "y": 4
-            },
-            {
-              "x": 35,
-              "y": 4
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-04g",
-          "type": "left",
-          "at": {
-            "x": 36,
-            "y": 4
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-04h",
-          "points": [
-            {
-              "x": 37,
-              "y": 4
-            },
-            {
-              "x": 41,
-              "y": 4
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-04i",
-          "type": "right",
-          "at": {
-            "x": 42,
-            "y": 4
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-04j",
-          "points": [
-            {
-              "x": 43,
-              "y": 4
-            },
-            {
-              "x": 46,
-              "y": 4
-            }
-          ]
-        },
-        {
-          "name": "Päärata Kel",
-          "kind": "connector",
-          "id": "exit-04k",
-          "at": {
-            "x": 46,
-            "y": 4
+            "x": 41,
+            "y": 16
           },
           "direction": "E"
         },
         {
+          "id": "connector-8tazrmm1",
           "name": "",
-          "kind": "bufferStop",
-          "id": "stop-04l",
+          "kind": "connector",
           "at": {
-            "x": 5,
-            "y": 6
-          },
-          "direction": "E"
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-04m",
-          "points": [
-            {
-              "x": 5,
-              "y": 6
-            },
-            {
-              "x": 9,
-              "y": 6
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-04n",
-          "type": "right",
-          "at": {
-            "x": 10,
-            "y": 6
-          },
-          "orientation": "W",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-04o",
-          "points": [
-            {
-              "x": 11,
-              "y": 6
-            },
-            {
-              "x": 29,
-              "y": 6
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "turnout",
-          "id": "turnout-04p",
-          "type": "left",
-          "at": {
-            "x": 30,
-            "y": 6
-          },
-          "orientation": "E",
-          "control": {
-            "kind": "dcc",
-            "addresses": [],
-            "invert": false
-          }
-        },
-        {
-          "name": "",
-          "kind": "track",
-          "id": "track-04q",
-          "points": [
-            {
-              "x": 31,
-              "y": 6
-            },
-            {
-              "x": 35,
-              "y": 6
-            }
-          ]
-        },
-        {
-          "name": "",
-          "kind": "bufferStop",
-          "id": "stop-04r",
-          "at": {
-            "x": 35,
-            "y": 6
+            "x": 59,
+            "y": 18
           },
           "direction": "W"
         },
         {
+          "id": "connector-rt73ux3m",
           "name": "",
-          "kind": "label",
-          "id": "label-04s",
+          "kind": "connector",
           "at": {
-            "x": 20,
-            "y": 0
+            "x": 77,
+            "y": 18
           },
-          "text": "1",
-          "size": "small"
+          "direction": "E"
         },
         {
+          "id": "connector-6q3snpjt",
           "name": "",
-          "kind": "label",
-          "id": "label-04t",
+          "kind": "connector",
           "at": {
-            "x": 20,
-            "y": 2
+            "x": 59,
+            "y": 20
           },
-          "text": "2",
-          "size": "small"
+          "direction": "W"
         },
         {
+          "id": "connector-dqv0v24x",
           "name": "",
-          "kind": "label",
-          "id": "label-04u",
+          "kind": "connector",
           "at": {
-            "x": 20,
-            "y": 4
+            "x": 77,
+            "y": 20
           },
-          "text": "3",
-          "size": "small"
+          "direction": "E"
         },
         {
+          "id": "connector-mdc4qwg0",
           "name": "",
-          "kind": "label",
-          "id": "label-04v",
+          "kind": "connector",
           "at": {
-            "x": 20,
-            "y": 6
+            "x": 9,
+            "y": 22
           },
-          "text": "4",
-          "size": "small"
+          "direction": "W"
+        },
+        {
+          "id": "connector-1zfrt7dl",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": 41,
+            "y": 22
+          },
+          "direction": "E"
         }
       ]
     }
   ],
+  "arrangements": [],
   "areas": [
     {
-      "id": "area-1",
+      "id": "area-y3jx4plk",
       "name": "olten",
       "level": 1
     },
     {
-      "id": "area-2",
+      "id": "area-m5u112x6",
       "name": "inselburg-dettingen",
       "level": 1
     },
     {
-      "id": "area-3",
+      "id": "area-r5qestfp",
       "name": "Sissach",
       "level": 1
     }
-  ]
+  ],
+  "blocks": [],
+  "signalTypes": [],
+  "routes": []
 }
