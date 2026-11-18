@@ -6,7 +6,11 @@ import {afterEach, describe, expect, it} from 'vitest';
 import {createFakeZ21, FakeZ21} from '../../../scripts/fake-z21.mjs';
 import {ConnectionManager} from '../../connection/ConnectionManager';
 import {NodeUdpTransport} from '../../connection/nodeUdpTransport';
-import {ENGINE_API_VERSION, EngineEvent} from '../../shared/engineApi';
+import {
+  ENGINE_API_VERSION,
+  EngineEvent,
+  EngineReport,
+} from '../../shared/engineApi';
 import {FeedbackInputState} from '../../shared/feedback';
 import {Engine} from '../Engine';
 
@@ -38,9 +42,11 @@ const start = async (firmware = '1.33') => {
   const connection = new ConnectionManager({
     createTransport: () => new NodeUdpTransport(),
   });
+  const reports: EngineReport[] = [];
   engine = new Engine(connection, {
     accessoryGapMs: GAP_MS,
     defaultPulseMs: PULSE_MS,
+    report: (report) => reports.push(report),
   });
   const events: EngineEvent[] = [];
   engine.attachPort({
@@ -61,7 +67,7 @@ const start = async (firmware = '1.33') => {
     }
     return latest;
   };
-  return {fake, connection, events, send, inputs};
+  return {fake, connection, events, reports, send, inputs};
 };
 
 describe('the fake Z21 itself', () => {
@@ -277,5 +283,33 @@ describe('operating a layout (Level 1) against the fake Z21', () => {
 
     expect(events.some((event) => event.type === 'layout')).toBe(true);
     expect(connection.getState()).toBe('connected');
+  });
+
+  it('restores the last known positions and reports confirmed ones (ACC-4)', async () => {
+    const {reports} = await start();
+    engine!.loadLayout(project);
+    const layout = () => engine!.snapshot().layout;
+    // Given the z21 start reports a default for a never-switched turnout
+    await waitFor(
+      () => layout().turnouts['W1']?.status === 'reported',
+      'start-up report',
+    );
+    // When main asks for the saved positions (and one for another project)
+    engine!.restoreTurnouts('other', {W1: 'straight'});
+    engine!.restoreTurnouts('p', {W1: 'diverging', M1: 'diverging'});
+    // Then the turnout is switched and confirmed, the manual one untouched
+    await waitFor(
+      () =>
+        layout().turnouts['W1']?.status === 'confirmed' &&
+        layout().turnouts['W1']?.position === 'diverging',
+      'restored',
+    );
+    expect(layout().turnouts['M1']?.status).toBe('unknown');
+    // And main is told the confirmed position to save
+    expect(reports).toContainEqual({
+      type: 'turnoutPositions',
+      projectId: 'p',
+      positions: {W1: 'diverging'},
+    });
   });
 });

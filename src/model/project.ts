@@ -89,6 +89,9 @@ export const projectSettingsSchema = z.object({
   blockReleaseDelayMs: z.number().int().min(0).max(60000).default(1000),
   // Set signals along a route automatically (RTE-5).
   autoSignalsOnRoute: z.boolean().default(true),
+  // Command the last known turnout positions after the first connection
+  // (ACC-4). Off by default.
+  restoreTurnoutsOnStartup: z.boolean().default(false),
   editPassword: passwordHashSchema.optional(),
 });
 export type ProjectSettings = z.infer<typeof projectSettingsSchema>;

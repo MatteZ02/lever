@@ -8,7 +8,11 @@ import {
   WebContents,
 } from 'electron';
 import enginePath from '../engine/index?modulePath';
-import {EngineControl} from '../shared/engineApi';
+import {
+  EngineControl,
+  EngineReport,
+  engineReportSchema,
+} from '../shared/engineApi';
 
 // Time the engine gets to log off before it is killed on quit.
 const SHUTDOWN_TIMEOUT_MS = 1000;
@@ -23,12 +27,26 @@ export class EngineHost {
   private protocolLog = false;
   // The open project, sent again after an engine restart.
   private project: unknown = null;
+  private readonly reportListeners = new Set<(report: EngineReport) => void>();
+
+  // Reports from the engine (validated).
+  onReport(listener: (report: EngineReport) => void): void {
+    this.reportListeners.add(listener);
+  }
 
   start(): void {
     const child = utilityProcess.fork(enginePath, [], {
       serviceName: 'Lever engine',
     });
     this.child = child;
+    child.on('message', (message: unknown) => {
+      const parsed = engineReportSchema.safeParse(message);
+      if (!parsed.success) {
+        console.error('Invalid report from engine', parsed.error.message);
+        return;
+      }
+      this.reportListeners.forEach((listener) => listener(parsed.data));
+    });
     child.on('exit', (code) => {
       if (this.child !== child) {
         return;
@@ -51,6 +69,12 @@ export class EngineHost {
   loadLayout(project: unknown): void {
     this.project = project;
     this.send({type: 'loadLayout', project});
+  }
+
+  // ACC-4: the engine commands these positions once, after it connects.
+  // Not repeated after an engine restart: the central unit has kept them.
+  restoreTurnouts(projectId: string, positions: Record<string, string>): void {
+    this.send({type: 'restoreTurnouts', projectId, positions});
   }
 
   // Connects (or reconnects) the engine to the central unit.

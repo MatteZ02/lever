@@ -24,6 +24,7 @@ import {
   Signal,
   Turnout,
 } from '../model/elements';
+import {turnoutPositions} from '../model/ports';
 import {Block, Project, StationView} from '../model/project';
 import {OutputReport, reconstructState} from '../model/reconstruct';
 import {findSignalType, SignalType} from '../model/signalTypes';
@@ -284,6 +285,30 @@ export class Interlocking {
   }
 
   // --- operator commands ------------------------------------------------------
+
+  // ACC-4: commands the last known positions of turnouts that the central
+  // unit controls. Manual turnouts are skipped (nothing to send; recording
+  // them would claim the operator had checked them). A reported position is
+  // not trusted (the central unit may have restarted and report a default),
+  // so only turnouts already seen in the saved position this session are
+  // left alone. Goes through the same checks and queue as an operator's click.
+  restoreTurnouts(positions: Record<string, string>): void {
+    for (const [elementId, position] of Object.entries(positions)) {
+      const element = this.infos.get(elementId)?.element;
+      const live = this.live.turnouts[elementId];
+      const alreadyThere =
+        live?.status === 'confirmed' && live.position === position;
+      if (
+        element?.kind === 'turnout' &&
+        element.control.kind !== 'manual' &&
+        // The turnout may have been changed to another type since.
+        turnoutPositions(element).includes(position) &&
+        !alreadyThere
+      ) {
+        this.command({type: 'setTurnout', elementId, position});
+      }
+    }
+  }
 
   command(command: ElementCommand): void {
     const info = this.infos.get(command.elementId);

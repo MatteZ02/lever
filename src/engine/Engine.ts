@@ -22,9 +22,11 @@ import {
   EngineCommand,
   engineCommandSchema,
   EngineEventInput,
+  EngineReport,
   EngineSnapshot,
 } from '../shared/engineApi';
 import {FeedbackSource} from '../shared/feedback';
+import {LayoutLiveChanges} from '../shared/liveState';
 
 // LAN_X_SET_EXT_ACCESSORY exists from Z21 FW 1.40 (§5.4). The z21 start in
 // use runs 1.33 (REU-5).
@@ -44,6 +46,8 @@ export type EngineOptions = {
   // Timers for the interlocking (confirmation, block release); tests inject
   // fake ones.
   schedule?: (ms: number, run: () => void) => () => void;
+  // Reports to the main process (ACC-4 last-known turnout positions).
+  report?: (report: EngineReport) => void;
 };
 
 const realSchedule = (ms: number, run: () => void) => {
@@ -67,6 +71,10 @@ export class Engine {
   private readonly awaitingReply = new Set<number>();
   private feedbackSources: FeedbackSource[] = [];
   private protocolLog = false;
+  private projectId: string | null = null;
+  // ACC-4: positions to command after the next connection.
+  private pendingRestore: Record<string, string> | null = null;
+  private readonly report: (report: EngineReport) => void;
 
   constructor(
     private readonly connection: ConnectionManager,
@@ -74,6 +82,7 @@ export class Engine {
   ) {
     this.now = options.now ?? Date.now;
     this.defaultPulseMs = options.defaultPulseMs ?? DEFAULT_PULSE_MS;
+    this.report = options.report ?? (() => {});
     this.queue = new AccessoryQueue({
       send: (datasets) => connection.sendDatasets(datasets),
       gapMs: options.accessoryGapMs,
@@ -82,7 +91,10 @@ export class Engine {
     this.interlocking = new Interlocking({
       enqueue: (job) => this.enqueue(job),
       schedule: options.schedule ?? realSchedule,
-      onChange: (changes) => this.broadcast({type: 'layout', changes}),
+      onChange: (changes) => {
+        this.broadcast({type: 'layout', changes});
+        this.reportConfirmedTurnouts(changes);
+      },
       onNotice: (notice) => this.notice(notice),
     });
 
@@ -188,6 +200,10 @@ export class Engine {
       return;
     }
     const project = parsed.data;
+    if (project.id !== this.projectId) {
+      this.pendingRestore = null;
+    }
+    this.projectId = project.id;
     this.interlocking.load(project);
     this.setAccessoryGap(project.settings.centralUnit.accessoryGapMs);
     this.setFeedbackSources(project.settings.centralUnit.feedbackSources);
@@ -198,6 +214,20 @@ export class Engine {
           this.query(fAdr);
         }
       }
+    }
+  }
+
+  // ACC-4: commands the last known turnout positions once, after the next
+  // connection (now, if connected). Through the interlocking and the
+  // rate-limited queue, after the start-up queries.
+  restoreTurnouts(projectId: string, positions: Record<string, string>): void {
+    if (projectId !== this.projectId) {
+      return;
+    }
+    if (this.connection.getState() === 'connected') {
+      this.interlocking.restoreTurnouts(positions);
+    } else {
+      this.pendingRestore = positions;
     }
   }
 
@@ -310,6 +340,32 @@ export class Engine {
     feedbackStartupQueries(this.feedbackSources).forEach((job) =>
       this.enqueue(job),
     );
+    if (this.pendingRestore) {
+      const positions = this.pendingRestore;
+      this.pendingRestore = null;
+      this.interlocking.restoreTurnouts(positions);
+    }
+  }
+
+  // Positions the central unit confirmed are the last known ones (ACC-4).
+  // Start-up reports are not: a restarted unit may report a default.
+  private reportConfirmedTurnouts(changes: LayoutLiveChanges): void {
+    if (!this.projectId) {
+      return;
+    }
+    const positions: Record<string, string> = {};
+    for (const [id, turnout] of Object.entries(changes.turnouts ?? {})) {
+      if (turnout?.status === 'confirmed' && turnout.position) {
+        positions[id] = turnout.position;
+      }
+    }
+    if (Object.keys(positions).length > 0) {
+      this.report({
+        type: 'turnoutPositions',
+        projectId: this.projectId,
+        positions,
+      });
+    }
   }
 
   private onJobStart(job: AccessoryJob): void {

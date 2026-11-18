@@ -224,6 +224,43 @@ describe('turnouts (ACC-2)', () => {
   });
 });
 
+describe('restoring last known positions (ACC-4)', () => {
+  const layout = () =>
+    projectWith(
+      dccTurnout(5),
+      turnout('U', [9, 0], {
+        control: {kind: 'dcc', addresses: [6], invert: false},
+      }),
+      turnout('M', [15, 0], {control: {kind: 'manual'}}),
+    );
+
+  it('commands addressed turnouts through the queue, skipping manual ones', () => {
+    // Given a start-up report that may be a default of the central unit
+    const {interlocking, jobs} = setup(layout());
+    interlocking.accessoryReport(4, 'output1', true);
+    // When the saved positions are restored
+    interlocking.restoreTurnouts({
+      T: 'straight',
+      U: 'diverging',
+      M: 'diverging',
+    });
+    // Then both addressed turnouts are commanded (a report is not trusted)
+    expect(jobs).toMatchObject([
+      {kind: 'switch', fAdr: 4, output: 0, tag: 'T'},
+      {kind: 'switch', fAdr: 5, output: 1, tag: 'U'},
+    ]);
+    // And the manual turnout is not recorded as checked by the operator
+    expect(interlocking.state().turnouts['M']).toEqual({status: 'unknown'});
+  });
+
+  it('leaves turnouts already confirmed in that position, and unknown positions', () => {
+    const {interlocking, jobs} = setup(layout());
+    interlocking.accessoryReport(4, 'output2', false);
+    interlocking.restoreTurnouts({T: 'diverging', U: 'left'});
+    expect(jobs).toEqual([]);
+  });
+});
+
 describe('position feedback (ACC-3)', () => {
   const withFeedback = () => {
     const project = projectWith(

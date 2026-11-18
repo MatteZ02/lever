@@ -20,6 +20,7 @@ import {EngineHost} from './engineHost';
 import {ProjectController} from './project/projectController';
 import {applySecurityPolicy} from './security';
 import {applySettingsUpdate, loadSettings, saveSettings} from './settingsFile';
+import {TurnoutPositionStore} from './turnoutPositions';
 import {runUiScript, uiScriptPath} from './uiAutomation';
 
 // Several instances may run at once, also on one PC (MULTI-5), so there is
@@ -36,6 +37,9 @@ let settings: Settings;
 let projects: ProjectController;
 // The last project sent to the engine, to send only changes.
 let appliedProject: Project | null = null;
+let turnoutPositions: TurnoutPositionStore;
+// Projects whose turnouts were restored in this run (ACC-4: once, on start).
+const restoredProjects = new Set<string>();
 
 const PROJECT_ACTIONS: ProjectFileAction[] = [
   'new',
@@ -59,6 +63,24 @@ const applyProjectToEngine = (project: Project): void => {
   if (project !== appliedProject) {
     appliedProject = project;
     engine.loadLayout(project);
+    restoreTurnouts(project);
+  }
+};
+
+// ACC-4: the first time a project is operated in this run, and only when
+// its setting is on, the engine commands the last known positions once
+// connected.
+const restoreTurnouts = (project: Project): void => {
+  if (restoredProjects.has(project.id)) {
+    return;
+  }
+  restoredProjects.add(project.id);
+  const positions = turnoutPositions.get(project.id);
+  if (
+    project.settings.restoreTurnoutsOnStartup &&
+    Object.keys(positions).length > 0
+  ) {
+    engine.restoreTurnouts(project.id, positions);
   }
 };
 
@@ -281,6 +303,15 @@ const start = async (): Promise<void> => {
   app.setAppUserModelId('fi.alppirautatiet.lever');
   applySecurityPolicy();
   settings = await loadSettings();
+  turnoutPositions = new TurnoutPositionStore(
+    join(app.getPath('userData'), 'turnout-positions.json'),
+  );
+  await turnoutPositions.load();
+  engine.onReport((report) => {
+    if (report.type === 'turnoutPositions') {
+      turnoutPositions.update(report.projectId, report.positions);
+    }
+  });
   projects = new ProjectController({
     onState: broadcastProject,
     rememberPath: rememberProjectPath,
@@ -311,7 +342,10 @@ app.on('before-quit', (event) => {
       return;
     }
     stopping = true;
-    void engine.stop().finally(() => app.quit());
+    void turnoutPositions
+      .flush()
+      .then(() => engine.stop())
+      .finally(() => app.quit());
   });
 });
 

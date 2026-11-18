@@ -318,6 +318,9 @@ export const strings = {
     feedbackSources: 'Feedback buses used',
     blockReleaseDelay: 'Default block release delay (ms)',
     autoSignals: 'Set signals along routes automatically',
+    restoreTurnouts: 'Restore turnout positions on startup',
+    restoreTurnoutsHelp:
+      'When Lever opens this project, it switches every connected turnout to its last confirmed position, one after another. Only the positions this PC saw are known.',
   },
 
   validation: {

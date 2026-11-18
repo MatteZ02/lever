@@ -131,6 +131,17 @@ export const ProjectProperties = ({
             }))
           }
         />
+        <CheckField
+          label={strings.properties.restoreTurnouts}
+          value={project.settings.restoreTurnoutsOnStartup}
+          onCommit={(value) =>
+            edit((p) => ({
+              ...p,
+              settings: {...p.settings, restoreTurnoutsOnStartup: value},
+            }))
+          }
+        />
+        <p className="muted small">{strings.properties.restoreTurnoutsHelp}</p>
       </Section>
 
       <Section title={strings.properties.centralUnit}>

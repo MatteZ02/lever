@@ -11,6 +11,7 @@ const SHUTDOWN_FLUSH_MS = 100;
 
 const engine = new Engine(
   new ConnectionManager({createTransport: () => new NodeUdpTransport()}),
+  {report: (report) => process.parentPort.postMessage(report)},
 );
 
 const wrapPort = (port: Electron.MessagePortMain): EnginePort => ({
@@ -47,6 +48,9 @@ process.parentPort.on('message', (event) => {
       break;
     case 'loadLayout':
       engine.loadLayout(control.project);
+      break;
+    case 'restoreTurnouts':
+      engine.restoreTurnouts(control.projectId, control.positions);
       break;
     case 'shutdown':
       engine.shutdown();

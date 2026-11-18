@@ -254,7 +254,28 @@ export const engineControlSchema = z.discriminatedUnion('type', [
   // The open project (validated by the engine). Its central-unit profile
   // sets the accessory gap and feedback sources (LOAD-1, LOAD-2).
   z.object({type: z.literal('loadLayout'), project: z.unknown()}),
+  // ACC-4: command these turnout positions (element id → position) once,
+  // after the next connection (or now, if connected). Sent by main once per
+  // opened project, when the project setting is on.
+  z.object({
+    type: z.literal('restoreTurnouts'),
+    projectId: z.string(),
+    positions: z.record(z.string(), z.string()),
+  }),
   // Log off cleanly and exit.
   z.object({type: z.literal('shutdown')}),
 ]);
 export type EngineControl = z.infer<typeof engineControlSchema>;
+
+// --- Reports (engine → main process, over parentPort) ------------------------
+
+export const engineReportSchema = z.discriminatedUnion('type', [
+  // Turnout positions the central unit confirmed (seen switching), for the
+  // last-known positions of ACC-4. Only changed turnouts are listed.
+  z.object({
+    type: z.literal('turnoutPositions'),
+    projectId: z.string(),
+    positions: z.record(z.string(), z.string()),
+  }),
+]);
+export type EngineReport = z.infer<typeof engineReportSchema>;
