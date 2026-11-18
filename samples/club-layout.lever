@@ -13,6 +13,7 @@
       "turnoutCommandMode": "pulse",
       "confirmation": "report",
       "confirmTimeoutMs": 2000,
+      "positionRefreshMs": 0,
       "feedbackSources": []
     },
     "blockReleaseDelayMs": 1000,
@@ -891,7 +892,7 @@
             "addresses": [
               803
             ],
-            "invert": true
+            "invert": false
           }
         },
         {
@@ -998,7 +999,7 @@
             "addresses": [
               804
             ],
-            "invert": true
+            "invert": false
           }
         },
         {
@@ -1606,36 +1607,6 @@
           "size": "small"
         },
         {
-          "id": "connector-6ib2mha7",
-          "name": "",
-          "kind": "connector",
-          "at": {
-            "x": 59,
-            "y": 1
-          },
-          "direction": "NE"
-        },
-        {
-          "id": "connector-7f9bl6pf",
-          "name": "",
-          "kind": "connector",
-          "at": {
-            "x": 61,
-            "y": 1
-          },
-          "direction": "NE"
-        },
-        {
-          "id": "connector-w402ykrk",
-          "name": "",
-          "kind": "connector",
-          "at": {
-            "x": 61,
-            "y": 3
-          },
-          "direction": "NE"
-        },
-        {
           "id": "connector-p199vcn5",
           "name": "",
           "kind": "connector",
@@ -1754,6 +1725,36 @@
             "y": 40
           },
           "direction": "E"
+        },
+        {
+          "id": "stop-u51dax25",
+          "name": "",
+          "kind": "bufferStop",
+          "at": {
+            "x": 59,
+            "y": 1
+          },
+          "direction": "SW"
+        },
+        {
+          "id": "stop-wh4rx8q8",
+          "name": "",
+          "kind": "bufferStop",
+          "at": {
+            "x": 61,
+            "y": 1
+          },
+          "direction": "SW"
+        },
+        {
+          "id": "stop-9gc2xcio",
+          "name": "",
+          "kind": "bufferStop",
+          "at": {
+            "x": 61,
+            "y": 3
+          },
+          "direction": "SW"
         }
       ]
     },
