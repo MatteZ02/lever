@@ -129,6 +129,15 @@ const createWindow = (): BrowserWindow => {
       backgroundThrottling: uiScript === undefined,
     },
   });
+  // Closing the window quits Lever (one window for now). Go through the quit
+  // path first, so "Cancel" in its unsaved-changes question keeps the window.
+  window.on('close', (event) => {
+    if (stopping || uiScript) {
+      return;
+    }
+    event.preventDefault();
+    app.quit();
+  });
   if (uiScript) {
     window.once('ready-to-show', () => void runUiScript(window, uiScript));
   } else {

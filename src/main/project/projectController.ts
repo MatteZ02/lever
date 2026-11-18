@@ -11,7 +11,7 @@ import {ProjectFileAction, ProjectState} from '../../shared/projectApi';
 import {strings} from '../../shared/strings';
 import {readZ21File} from '../z21File';
 import {backupDir} from './backups';
-import {OpenResult, ProjectDocument} from './ProjectDocument';
+import {OpenResult, ProjectDocument, unsavedRisk} from './ProjectDocument';
 
 const FILTERS = [
   {name: strings.project.fileType, extensions: [PROJECT_FILE_EXTENSION]},
@@ -54,6 +54,16 @@ export class ProjectController {
   }
 
   async run(action: ProjectFileAction, window?: BrowserWindow): Promise<void> {
+    // These replace the open layout: never lose unsaved work silently.
+    if (
+      (action === 'new' ||
+        action === 'open' ||
+        action === 'import' ||
+        action === 'importZ21') &&
+      !(await this.confirmClose('replace', window))
+    ) {
+      return;
+    }
     switch (action) {
       case 'new':
         await this.document.newProject(createProject(strings.project.untitled));
@@ -140,37 +150,86 @@ export class ProjectController {
     }
   }
 
-  // Before quitting: write pending changes; ask about an untitled project
-  // with content. Returns false if the user cancels.
+  // Before quitting: write pending changes, ask where work would be lost.
+  // Returns false if the user cancels.
   async beforeQuit(): Promise<boolean> {
-    const state = this.document.get();
-    const hasContent = state.project.views.some(
-      (view) => view.elements.length > 0,
-    );
-    if (state.path === null && hasContent) {
-      const {response} = await dialog.showMessageBox({
-        type: 'question',
-        message: strings.project.saveBeforeQuit,
-        buttons: [
-          strings.project.save,
-          strings.project.dontSave,
-          strings.project.cancel,
-        ],
-        defaultId: 0,
-        cancelId: 2,
-      });
-      if (response === 2) {
-        return false;
-      }
-      if (response === 0) {
-        await this.run('saveAs');
-        if (this.document.get().path === null) {
-          return false;
-        }
-      }
+    if (!(await this.confirmClose('quit'))) {
+      return false;
     }
     await this.document.close();
     return true;
+  }
+
+  // Before the open layout is closed or replaced. Commits what is being typed
+  // in a field, writes a pending autosave, then asks if anything would still
+  // be lost. Returns false if the user cancels (nothing changes).
+  async confirmClose(
+    reason: 'quit' | 'replace',
+    window?: BrowserWindow,
+  ): Promise<boolean> {
+    await commitTyping();
+    await this.document.flush();
+    // On top of Lever's window, also when quitting (no window passed).
+    const parent =
+      window ??
+      BrowserWindow.getFocusedWindow() ??
+      BrowserWindow.getAllWindows()[0];
+    const ask = (options: Electron.MessageBoxOptions) =>
+      parent
+        ? dialog.showMessageBox(parent, options)
+        : dialog.showMessageBox(options);
+
+    switch (unsavedRisk(this.document.get())) {
+      case 'none':
+        return true;
+      case 'untitled': {
+        const {response} = await ask({
+          type: 'question',
+          message:
+            reason === 'quit'
+              ? strings.project.saveBeforeQuit
+              : strings.project.saveBeforeReplace,
+          detail: strings.project.unsavedDetail,
+          buttons: [
+            strings.project.save,
+            strings.project.dontSave,
+            strings.project.cancel,
+          ],
+          defaultId: 0,
+          cancelId: 2,
+        });
+        if (response === 2) {
+          return false;
+        }
+        if (response === 0) {
+          await this.run('saveAs', window);
+          return this.document.get().path !== null;
+        }
+        return true;
+      }
+      case 'saveFailed': {
+        const {response} = await ask({
+          type: 'warning',
+          message: strings.project.saveFailedClose,
+          detail: strings.project.saveFailedCloseDetail,
+          buttons: [
+            strings.project.tryAgain,
+            strings.project.discardChanges,
+            strings.project.cancel,
+          ],
+          defaultId: 0,
+          cancelId: 2,
+        });
+        if (response === 2) {
+          return false;
+        }
+        if (response === 0) {
+          await this.document.save();
+          return unsavedRisk(this.document.get()) === 'none';
+        }
+        return true;
+      }
+    }
   }
 
   // A Z21 app control station becomes a new, unsaved layout (the .z21 file
@@ -290,5 +349,26 @@ const describeError = (
       return strings.project.errors.invalid(error.details);
     case 'unreadable':
       return error.message;
+  }
+};
+
+// A property field commits on Enter or when it loses focus; closing the window
+// does neither. Take the focus away first so the typed value is kept, and
+// give its edit a moment to arrive.
+const commitTyping = async (): Promise<void> => {
+  const windows = BrowserWindow.getAllWindows().filter(
+    (window) => !window.isDestroyed(),
+  );
+  await Promise.all(
+    windows.map((window) =>
+      window.webContents
+        .executeJavaScript(
+          'document.activeElement instanceof HTMLElement && document.activeElement.blur(); true',
+        )
+        .catch(() => undefined),
+    ),
+  );
+  if (windows.length > 0) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 };

@@ -18,6 +18,25 @@ import {readProjectFile, writeProjectFile} from './projectFile';
 // Autosave this long after the last change (PRJ-3).
 export const AUTOSAVE_DELAY_MS = 1500;
 
+// What would be lost if the open layout were closed or replaced now (after a
+// flush): nothing; an untitled layout with content (never saved to a file;
+// its recovery copy is overwritten by the next untitled one); or changes to a
+// file whose last save failed.
+export type UnsavedRisk = 'none' | 'untitled' | 'saveFailed';
+
+export const unsavedRisk = (state: ProjectState): UnsavedRisk => {
+  if (state.readOnly) {
+    return 'none';
+  }
+  if (state.path === null) {
+    const hasContent = state.project.views.some(
+      (view) => view.elements.length > 0,
+    );
+    return hasContent ? 'untitled' : 'none';
+  }
+  return state.unsaved ? 'saveFailed' : 'none';
+};
+
 export type OpenResult =
   | {ok: true}
   | {ok: false; error: LoadError | {code: 'unreadable'; message: string}};
