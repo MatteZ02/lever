@@ -212,6 +212,17 @@ export const ProjectProperties = ({
             value !== undefined && setProfile({confirmTimeoutMs: value})
           }
         />
+        <NumberField
+          label={strings.properties.positionRefresh}
+          help={strings.properties.positionRefreshHelp}
+          value={profile.positionRefreshMs / 1000}
+          min={0}
+          max={600}
+          onCommit={(value) =>
+            value !== undefined &&
+            setProfile({positionRefreshMs: Math.round(value * 1000)})
+          }
+        />
         <span className="field-label">
           {strings.properties.feedbackSources}
         </span>

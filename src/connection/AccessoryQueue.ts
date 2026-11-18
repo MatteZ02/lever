@@ -21,6 +21,9 @@ export const DEFAULT_PULSE_MS = 150;
 export const MIN_PULSE_MS = 20;
 export const MAX_PULSE_MS = 5000;
 export const MIN_GAP_MS = 20;
+// Gap after a background query: it only asks the central unit what it
+// knows, nothing goes out to the track, so a short gap is enough.
+export const BACKGROUND_QUERY_GAP_MS = 50;
 
 export type AccessoryJob =
   | {
@@ -37,7 +40,9 @@ export type AccessoryJob =
   | {kind: 'extAccessory'; rawAddress: number; value: number; tag?: string}
   // A request whose answer arrives as a broadcast-style message (turnout
   // info, feedback status). `key` identifies duplicates.
-  | {kind: 'query'; key: string; dataset: Uint8Array};
+  // `background`: a refresh (positions changed by other programs). Runs only
+  // when nothing else waits, so it never delays an operator's command.
+  | {kind: 'query'; key: string; dataset: Uint8Array; background?: boolean};
 
 // sent: on the wire (for a switch: activate and deactivate both sent).
 // replaced: a newer switch for the same address took its place.
@@ -106,6 +111,14 @@ export class AccessoryQueue {
     const existing = this.pending.findIndex((entry) =>
       sameTarget(entry.job, job),
     );
+    if (
+      existing >= 0 &&
+      isBackground(job) &&
+      !isBackground(this.pending[existing].job)
+    ) {
+      onDone?.('sent');
+      return this.pending[existing].id;
+    }
     if (existing >= 0) {
       const replaced = this.pending[existing];
       this.pending[existing] = {id, job, onDone};
@@ -164,7 +177,11 @@ export class AccessoryQueue {
     if (this.busy || !this.connected) {
       return;
     }
-    const entry = this.pending.shift();
+    // Commands first; background queries only when nothing else waits.
+    const index = this.pending.findIndex(
+      (candidate) => !isBackground(candidate.job),
+    );
+    const [entry] = this.pending.splice(index >= 0 ? index : 0, 1);
     if (!entry) {
       return;
     }
@@ -209,7 +226,12 @@ export class AccessoryQueue {
       case 'query':
         this.send([job.dataset]);
         entry.onDone?.('sent');
-        this.wait(this.gapMs, () => this.next());
+        this.wait(
+          job.background
+            ? Math.min(this.gapMs, BACKGROUND_QUERY_GAP_MS)
+            : this.gapMs,
+          () => this.next(),
+        );
         break;
     }
   }
@@ -226,6 +248,9 @@ export class AccessoryQueue {
     this.pump();
   }
 }
+
+const isBackground = (job: AccessoryJob): boolean =>
+  job.kind === 'query' && job.background === true;
 
 const sameTarget = (a: AccessoryJob, b: AccessoryJob): boolean => {
   if (a.kind === 'switch' && b.kind === 'switch') {

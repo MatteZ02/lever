@@ -10,7 +10,11 @@ import {
 } from '../../model/__tests__/testLayouts';
 import {DiagramElement, Signal} from '../../model/elements';
 import {Project} from '../../model/project';
-import {Interlocking, InterlockingNotice} from '../Interlocking';
+import {
+  CHECK_REPLY_MS,
+  Interlocking,
+  InterlockingNotice,
+} from '../Interlocking';
 
 const fakeClock = () => {
   let now = 0;
@@ -447,5 +451,116 @@ describe('mixed levels (ARC-L1)', () => {
     expect(notices).toEqual([
       {code: 'refused', elementId: 'T', reason: 'levelNotAvailable'},
     ]);
+  });
+});
+
+describe('position refresh (DR5000: changes by other programs)', () => {
+  it('given a known position, when a refresh reply differs, then the change is followed and confirmed', () => {
+    const {interlocking} = setup(projectWith(dccTurnout(5)));
+    interlocking.accessoryReport(4, 'output1', true);
+    // WinDigipet throws it; the DR5000 tells nobody. The refresh asks:
+    interlocking.accessoryReport(4, 'output2', true);
+    expect(interlocking.state().turnouts['T']).toEqual({
+      position: 'diverging',
+      status: 'confirmed',
+    });
+  });
+
+  it('given a start-up position, when a refresh reply is the same, then it stays reported', () => {
+    const {interlocking} = setup(projectWith(dccTurnout(5)));
+    interlocking.accessoryReport(4, 'output1', true);
+    interlocking.accessoryReport(4, 'output1', true);
+    expect(interlocking.state().turnouts['T']).toEqual({
+      position: 'straight',
+      status: 'reported',
+    });
+  });
+
+  it('lists the addresses drawn in a view', () => {
+    const {interlocking} = setup(projectWith(dccTurnout(5)));
+    expect(interlocking.addressesOfViews(new Set(['v']))).toEqual([4]);
+    expect(interlocking.addressesOfViews(new Set(['other']))).toEqual([]);
+  });
+});
+
+describe('a lost report (DR5000: replies sent to the wrong client)', () => {
+  const setupWithQuery = () => {
+    const queried: number[] = [];
+    const clock = fakeClock();
+    const jobs: AccessoryJob[] = [];
+    const notices: InterlockingNotice[] = [];
+    const interlocking = new Interlocking({
+      enqueue: (job) => jobs.push(job),
+      schedule: clock.schedule,
+      onChange: () => undefined,
+      onNotice: (notice) => notices.push(notice),
+      query: (fAdr) => queried.push(fAdr),
+    });
+    interlocking.load(projectWith(dccTurnout(5)));
+    // Known: straight. The operator throws it to diverging.
+    interlocking.accessoryReport(4, 'output1', true);
+    interlocking.command({
+      type: 'setTurnout',
+      elementId: 'T',
+      position: 'diverging',
+    });
+    const startJobs = () => {
+      for (const job of jobs.splice(0)) {
+        if (job.kind !== 'query' && job.tag) {
+          interlocking.jobStarted(job.tag);
+        }
+      }
+    };
+    startJobs();
+    return {interlocking, clock, jobs, notices, queried, startJobs};
+  };
+
+  it('given no report, when the check finds it moved, then it is confirmed and not sent again', () => {
+    const {interlocking, clock, jobs, queried} = setupWithQuery();
+    clock.advance(2000);
+    expect(queried).toEqual([4]);
+    expect(jobs).toEqual([]);
+
+    interlocking.accessoryReport(4, 'output2', true); // the check's answer
+    expect(interlocking.state().turnouts['T']).toEqual({
+      position: 'diverging',
+      status: 'confirmed',
+    });
+    clock.advance(10000);
+    expect(jobs).toEqual([]);
+  });
+
+  it('given the check finds it has not moved, then it is sent again', () => {
+    const {interlocking, clock, jobs, startJobs} = setupWithQuery();
+    clock.advance(2000);
+    interlocking.accessoryReport(4, 'output1', true);
+    clock.advance(CHECK_REPLY_MS);
+    expect(jobs).toMatchObject([{kind: 'switch', fAdr: 4, output: 1}]);
+    expect(interlocking.state().turnouts['T'].status).toBe('retrying');
+
+    startJobs();
+    interlocking.accessoryReport(4, 'output2', false);
+    expect(interlocking.state().turnouts['T']).toEqual({
+      position: 'diverging',
+      status: 'confirmed',
+    });
+  });
+
+  it('given it really does not move, then it fails in the position the central unit reports', () => {
+    const {interlocking, clock, notices, queried, startJobs} = setupWithQuery();
+    clock.advance(2000);
+    interlocking.accessoryReport(4, 'output1', true);
+    clock.advance(CHECK_REPLY_MS);
+    startJobs(); // the second try
+    clock.advance(2000);
+    expect(queried).toEqual([4, 4]);
+    interlocking.accessoryReport(4, 'output1', true);
+    clock.advance(CHECK_REPLY_MS);
+
+    expect(interlocking.state().turnouts['T']).toEqual({
+      position: 'straight',
+      status: 'failed',
+    });
+    expect(notices).toEqual([{code: 'failed', elementId: 'T'}]);
   });
 });

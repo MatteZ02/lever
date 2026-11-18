@@ -71,6 +71,13 @@ export const engineCommandSchema = z.discriminatedUnion('type', [
     elementId: z.string(),
     on: z.boolean(),
   }),
+  // The station view this window shows (null: none). The engine refreshes
+  // the positions of what is on screen (positionRefreshMs).
+  z.object({
+    v: version,
+    type: z.literal('showView'),
+    viewId: z.string().nullable(),
+  }),
   // Train number label on a block with feedback (BLK-4); null clears it.
   z.object({
     v: version,

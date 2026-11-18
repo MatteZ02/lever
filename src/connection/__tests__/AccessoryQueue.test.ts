@@ -1,6 +1,11 @@
 import {lanXGetTurnoutInfo, toHex} from '@lever/z21-protocol';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import {AccessoryJob, AccessoryQueue, JobResult} from '../AccessoryQueue';
+import {
+  AccessoryJob,
+  AccessoryQueue,
+  BACKGROUND_QUERY_GAP_MS,
+  JobResult,
+} from '../AccessoryQueue';
 
 // Byte values: spec §5.2.1 (FAdr 4 = turnout #5, output 2) and
 // packages/z21-protocol accessories tests.
@@ -177,5 +182,60 @@ describe('AccessoryQueue', () => {
     expect(started).toEqual([switchJob(4, 1)]);
     vi.advanceTimersByTime(PULSE + GAP);
     expect(started).toEqual([switchJob(4, 1), switchJob(2, 0)]);
+  });
+});
+
+describe('background queries (position refresh)', () => {
+  const refresh = (fAdr: number): AccessoryJob => ({
+    kind: 'query',
+    key: `turnout:${fAdr}`,
+    dataset: lanXGetTurnoutInfo(fAdr),
+    background: true,
+  });
+
+  it('given a refresh round waiting, when the operator throws a turnout, then the throw goes next', () => {
+    const {queue, hexes} = setup();
+    [10, 11, 12, 13].forEach((fAdr) => queue.enqueue(refresh(fAdr)));
+    // The first query is on its way; the rest wait.
+    expect(hexes()).toEqual([toHex(lanXGetTurnoutInfo(10))]);
+
+    queue.enqueue(switchJob(4, 1));
+    vi.advanceTimersByTime(BACKGROUND_QUERY_GAP_MS);
+    expect(hexes()[1]).toBe(ACTIVATE_5_OUT2);
+  });
+
+  it('uses the short gap after a background query, the full gap after a command', () => {
+    const {queue, sent} = setup();
+    queue.enqueue(refresh(10));
+    queue.enqueue(refresh(11));
+    queue.enqueue(switchJob(4, 1));
+    vi.advanceTimersByTime(2000);
+    expect(sent).toEqual([
+      {at: 0, hex: toHex(lanXGetTurnoutInfo(10))},
+      {at: BACKGROUND_QUERY_GAP_MS, hex: ACTIVATE_5_OUT2},
+      {at: BACKGROUND_QUERY_GAP_MS + PULSE, hex: DEACTIVATE_5_OUT2},
+      {
+        at: BACKGROUND_QUERY_GAP_MS + PULSE + GAP,
+        hex: toHex(lanXGetTurnoutInfo(11)),
+      },
+    ]);
+  });
+
+  it('does not turn a waiting start-up query into a background one', () => {
+    const {queue, started} = setup();
+    queue.enqueue(switchJob(4, 1));
+    queue.enqueue({
+      kind: 'query',
+      key: 'turnout:10',
+      dataset: lanXGetTurnoutInfo(10),
+    });
+    queue.enqueue(refresh(10));
+    queue.enqueue(switchJob(2, 0));
+    vi.advanceTimersByTime(2000);
+    expect(started.map((job) => job.kind)).toEqual([
+      'switch',
+      'query',
+      'switch',
+    ]);
   });
 });

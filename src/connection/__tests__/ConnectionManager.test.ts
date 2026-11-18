@@ -8,13 +8,19 @@ import {
   ConnectionState,
   CONNECTION_LOST_AFTER_MS,
   DEVICE_INFO_TIMEOUT_MS,
+  FLAGS_REPLY_TIMEOUT_MS,
   KEEPALIVE_IDLE_MS,
   RECONNECT_DELAYS_MS,
+  STATUS_REFRESH_MIN_AGE_MS,
 } from '../ConnectionManager';
 import {FakeTransport} from '../testUtils/fakeTransport';
 import {TrackStatus} from '../trackStatus';
 
-const SET_FLAGS_AND_STATUS = '08 00 50 00 01 00 00 00 07 00 40 00 21 24 05';
+// Login: ask which broadcast flags are set, and the status (§2.17, §2.12).
+const LOGIN = '04 00 51 00 07 00 40 00 21 24 05';
+const SET_FLAGS_1 = '08 00 50 00 01 00 00 00';
+// LAN_GET_BROADCASTFLAGS reply: none set (a new client on a Z21).
+const FLAGS_NONE = '08 00 51 00 00 00 00 00';
 const GET_STATUS = '07 00 40 00 21 24 05';
 const DEVICE_INFO_REQUESTS = '04 00 1A 00 04 00 18 00 04 00 10 00';
 const GET_FIRMWARE_VERSION = '07 00 40 00 F1 0A FB';
@@ -22,7 +28,9 @@ const LOGOFF = '04 00 30 00';
 const STATUS_NORMAL = '08 00 40 00 62 22 00 40';
 const HWINFO_FW_143 = '0C 00 1A 00 04 02 00 00 43 01 00 00';
 
-const setup = (options: {combineDatasets?: boolean} = {}) => {
+const setup = (
+  options: {combineDatasets?: boolean; broadcastFlags?: number} = {},
+) => {
   const transports: FakeTransport[] = [];
   const manager = new ConnectionManager({
     createTransport: () => {
@@ -48,6 +56,7 @@ const connected = async (options?: {combineDatasets?: boolean}) => {
   context.manager.connect('192.168.0.111');
   await settle();
   context.current().receive(STATUS_NORMAL);
+  context.current().receive(FLAGS_NONE);
   context.current().takeSent();
   return context;
 };
@@ -61,14 +70,14 @@ afterEach(() => {
 });
 
 describe('connecting', () => {
-  it('logs in by setting broadcast flags and requesting status in one datagram', async () => {
+  it('logs in by asking the broadcast flags and the status in one datagram', async () => {
     const {manager, current, states} = setup();
     manager.connect('192.168.0.111');
     await settle();
 
     expect(current().host).toBe('192.168.0.111');
     expect(current().port).toBe(21105);
-    expect(current().sent).toEqual([SET_FLAGS_AND_STATUS]);
+    expect(current().sent).toEqual([LOGIN]);
     expect(states).toEqual(['connecting']);
   });
 
@@ -123,12 +132,12 @@ describe('connecting', () => {
 
     await vi.advanceTimersByTimeAsync(CONNECT_TIMEOUT_MS);
     expect(transports[0].closed).toBe(true);
-    expect(transports[0].sent).toEqual([SET_FLAGS_AND_STATUS]); // no logoff
+    expect(transports[0].sent).toEqual([LOGIN]); // no logoff
     expect(states).toEqual(['connecting', 'reconnecting']);
 
     await vi.advanceTimersByTimeAsync(RECONNECT_DELAYS_MS[0]);
     expect(transports).toHaveLength(2);
-    expect(transports[1].sent).toEqual([SET_FLAGS_AND_STATUS]);
+    expect(transports[1].sent).toEqual([LOGIN]);
 
     // Second failure waits for the second delay.
     await vi.advanceTimersByTimeAsync(CONNECT_TIMEOUT_MS);
@@ -153,14 +162,14 @@ describe('connecting', () => {
     expect(manager.getState()).toBe('reconnecting');
 
     await vi.advanceTimersByTimeAsync(RECONNECT_DELAYS_MS[0]);
-    expect(transports[1].sent).toEqual([SET_FLAGS_AND_STATUS]);
+    expect(transports[1].sent).toEqual([LOGIN]);
   });
 
   it('uses separate datagrams when combining is turned off', async () => {
     const {manager, current} = setup({combineDatasets: false});
     manager.connect('192.168.0.111');
     await settle();
-    expect(current().sent).toEqual(['08 00 50 00 01 00 00 00', GET_STATUS]);
+    expect(current().sent).toEqual(['04 00 51 00', GET_STATUS]);
   });
 
   it('sets the configured broadcast flags', async () => {
@@ -171,11 +180,70 @@ describe('connecting', () => {
     });
     manager.connect('192.168.0.111');
     await settle();
-    expect(transport.sent[0].startsWith('08 00 50 00 03 00 00 00')).toBe(true);
+    transport.receive(STATUS_NORMAL);
+    transport.receive(FLAGS_NONE);
+    expect(transport.sent).toContain('08 00 50 00 03 00 00 00');
   });
 });
 
 describe('broadcast flags', () => {
+  it('given a Z21 (no flags set for a new client), Lever sets its own', async () => {
+    const {manager, current} = setup();
+    manager.connect('192.168.0.111');
+    await settle();
+    current().receive(STATUS_NORMAL);
+    current().takeSent();
+    current().receive(FLAGS_NONE);
+    expect(current().takeSent()).toEqual([SET_FLAGS_1]);
+  });
+
+  it('given a DR5000 (one set of flags for all clients), Lever adds its own and keeps the others', async () => {
+    const {manager, current} = setup({broadcastFlags: 0x00000003});
+    manager.connect('192.168.0.111');
+    await settle();
+    current().receive(STATUS_NORMAL);
+    current().takeSent();
+    // WinDigipet or the Z21 app set basic + system state (0x101).
+    current().receive('08 00 51 00 01 01 00 00');
+    expect(current().takeSent()).toEqual(['08 00 50 00 03 01 00 00']);
+
+    // Later changes keep them too.
+    manager.setBroadcastFlags(0x00000001);
+    expect(current().takeSent()).toEqual(['08 00 50 00 01 01 00 00']);
+  });
+
+  it("given the flags already include Lever's, nothing is sent", async () => {
+    const {manager, current} = setup();
+    manager.connect('192.168.0.111');
+    await settle();
+    current().receive(STATUS_NORMAL);
+    current().takeSent();
+    current().receive('08 00 51 00 01 00 00 00');
+    expect(current().takeSent()).toEqual([]);
+  });
+
+  it('never sends the all-locos flag, also not on behalf of another client', async () => {
+    const {manager, current} = setup();
+    manager.connect('192.168.0.111');
+    await settle();
+    current().receive(STATUS_NORMAL);
+    current().takeSent();
+    current().receive('08 00 51 00 01 00 01 00');
+    expect(current().takeSent()).toEqual([SET_FLAGS_1]);
+  });
+
+  it('given no answer to the flags request, Lever sets its own after a timeout', async () => {
+    const {manager, current} = setup();
+    manager.connect('192.168.0.111');
+    await settle();
+    current().receive(STATUS_NORMAL);
+    current().takeSent();
+    vi.advanceTimersByTime(FLAGS_REPLY_TIMEOUT_MS - 1);
+    expect(current().takeSent()).not.toContain(SET_FLAGS_1);
+    vi.advanceTimersByTime(1);
+    expect(current().takeSent()).toContain(SET_FLAGS_1);
+  });
+
   it('sends changed flags at once and again after reconnecting', async () => {
     const {manager, transports} = await connected();
     manager.setBroadcastFlags(0x00000003);
@@ -186,21 +254,22 @@ describe('broadcast flags', () => {
 
     vi.advanceTimersByTime(CONNECTION_LOST_AFTER_MS + 5000);
     await vi.advanceTimersByTimeAsync(RECONNECT_DELAYS_MS[0]);
-    expect(transports[1].sent[0].startsWith('08 00 50 00 03 00 00 00')).toBe(
-      true,
-    );
+    expect(transports[1].takeSent()).toEqual([LOGIN]);
+    transports[1].receive(STATUS_NORMAL);
+    transports[1].receive(FLAGS_NONE);
+    expect(transports[1].takeSent()).toContain('08 00 50 00 03 00 00 00');
   });
 
-  it('sends flags changed while still waiting for the first reply', async () => {
-    // Given the login datagram went out with the old flags
+  it('given flags changed while the flags request is open, the answer sends the new ones', async () => {
     const {manager, current} = setup();
     manager.connect('192.168.0.111');
     await settle();
-    expect(current().takeSent()).toEqual([SET_FLAGS_AND_STATUS]);
-    // When the flags change before the central unit has answered
+    expect(current().takeSent()).toEqual([LOGIN]);
     manager.setBroadcastFlags(0x00000003);
-    // Then the new flags are sent at once, not only after a reconnect
-    expect(current().takeSent()).toEqual(['08 00 50 00 03 00 00 00']);
+    expect(current().takeSent()).toEqual([]);
+    current().receive(STATUS_NORMAL);
+    current().receive(FLAGS_NONE);
+    expect(current().takeSent()).toContain('08 00 50 00 03 00 00 00');
   });
 
   it('refuses the all-locos flag', () => {
@@ -249,7 +318,7 @@ describe('keepalive and connection loss', () => {
     expect(states.at(-1)).toBe('reconnecting');
 
     await vi.advanceTimersByTimeAsync(RECONNECT_DELAYS_MS[0]);
-    expect(transports[1].sent).toEqual([SET_FLAGS_AND_STATUS]);
+    expect(transports[1].sent).toEqual([LOGIN]);
   });
 
   it('stays connected while replies keep coming', async () => {
@@ -259,6 +328,47 @@ describe('keepalive and connection loss', () => {
       current().receive(STATUS_NORMAL);
     }
     expect(manager.getState()).toBe('connected');
+  });
+});
+
+describe('status refresh on user actions', () => {
+  it('given a stale status, when the user acts, then the status is asked again', async () => {
+    const {manager, current} = await connected();
+    vi.advanceTimersByTime(STATUS_REFRESH_MIN_AGE_MS);
+    current().takeSent(); // device info requests
+    manager.refreshStatusIfStale();
+    expect(current().takeSent()).toEqual([GET_STATUS]);
+  });
+
+  it('given a recent request, when the user acts quickly again, then nothing is sent', async () => {
+    const {manager, current} = await connected();
+    vi.advanceTimersByTime(STATUS_REFRESH_MIN_AGE_MS);
+    current().takeSent(); // device info requests
+    manager.refreshStatusIfStale();
+    vi.advanceTimersByTime(STATUS_REFRESH_MIN_AGE_MS - 1);
+    manager.refreshStatusIfStale();
+    expect(current().takeSent()).toEqual([GET_STATUS]);
+  });
+
+  it('given the connect request was just sent, then no extra request', async () => {
+    const {manager, current} = await connected();
+    manager.refreshStatusIfStale();
+    expect(current().takeSent()).toEqual([]);
+  });
+
+  it('given another device stopped the layout, when the user acts, then the stop shows', async () => {
+    const {manager, current, trackStatuses} = await connected();
+    vi.advanceTimersByTime(STATUS_REFRESH_MIN_AGE_MS);
+    current().takeSent(); // device info requests
+    manager.refreshStatusIfStale();
+    current().receive('08 00 40 00 62 22 01 41'); // status: emergency stop
+    expect(trackStatuses.at(-1)).toBe('emergencyStop');
+  });
+
+  it('given no connection, then nothing is sent', () => {
+    const {manager, transports} = setup();
+    manager.refreshStatusIfStale();
+    expect(transports).toEqual([]);
   });
 });
 

@@ -5,6 +5,7 @@ import {
   RECONNECT_DELAYS_MS,
 } from '../connection/ConnectionManager';
 import {FakeTransport} from '../connection/testUtils/fakeTransport';
+import {projectWith, turnout} from '../model/__tests__/testLayouts';
 import {ENGINE_API_VERSION, EngineEvent} from '../shared/engineApi';
 import {Engine, EnginePort} from './Engine';
 
@@ -57,6 +58,7 @@ const setup = async () => {
   await vi.advanceTimersByTimeAsync(0);
   const transport = () => transports[transports.length - 1];
   transport().receive(STATUS_NORMAL);
+  transport().receive('08 00 51 00 00 00 00 00'); // broadcast flags: none
   transport().takeSent();
   const window = fakePort();
   engine.attachPort(window.port);
@@ -249,5 +251,67 @@ describe('feedback', () => {
     expect(window.ofType('feedback')).toMatchObject([
       {changes: [{key: 'loconet:5', occupied: true}]},
     ]);
+  });
+});
+
+describe('position refresh (positionRefreshMs)', () => {
+  const GET_INFO_5 = '08 00 40 00 43 00 04 47';
+  const layout = (positionRefreshMs: number) => {
+    const project = projectWith(
+      turnout('T', [3, 0], {
+        control: {kind: 'dcc', addresses: [5], invert: false},
+      }),
+    );
+    return {
+      ...project,
+      settings: {
+        ...project.settings,
+        centralUnit: {...project.settings.centralUnit, positionRefreshMs},
+      },
+    };
+  };
+  const started = async (positionRefreshMs: number) => {
+    const context = await setup();
+    context.engine.loadLayout(layout(positionRefreshMs));
+    context.window.send({type: 'showView', viewId: 'v'});
+    // Start-up query and the first refresh for the shown view.
+    await vi.advanceTimersByTimeAsync(1000);
+    context.transport().takeSent();
+    return context;
+  };
+
+  it('given it is off (default), nothing is asked again', async () => {
+    const {transport} = await started(0);
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(transport().takeSent()).not.toContain(GET_INFO_5);
+  });
+
+  it('given 10 s, the turnouts on screen are asked for every 10 s', async () => {
+    const {transport} = await started(10000);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(transport().takeSent()).toContain(GET_INFO_5);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(transport().takeSent()).not.toContain(GET_INFO_5);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(transport().takeSent()).toContain(GET_INFO_5);
+  });
+
+  it('given a round more than 3 s old, an operator action asks again at once, after its own command', async () => {
+    const {transport, window} = await started(60000);
+    await vi.advanceTimersByTimeAsync(4000);
+    transport().takeSent();
+    window.send({type: 'switchAccessory', fAdr: 2, output: 0});
+    await vi.advanceTimersByTimeAsync(1000);
+    const sent = transport().takeSent();
+    const thrown = sent.indexOf('09 00 40 00 53 00 02 88 D9');
+    expect(thrown).toBeGreaterThanOrEqual(0);
+    expect(sent.indexOf(GET_INFO_5)).toBeGreaterThan(thrown);
+  });
+
+  it('given no window shows the station, its turnouts are not asked for', async () => {
+    const {transport, window} = await started(10000);
+    window.send({type: 'showView', viewId: null});
+    await vi.advanceTimersByTimeAsync(30000);
+    expect(transport().takeSent()).not.toContain(GET_INFO_5);
   });
 });

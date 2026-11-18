@@ -4,6 +4,7 @@
 import {
   BroadcastFlag,
   decodeDatagram,
+  lanGetBroadcastFlags,
   lanGetCode,
   lanGetHwInfo,
   lanGetSerialNumber,
@@ -27,6 +28,9 @@ import {UdpTransport} from './transport';
 
 // No reply within this time after connecting: try again.
 export const CONNECT_TIMEOUT_MS = 3000;
+// Waiting for the current broadcast flags at login; without an answer Lever
+// sets only its own.
+export const FLAGS_REPLY_TIMEOUT_MS = 1000;
 // LAN_GET_HWINFO unanswered after this time: fall back to
 // LAN_X_GET_FIRMWARE_VERSION.
 export const DEVICE_INFO_TIMEOUT_MS = 2000;
@@ -34,6 +38,11 @@ export const DEVICE_INFO_TIMEOUT_MS = 2000;
 // when nothing has been sent, or nothing received, for this long.
 export const KEEPALIVE_IDLE_MS = 25000;
 export const KEEPALIVE_CHECK_INTERVAL_MS = 5000;
+// On a user action, the track status is asked again if the last request is
+// at least this old. Some central units (the DR5000, FW 1.29) do not send
+// track power, STOP or short-circuit changes made by other devices to Lever,
+// so without this they would show up only with the next keepalive.
+export const STATUS_REFRESH_MIN_AGE_MS = 2000;
 // Nothing received for this long (one keepalive went unanswered): connection
 // is lost.
 export const CONNECTION_LOST_AFTER_MS = 35000;
@@ -92,6 +101,14 @@ export class ConnectionManager {
   private readonly events = new TypedEmitter<ConnectionEvents>();
   private readonly createTransport: () => UdpTransport;
   private broadcastFlags: number;
+  // Flags other clients had set when Lever logged in. Some central units
+  // (the DR5000) keep ONE set of flags for all clients, so Lever only ever
+  // adds its own to these and never takes theirs away. On a Z21 (flags per
+  // client) this is 0 and Lever's flags are simply its own.
+  private othersFlags = 0;
+  // Between login and the answer to LAN_GET_BROADCASTFLAGS.
+  private awaitingFlags = false;
+  private flagsTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly combineDatasets: boolean;
 
   private host = '';
@@ -112,6 +129,7 @@ export class ConnectionManager {
   private lastSentAt = 0;
   private lastReceivedAt = 0;
   private lastKeepaliveAt = 0;
+  private lastStatusRequestAt = 0;
 
   private deviceInfo: DeviceInfo = {};
   private trackStatus: TrackStatus = 'unknown';
@@ -135,7 +153,15 @@ export class ConnectionManager {
       return;
     }
     this.broadcastFlags = checked;
-    this.sendNow([lanSetBroadcastFlags(checked)]);
+    // While the current flags are still being asked for, the answer sends
+    // the new ones.
+    if (!this.awaitingFlags) {
+      this.sendNow([lanSetBroadcastFlags(this.flagsToSet())]);
+    }
+  }
+
+  private flagsToSet(): number {
+    return checkFlags((this.othersFlags | this.broadcastFlags) >>> 0);
   }
 
   getBroadcastFlags(): number {
@@ -208,7 +234,20 @@ export class ConnectionManager {
   }
 
   requestStatus(): void {
+    this.lastStatusRequestAt = Date.now();
     this.send([lanXGetStatus()]);
+  }
+
+  // Asks for the track status if the last request is older than
+  // STATUS_REFRESH_MIN_AGE_MS (called on user actions). Not a polling loop:
+  // at most one request per action, and none while actions come quickly.
+  refreshStatusIfStale(): void {
+    if (
+      this.state === 'connected' &&
+      Date.now() - this.lastStatusRequestAt >= STATUS_REFRESH_MIN_AGE_MS
+    ) {
+      this.requestStatus();
+    }
   }
 
   requestSystemState(): void {
@@ -264,8 +303,12 @@ export class ConnectionManager {
     }
     this.transport = transport;
     // Login is implicit with the first command (§2.2). Flags must be set
-    // again on every login (§2.16).
-    this.sendNow([lanSetBroadcastFlags(this.broadcastFlags), lanXGetStatus()]);
+    // again on every login (§2.16): first ask which flags are set, then add
+    // Lever's to them (see othersFlags).
+    this.lastStatusRequestAt = Date.now();
+    this.othersFlags = 0;
+    this.awaitingFlags = true;
+    this.sendNow([lanGetBroadcastFlags(), lanXGetStatus()]);
     this.connectTimer = setTimeout(() => {
       this.log('info', 'No reply from central unit');
       this.closeSocket(false);
@@ -275,6 +318,18 @@ export class ConnectionManager {
 
   private onConnected(): void {
     this.clearTimer('connectTimer');
+    // The central unit answers; if the flags request is not answered soon,
+    // set Lever's own flags.
+    if (this.awaitingFlags) {
+      this.flagsTimer = setTimeout(() => {
+        this.flagsTimer = null;
+        if (this.awaitingFlags) {
+          this.awaitingFlags = false;
+          this.log('info', 'No reply to the broadcast flags request');
+          this.sendNow([lanSetBroadcastFlags(this.flagsToSet())]);
+        }
+      }, FLAGS_REPLY_TIMEOUT_MS);
+    }
     this.reconnectAttempt = 0;
     this.setState('connected');
 
@@ -306,6 +361,7 @@ export class ConnectionManager {
       now - this.lastKeepaliveAt >= KEEPALIVE_IDLE_MS;
     if (sendIdle || receiveIdle) {
       this.lastKeepaliveAt = now;
+      this.lastStatusRequestAt = now;
       this.sendNow([lanXGetStatus()]);
     }
   }
@@ -331,6 +387,8 @@ export class ConnectionManager {
     this.generation++;
     this.clearTimer('connectTimer');
     this.clearTimer('deviceInfoTimer');
+    this.clearTimer('flagsTimer');
+    this.awaitingFlags = false;
     if (this.keepaliveTimer !== null) {
       clearInterval(this.keepaliveTimer);
       this.keepaliveTimer = null;
@@ -350,7 +408,7 @@ export class ConnectionManager {
   }
 
   private clearTimer(
-    name: 'connectTimer' | 'deviceInfoTimer' | 'reconnectTimer',
+    name: 'connectTimer' | 'deviceInfoTimer' | 'reconnectTimer' | 'flagsTimer',
   ): void {
     const timer = this[name];
     if (timer !== null) {
@@ -384,6 +442,17 @@ export class ConnectionManager {
     }
 
     switch (message.type) {
+      case 'broadcastFlags':
+        if (this.awaitingFlags) {
+          this.awaitingFlags = false;
+          this.clearTimer('flagsTimer');
+          // Never the all-locos flag, also not on another client's behalf.
+          this.othersFlags = (message.flags & ~ALL_LOCOS_FLAG) >>> 0;
+          if (this.flagsToSet() !== message.flags >>> 0) {
+            this.sendNow([lanSetBroadcastFlags(this.flagsToSet())]);
+          }
+        }
+        break;
       case 'systemState':
         this.events.emit('systemState', message.systemState);
         break;

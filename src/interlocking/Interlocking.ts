@@ -55,7 +55,14 @@ export type InterlockingDeps = {
   schedule: (ms: number, run: () => void) => () => void;
   onChange: (changes: LayoutLiveChanges) => void;
   onNotice: (notice: InterlockingNotice) => void;
+  // Asks the central unit for an accessory's position (its answer is a
+  // reply, LAN_X_GET_TURNOUT_INFO). Used to check a command whose report did
+  // not arrive.
+  query?: (fAdr: number) => void;
 };
+
+// How long to wait for the answer to a position check.
+export const CHECK_REPLY_MS = 1500;
 
 type ControlledInfo = {
   element: Turnout | Signal | GenericAccessory;
@@ -65,9 +72,15 @@ type ControlledInfo = {
   states: Map<string, ResolvedOutput[]>;
 };
 
+// A command waiting for its report. Without one in time: ask the position
+// ('checking'); not there yet: send again ('resent'), ask again
+// ('rechecking'); still not there: failed. A report can get lost (the DR5000
+// sends a reply to the wrong client when two ask at once) while the turnout
+// did move, so Lever asks before it sends again or gives up.
 type Pending = {
   target: string;
   attempts: number;
+  stage: 'sent' | 'checking' | 'resent' | 'rechecking';
   cancel?: () => void;
 };
 
@@ -108,6 +121,20 @@ export class Interlocking {
   // Every function address in the layout (start-up query, LOAD-3).
   addresses(): number[] {
     return [...this.byFAdr.keys()].sort((a, b) => a - b);
+  }
+
+  // DCC addresses of the controlled elements drawn in these views.
+  addressesOfViews(viewIds: ReadonlySet<string>): number[] {
+    const result = new Set<number>();
+    for (const info of this.infos.values()) {
+      if (!viewIds.has(info.view.id)) {
+        continue;
+      }
+      for (const outputs of info.states.values()) {
+        outputs.forEach(({fAdr}) => result.add(fAdr));
+      }
+    }
+    return [...result].sort((a, b) => a - b);
   }
 
   // A new or edited project. Live state of elements that still exist is
@@ -217,9 +244,14 @@ export class Interlocking {
     position: TurnoutInfoPosition,
     solicited: boolean,
   ): void {
-    this.outputs.set(fAdr, reportToOutput(position));
+    const previous = this.outputs.get(fAdr);
+    const output = reportToOutput(position);
+    this.outputs.set(fAdr, output);
+    // A reply that differs from what was known also shows a real switch:
+    // made by a program the central unit does not report (position refresh).
+    const changed = previous !== undefined && previous !== output;
     for (const id of this.byFAdr.get(fAdr) ?? []) {
-      if (!solicited) {
+      if (!solicited || changed) {
         this.seenSwitching.add(id);
       }
       this.update(id);
@@ -366,7 +398,7 @@ export class Interlocking {
       return;
     }
     this.pending.get(element.id)?.cancel?.();
-    this.pending.set(element.id, {target, attempts: 0});
+    this.pending.set(element.id, {target, attempts: 0, stage: 'sent'});
     this.send(element.id, plan);
     // A momentary accessory has no lasting state to confirm.
     if (element.kind === 'accessory' && element.buttonType === 'momentary') {
@@ -444,35 +476,21 @@ export class Interlocking {
       this.flush();
       return;
     }
-    if (pending.attempts === 0) {
-      // One more try: a z21 start silently ignores a command for a turnout
-      // whose other output another client holds active at that moment.
-      pending.attempts = 1;
-      pending.cancel = undefined;
-      const profile = this.project.settings.centralUnit;
-      const {element} = info;
-      const plan =
-        element.kind === 'turnout'
-          ? turnoutCommands(element, pending.target, profile)
-          : element.kind === 'signal' && info.signalType
-            ? signalAspectCommands(
-                element,
-                info.signalType,
-                pending.target,
-                profile,
-              )
-            : element.kind === 'accessory'
-              ? accessoryButtonCommands(
-                  element,
-                  pending.target === 'on',
-                  profile,
-                )
-              : undefined;
-      if (plan) {
-        this.send(elementId, plan);
-      }
-      this.update(elementId);
-      this.flush();
+    const addresses = this.dccAddresses(info);
+    const canCheck = this.deps.query !== undefined && addresses.length > 0;
+    if (pending.stage === 'sent' && canCheck) {
+      // The report may have been lost: ask before sending again.
+      pending.stage = 'checking';
+      this.check(elementId, pending, addresses);
+      return;
+    }
+    if (pending.stage === 'sent' || pending.stage === 'checking') {
+      this.resend(elementId, pending, info);
+      return;
+    }
+    if (pending.stage === 'resent' && canCheck) {
+      pending.stage = 'rechecking';
+      this.check(elementId, pending, addresses);
       return;
     }
     this.pending.delete(elementId);
@@ -480,11 +498,63 @@ export class Interlocking {
       // For central units that do not report accessory changes.
       this.setValue(info.element, pending.target, 'confirmed', undefined);
     } else {
+      // It really has not moved: show where the central unit says it is,
+      // so the next click sends the right position.
       const old = this.valueOf(info.element);
-      this.setValue(info.element, old.value, 'failed', undefined);
+      this.setValue(info.element, current ?? old.value, 'failed', undefined);
       this.deps.onNotice({code: 'failed', elementId});
     }
     this.flush();
+  }
+
+  private check(elementId: string, pending: Pending, addresses: number[]) {
+    addresses.forEach((fAdr) => this.deps.query?.(fAdr));
+    pending.cancel?.();
+    pending.cancel = this.deps.schedule(CHECK_REPLY_MS, () =>
+      this.timeout(elementId),
+    );
+  }
+
+  // One more try: e.g. a z21 start silently ignores a command for a turnout
+  // whose other output another client holds active at that moment. The
+  // confirmation timeout starts again when the queue sends it (jobStarted).
+  private resend(elementId: string, pending: Pending, info: ControlledInfo) {
+    if (!this.project) {
+      return;
+    }
+    pending.attempts = 1;
+    pending.stage = 'resent';
+    pending.cancel?.();
+    pending.cancel = undefined;
+    const profile = this.project.settings.centralUnit;
+    const {element} = info;
+    const plan =
+      element.kind === 'turnout'
+        ? turnoutCommands(element, pending.target, profile)
+        : element.kind === 'signal' && info.signalType
+          ? signalAspectCommands(
+              element,
+              info.signalType,
+              pending.target,
+              profile,
+            )
+          : element.kind === 'accessory'
+            ? accessoryButtonCommands(element, pending.target === 'on', profile)
+            : undefined;
+    if (plan) {
+      this.send(elementId, plan);
+    }
+    this.update(elementId);
+    this.flush();
+  }
+
+  // DCC addresses an element uses (to ask their positions).
+  private dccAddresses(info: ControlledInfo): number[] {
+    const result = new Set<number>();
+    for (const outputs of info.states.values()) {
+      outputs.forEach(({fAdr}) => result.add(fAdr));
+    }
+    return [...result].sort((a, b) => a - b);
   }
 
   // The position/aspect/on-off the reports say, if any.

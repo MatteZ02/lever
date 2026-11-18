@@ -25,6 +25,8 @@ const startFakeZ21 = async () => {
       const body = toHex(data);
       if (header === 0x40 && body === '21 24 05') {
         reply('08 00 40 00 62 22 00 40');
+      } else if (header === 0x51) {
+        reply('08 00 51 00 00 00 00 00');
       } else if (header === 0x1a) {
         reply('0C 00 1A 00 04 02 00 00 43 01 00 00');
       } else if (header === 0x40 && body === '21 81 A0') {
@@ -72,10 +74,10 @@ describe('ConnectionManager over real UDP', () => {
       await waitFor(() => z21.received.includes('30:'));
 
       expect(states).toEqual(['connecting', 'connected', 'disconnected']);
-      expect(z21.received.slice(0, 2)).toEqual([
-        '50:01 00 00 00',
-        '40:21 24 05',
-      ]);
+      // Login asks the flags and the status; the flags are set after the
+      // answer.
+      expect(z21.received.slice(0, 2)).toEqual(['51:', '40:21 24 05']);
+      expect(z21.received).toContain('50:01 00 00 00');
     } finally {
       manager.dispose();
       z21.close();

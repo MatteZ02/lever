@@ -55,6 +55,24 @@ const realSchedule = (ms: number, run: () => void) => {
   return () => clearTimeout(timer);
 };
 
+// Commands that come from an operator's action. Each one also refreshes the
+// track status if it is stale (see ConnectionManager.refreshStatusIfStale).
+// STOP and track power are left out: their own reply reports the status.
+// Position refresh (positionRefreshMs): never more often than this, and on
+// an operator's action only when the last round is at least this old.
+const MIN_POSITION_REFRESH_MS = 2000;
+const POSITION_REFRESH_ON_ACTION_MS = 3000;
+
+const USER_ACTIONS: ReadonlySet<EngineCommand['type']> = new Set([
+  'switchAccessory',
+  'queryAccessory',
+  'setExtAccessory',
+  'setTurnout',
+  'setSignal',
+  'pressAccessory',
+  'setTrainLabel',
+]);
+
 export class Engine {
   private readonly ports = new Set<EnginePort>();
   private readonly now: () => number;
@@ -75,6 +93,13 @@ export class Engine {
   // ACC-4: positions to command after the next connection.
   private pendingRestore: Record<string, string> | null = null;
   private readonly report: (report: EngineReport) => void;
+  private readonly schedule: (ms: number, run: () => void) => () => void;
+  // The station view each window shows (key: its port); their turnouts are
+  // the ones the position refresh asks for.
+  private readonly shownViews = new Map<unknown, string>();
+  private positionRefreshMs = 0;
+  private lastPositionRefreshAt = 0;
+  private cancelPositionRefresh: (() => void) | null = null;
 
   constructor(
     private readonly connection: ConnectionManager,
@@ -83,6 +108,7 @@ export class Engine {
     this.now = options.now ?? Date.now;
     this.defaultPulseMs = options.defaultPulseMs ?? DEFAULT_PULSE_MS;
     this.report = options.report ?? (() => {});
+    this.schedule = options.schedule ?? realSchedule;
     this.queue = new AccessoryQueue({
       send: (datasets) => connection.sendDatasets(datasets),
       gapMs: options.accessoryGapMs,
@@ -90,12 +116,13 @@ export class Engine {
     });
     this.interlocking = new Interlocking({
       enqueue: (job) => this.enqueue(job),
-      schedule: options.schedule ?? realSchedule,
+      schedule: this.schedule,
       onChange: (changes) => {
         this.broadcast({type: 'layout', changes});
         this.reportConfirmedTurnouts(changes);
       },
       onNotice: (notice) => this.notice(notice),
+      query: (fAdr) => this.query(fAdr),
     });
 
     connection.on('state', (state) => {
@@ -157,10 +184,11 @@ export class Engine {
   attachPort(port: EnginePort): void {
     this.ports.add(port);
     port.onMessage((data) => {
-      this.handleCommand(data);
+      this.handleCommand(data, port);
     });
     port.onClose(() => {
       this.ports.delete(port);
+      this.shownViews.delete(port);
     });
     this.post(port, {type: 'snapshot', snapshot: this.snapshot()});
   }
@@ -207,6 +235,10 @@ export class Engine {
     this.interlocking.load(project);
     this.setAccessoryGap(project.settings.centralUnit.accessoryGapMs);
     this.setFeedbackSources(project.settings.centralUnit.feedbackSources);
+    const refreshMs = project.settings.centralUnit.positionRefreshMs;
+    this.setPositionRefresh(
+      refreshMs > 0 ? Math.max(MIN_POSITION_REFRESH_MS, refreshMs) : 0,
+    );
     // Ask for the position of accessories not reported yet (LOAD-3).
     if (this.connection.getState() === 'connected') {
       for (const fAdr of this.interlocking.addresses()) {
@@ -233,6 +265,7 @@ export class Engine {
 
   // Logs off cleanly (§2.2).
   shutdown(): void {
+    this.stopPositionRefresh();
     this.queue.dispose();
     this.connection.disconnect();
   }
@@ -255,13 +288,17 @@ export class Engine {
     };
   }
 
-  handleCommand(data: unknown): void {
+  // `source`: the window (port) it came from.
+  handleCommand(data: unknown, source: unknown = this): void {
     const parsed = engineCommandSchema.safeParse(data);
     if (!parsed.success) {
       console.error('Engine: invalid command', parsed.error.message);
       return;
     }
     const command: EngineCommand = parsed.data;
+    if (USER_ACTIONS.has(command.type)) {
+      this.connection.refreshStatusIfStale();
+    }
     switch (command.type) {
       // STOP and track power go straight out, never through the queue.
       case 'emergencyStop':
@@ -307,6 +344,23 @@ export class Engine {
       case 'setTrainLabel':
         this.interlocking.setTrainLabel(command.blockId, command.label);
         break;
+      case 'showView': {
+        const before = this.shownViews.get(source);
+        if (command.viewId === null) {
+          this.shownViews.delete(source);
+        } else {
+          this.shownViews.set(source, command.viewId);
+        }
+        // Another station on screen: bring its positions up to date now.
+        if (command.viewId !== null && command.viewId !== before) {
+          this.refreshPositions();
+        }
+        break;
+      }
+    }
+    // After the command itself, so its job is queued first.
+    if (USER_ACTIONS.has(command.type)) {
+      this.refreshPositionsIfStale();
     }
   }
 
@@ -330,8 +384,10 @@ export class Engine {
       this.awaitingReply.clear();
       this.interlocking.connectionLost();
       this.broadcastSnapshot();
+      this.stopPositionRefresh();
       return;
     }
+    this.startPositionRefresh();
     // Startup state, rate-limited through the queue, never as a burst
     // (LOAD-3): every accessory of the layout, and any touched by hand.
     [...new Set([...this.interlocking.addresses(), ...this.knownAccessories])]
@@ -379,6 +435,68 @@ export class Engine {
       });
     }
     this.broadcast({type: 'accessoryQueue', length: this.queue.size()});
+  }
+
+  // --- position refresh -------------------------------------------------------
+  // For central units that do not report turnouts switched by other programs
+  // (DR5000: WinDigipet over USB, other network clients). Asks for the
+  // positions of the stations on screen, as background queries that never
+  // delay a command. A position that differs from the known one counts as
+  // seen switching (Interlocking.accessoryReport).
+
+  private setPositionRefresh(intervalMs: number): void {
+    if (intervalMs === this.positionRefreshMs) {
+      return;
+    }
+    this.positionRefreshMs = intervalMs;
+    this.stopPositionRefresh();
+    if (this.connection.getState() === 'connected') {
+      this.startPositionRefresh();
+    }
+  }
+
+  private startPositionRefresh(): void {
+    this.stopPositionRefresh();
+    if (this.positionRefreshMs <= 0) {
+      return;
+    }
+    const tick = () => {
+      if (this.now() - this.lastPositionRefreshAt >= this.positionRefreshMs) {
+        this.refreshPositions();
+      }
+      this.cancelPositionRefresh = this.schedule(this.positionRefreshMs, tick);
+    };
+    this.cancelPositionRefresh = this.schedule(this.positionRefreshMs, tick);
+  }
+
+  private stopPositionRefresh(): void {
+    this.cancelPositionRefresh?.();
+    this.cancelPositionRefresh = null;
+  }
+
+  private refreshPositionsIfStale(): void {
+    if (
+      this.now() - this.lastPositionRefreshAt >=
+      POSITION_REFRESH_ON_ACTION_MS
+    ) {
+      this.refreshPositions();
+    }
+  }
+
+  private refreshPositions(): void {
+    if (
+      this.positionRefreshMs <= 0 ||
+      this.connection.getState() !== 'connected' ||
+      this.shownViews.size === 0
+    ) {
+      return;
+    }
+    this.lastPositionRefreshAt = this.now();
+    const views = new Set(this.shownViews.values());
+    for (const fAdr of this.interlocking.addressesOfViews(views)) {
+      this.awaitingReply.add(fAdr);
+      this.enqueue(turnoutQuery(fAdr, true));
+    }
   }
 
   private query(fAdr: number): void {
@@ -432,8 +550,9 @@ export class Engine {
   }
 }
 
-const turnoutQuery = (fAdr: number): AccessoryJob => ({
+const turnoutQuery = (fAdr: number, background = false): AccessoryJob => ({
   kind: 'query',
   key: `turnout:${fAdr}`,
   dataset: lanXGetTurnoutInfo(fAdr),
+  ...(background ? {background} : {}),
 });

@@ -29,6 +29,12 @@ export const centralUnitProfileSchema = z.object({
   //           units that do not report accessory changes.
   confirmation: z.enum(['report', 'assume']).default('report'),
   confirmTimeoutMs: z.number().int().min(100).max(30000).default(2000),
+  // Some central units (the DR5000, FW 1.29) do not tell Lever about turnouts
+  // switched by other programs (e.g. WinDigipet over USB) or other clients.
+  // Then Lever asks for the positions of the stations on screen this often,
+  // and at once on an operator's action when they are a few seconds old.
+  // 0 = off: a Z21 reports changes itself.
+  positionRefreshMs: z.number().int().min(0).max(600000).default(0),
   // Feedback buses the layout uses (LOAD-1, BLK-1).
   feedbackSources: z.array(feedbackSourceSchema).default([]),
 });
