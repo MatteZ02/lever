@@ -20,6 +20,11 @@ A layout is one file with the extension `.lever`. **File** menu:
   automatic backups (at most one every 10 minutes, the last 20) in a `.lever-backups` folder next
   to the layout file. Restoring first backs up the current state, so it can be undone.
 
+Lever never drops unsaved work silently. Before it closes, or before **New**, **Open**, **Import**
+or **Import from Z21 app** replace the open layout, it asks to **Save…** a layout that has not been
+saved to a file yet; and if the last automatic save of a file failed, it offers **Try again**.
+**Cancel** always leaves everything as it was.
+
 Lever reopens the last layout when it starts. If the layout is already open for editing in another
 copy of Lever (on this PC or another one on the network share), it opens **read-only** and says
 where it is open.
@@ -48,15 +53,28 @@ In **Operate**, click an element on the diagram:
 | **Occupied track**        | Lets you type a train number or name, shown on the track while it stays occupied. Needs feedback on that block.    |
 | **Manual turnout**        | Records the position you set by hand on the layout (marked **M**). Lever cannot check it; it is "recorded by you". |
 
-What the diagram shows never claims more than the central unit has reported:
+The leg a turnout is set to is drawn **yellow** (for a double slip: the X when straight, the two
+curves when diverging); the other leg is cut short and dimmed. What the diagram shows never claims
+more than the central unit has reported:
 
-| Turnout drawn as                   | Meaning                                                                                                          |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| solid set leg, other leg cut short | **confirmed**: seen switching (by Lever, a Throttle or the Roco app) or confirmed by position feedback           |
-| set leg in fine dashes             | **reported**: only the start-up answer of the central unit; it may be a default, not where the turnout really is |
-| set leg dotted, in another colour  | **commanded**: sent, waiting for the central unit to report it (one retry)                                       |
-| both legs cut short, **?**         | **unknown**: nothing reported yet (also after the connection was lost), or outputs that fit no position          |
-| **!** below the turnout            | **failed** (no report after the retry) or **mismatch** (position feedback disagrees with the central unit)       |
+| Turnout drawn as              | Meaning                                                                                                          |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| set leg solid yellow          | **confirmed**: seen switching (by Lever, a Throttle or the Roco app) or confirmed by position feedback           |
+| set leg in yellow fine dashes | **reported**: only the start-up answer of the central unit; it may be a default, not where the turnout really is |
+| set leg dotted                | **commanded**: sent, waiting for the central unit to report it                                                   |
+| both legs cut short, **?**    | **unknown**: nothing reported yet (also after the connection was lost), or outputs that fit no position          |
+| **!** below the turnout       | **failed** (it did not move, see below) or **mismatch** (position feedback disagrees with the central unit)      |
+
+**DR5000:** the DR5000 does not tell Lever about turnouts switched by other programs (WinDigipet
+over USB, the Z21 app, Throttle, another Lever). Set _Central unit settings → Ask for turnout
+positions every (s)_ to **10**: Lever then asks for the positions of the station on screen every
+10 seconds, and at once when you click something, and shows such changes with that delay. On a Z21
+this works without the setting.
+
+When a turnout's report does not arrive within 2 seconds, Lever asks the central unit where the
+turnout is. If it has moved, it is shown as set; if not, Lever sends the command once more and
+asks again. Only if it still has not moved is it shown as **failed**, in the position the central
+unit reports, so the next click sends the right position.
 
 Occupied track is **solid red**. A block stays red for its release delay after its detectors become
 free. Status is never shown by colour alone: there is always a pattern, marker or text too.
@@ -87,7 +105,9 @@ turnouts are not touched.
 
 Other keys while editing: **R** rotate, **Delete** delete, **Ctrl+C / Ctrl+X / Ctrl+V** copy, cut,
 paste (copies get no addresses), **Ctrl+Z / Ctrl+Y** undo, redo, **Ctrl+A** select all, **F** show
-all. Mouse wheel zooms; the middle button (or Alt + drag) pans.
+all. Mouse wheel zooms; the middle button (or Alt + drag) pans. On a touchpad, drag with two
+fingers to move the layout and pinch to zoom; on a touchscreen, pinch to zoom and drag with two
+fingers to move (one finger works like the mouse).
 
 ## Properties
 

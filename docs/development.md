@@ -68,8 +68,10 @@ netsh interface ipv4 set interface interface="Ethernet" dhcpstaticipcoexistence=
 
 Turn on **Settings → Protocol log**. `>>` is sent, `<<` is received, `--` is an info line.
 
-- On connect, the first datagram is `08 00 50 00 01 00 00 00 07 00 40 00 21 24 05`: broadcast
-  flags plus a status request.
+- On connect, the first datagram is `04 00 51 00 07 00 40 00 21 24 05`: which broadcast flags are
+  set, plus a status request. Lever then sets those flags **plus its own** (e.g.
+  `08 00 50 00 01 00 00 00`). The DR5000 keeps one set of flags for all clients, so Lever never
+  removes another program's flags (except the all-locos flag `0x00010000`, which it never sends).
 - Lever counts as **connected only after the first reply**.
 - When idle, a keepalive (`07 00 40 00 21 24 05`) is sent about every 25 s.
 - On quit, Lever sends `04 00 30 00` (logoff) before closing.

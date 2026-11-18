@@ -47,7 +47,9 @@ test; nothing connected to the outputs):
       ignored** (no report, position unchanged). Different turnouts overlap fine. Within one Lever
       instance the queue prevents this; between clients it can happen (two Lever instances, Lever
       and the Roco app). The position then stays unconfirmed. Since Phase 3, if no report arrives
-      within the confirmation timeout, Lever sends the command once more, then shows **failed**.
+      within the confirmation timeout, Lever first asks the turnout's position (a lost report,
+      e.g. on the DR5000), sends the command once more only if it has not moved, asks again, and
+      then shows **failed** in the position the central unit reports.
 
 On the layout, with real turnouts (later):
 
@@ -94,19 +96,81 @@ If a difference cannot be expressed with these, the place to change behaviour is
 `src/model/accessoryCommands.ts` (which outputs are sent) or `src/connection/AccessoryQueue.ts`
 (timing); both are covered by unit tests.
 
-- [ ] Accessory addressing: does `FAdr = number − 1` match what the DR5000's own tools show?
-      If not, use the per-project **address offset** (LOAD-5).
-- [ ] `LAN_X_TURNOUT_INFO` broadcasts to all clients with flag `0x00000001`, also for changes made
-      by other clients and by handsets (MULTI-1).
-- [ ] Reply to `LAN_X_GET_TURNOUT_INFO` for a never-switched turnout.
-- [ ] Which feedback sources it exposes over LAN: R-Bus (`LAN_RMBUS_*`), LocoNet detectors
-      (`LAN_LOCONET_DETECTOR`), CAN detectors (`LAN_CAN_DETECTOR`), and with which broadcast flags.
-- [ ] Extended accessories (`LAN_X_SET_EXT_ACCESSORY`, `LAN_X_EXT_ACCESSORY_INFO`).
-- [ ] Whether it accepts several datasets per datagram (both directions).
-- [ ] `LAN_GET_HWINFO`, `LAN_X_GET_FIRMWARE_VERSION`, `LAN_GET_CODE` replies (all optional; Lever
-      tolerates no reply).
-- [ ] `LAN_X_UNKNOWN_COMMAND` for unsupported commands, or silence.
-- [ ] Minimum gap between accessory commands it handles reliably (LOAD-2 default 100–150 ms).
+**Checked 2026-11-18** on the club's DR5000 at `192.168.0.111` (over WiFi), protocol level, with
+`scripts/z21-probe.mjs`, follow-up probes and the two-engine live test; switching only FAdr 0
+(turnout #1, an olten double slip). Nobody watched the turnout, so physical movement is unchecked.
+
+- [x] Identity: `LAN_GET_HWINFO` → type `0x201` (it poses as a black Z21), FW **1.29**;
+      `LAN_X_GET_FIRMWARE_VERSION` → 1.29; `LAN_X_GET_VERSION` → X-Bus 3.0, `CMDST_ID 0x12`;
+      `LAN_GET_CODE` → `0x00`; serial `0x2149`.
+- [x] Track power: the earlier "power on while the user said off" was the layout's track feed
+      being disconnected while the DR5000's output was on (connected later the same day).
+- [x] **A plain power-off is reported as a short circuit by `LAN_X_GET_STATUS`** (2026-11-18,
+      19:58:24–26, power switched off and on from another device, status asked every second):
+      `LAN_X_GET_STATUS` → `0x06` (track voltage off **+ short circuit**), while
+      `LAN_SYSTEMSTATE_GETDATA` → CentralState `0x02` (track voltage off only). CentralStateEx is
+      `0x04` ("short circuit external") **all the time**, also with power on, so it means nothing
+      on the DR5000. Lever reads `LAN_X_GET_STATUS` (keepalive, refresh on user actions), so it
+      would show **SHORT CIRCUIT** for a plain power-off. **Decision needed** (e.g. confirm a
+      short circuit with `LAN_SYSTEMSTATE_GETDATA` before showing it).
+- [x] **MULTI-1 fails: no broadcasts to other clients.** `LAN_X_TURNOUT_INFO` goes **only to the
+      client that switched** (on activate, not on deactivate), never to other clients, whatever
+      their flags and also after they asked for that turnout. The two-engine live test fails
+      (instance B never sees A's change). Changes by Throttle, the Roco app, handsets or a second
+      Lever are invisible to Lever, so a "confirmed" position can be stale. **Decided:** the
+      position refresh below.
+- [x] **No track status broadcasts to other clients either:** a passive client (flag `0x1`) got no
+      `BC_TRACK_POWER_OFF/ON`, `BC_STOPPED` or `BC_TRACK_SHORT_CIRCUIT` while power went off and
+      on from elsewhere; the change showed only in replies to `LAN_X_GET_STATUS` (`0x06` = power
+      off + short circuit, later `0x00`). Lever therefore asks for the status on user actions when
+      the last request is over 2 s old (`STATUS_REFRESH_MIN_AGE_MS`), besides the keepalive.
+      `0x06` was a plain power-off reported with the short-circuit bit (see above).
+- [x] **Replies go to the wrong client under simultaneous requests:** two clients sending the
+      same request within ~1 ms both got their replies at the **later** sender; the other got
+      nothing. Requests 50 ms apart were answered correctly. Lever recovers by reconnecting, but
+      with several Throttles a confirmation can be lost (→ retry → _failed_). The stock live test
+      also times out on connect for this reason (both engines connect at the same moment).
+- [x] **Broadcast flags are global, not per client:** every client reads back the flags the
+      _last_ client set (four clients set `0x1`, `0x101`, `0x0F0C0107`, `0xFFFEFFFF`; all four read
+      `0xFFFEFFFF`). Lever setting its flags on connect therefore changes them for WinDigipet,
+      the Z21 app and Throttle too. **Decided (2026-11-18):** Lever asks the current flags at login
+      and only adds its own (`ConnectionManager`, `othersFlags`).
+- [x] **Turnouts switched by WinDigipet (USB) are never reported to network clients:** with flags
+      `0x04000001` (basic + LocoNet switch messages), no `LAN_X_TURNOUT_INFO` and no LocoNet
+      message arrived while turnouts 35, 39 and 10 were switched from WinDigipet (2026-11-18). The
+      Z21 app still showed them, so it polls. **Decided:** the layout setting _Ask for turnout
+      positions every (s)_ (`positionRefreshMs`, 0 = off) makes Lever ask for the positions of the
+      station on screen that often, and at once on an operator's action when the last round is
+      over 3 s old. Background queries (50 ms apart) that never delay a command; a changed
+      position counts as confirmed. 10 s for the club layout on the DR5000.
+- [x] **The DR5000's position reply does follow WinDigipet** (checked 2026-11-18, 19:53–19:55):
+      asking turnout 35 every 5 s while it was switched from WinDigipet gave output 2 → 1 → 2 → 1
+      → 2 → 1, each change within one poll. So _Ask for turnout positions every (s)_ shows
+      WinDigipet's (and other clients') switching on the DR5000, with that delay.
+- [x] **The club layout has no occupancy detectors** (user, 2026-11-18). Even so, with flags
+      `0x09080003` the DR5000 sent an unsolicited LocoNet `OPC_INPUT_REP` for **sensor #1013
+      occupied**, and the LocoNet detector request (`LAN_LOCONET_DETECTOR` type `0x80`, address 0)
+      was answered with type `0x01`, address 1013, value `01`. Something on LocoNet (or
+      WinDigipet) sets sensor 1013. CAN detector request: `LAN_X_UNKNOWN_COMMAND`. R-Bus groups
+      0–1: all free.
+- [x] Feedback: `LAN_RMBUS_GETDATA` answered (groups 0 and 1, all free). LocoNet detector: no
+      reply. CAN detector: `LAN_X_UNKNOWN_COMMAND`.
+- [x] Never-switched turnout (FAdr 999): `ZZ=2` (output 2), not `ZZ=00`; FAdr 1 and 2 also `ZZ=2`.
+      Start-up positions are meaningless defaults (Lever shows them as _reported_).
+- [x] Extended accessories: get and set → `LAN_X_UNKNOWN_COMMAND` (FW 1.29 < 1.40; Lever refuses).
+- [x] Several datasets per datagram: answered, one reply datagram each. Three requests in separate
+      back-to-back datagrams: all answered (once, in the first probe, one of two was not).
+- [x] `Q=1` accepted (reply as with `Q=0`).
+- [x] **Pacing (LOAD-2), 2026-11-18:** a route of six olten turnouts and signal 803 (21, 15, 32,
+      3, 803, 14, 1), thrown one after another with a 150 ms pulse and a **150 ms** gap, then a
+      **75 ms** gap, and put back: six distinct clicks at 75 ms (the user listened), signal 803
+      seen changing, and the DR5000 reported every new position. **75 ms is reliable** on the club
+      layout (route of 7 in 1.6 s instead of 2.1 s); the default stays 150 ms, the club can set
+      _Pause between accessory commands_ to 75–100. In the 150 ms run two activate replies (#32,
+      #14) were lost while another client was polling, yet the turnouts had moved; a later
+      `LAN_X_GET_TURNOUT_INFO` showed them in place (handled by the check before retry).
+- [x] Turnout numbering: `FAdr = number − 1` matches (all olten turnouts switched correctly from
+      Lever, 2026-11-18). Signals 803/804: the Z21 app's state 0 is **Proceed** (import fixed).
 
 ## Z21 app export (.z21 file)
 
