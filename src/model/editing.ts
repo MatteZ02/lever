@@ -392,3 +392,18 @@ export const extendPolyline = (
   }
   return simplifyPolyline([...points, next]);
 };
+
+// Places a new element in place of the given ones, as one edit (one undo
+// step): the old ones are deleted with every reference to them first.
+export const placeReplacing = (
+  project: Project,
+  viewId: string,
+  element: DiagramElement,
+  replacedIds: string[],
+): Project => {
+  const cleaned =
+    replacedIds.length > 0 ? deleteElements(project, replacedIds) : project;
+  return element.kind === 'turnout'
+    ? insertTurnout(cleaned, viewId, element)
+    : addElements(cleaned, viewId, [element]);
+};

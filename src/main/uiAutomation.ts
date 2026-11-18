@@ -37,10 +37,23 @@ type Step =
   | {capture: string}
   | {js: string}
   // Mouse wheel at [x, y] (page coordinates) with deltaY, `times` times.
-  | {wheel: [number, number, number]; times?: number}
+  // `touchpad`: smooth scrolling (precise deltas, deltaX allowed) instead of
+  // wheel notches; `ctrl`: as a touchpad pinch sends it.
+  | {
+      wheel: [number, number, number];
+      times?: number;
+      deltaX?: number;
+      touchpad?: boolean;
+      ctrl?: boolean;
+    }
   // Slows the renderer's CPU by this factor (Chromium DevTools emulation), to
   // approximate a low-spec PC. 1 = off.
   | {cpuThrottle: number}
+  // Real touch input (DevTools Input.dispatchTouchEvent): the fingers now on
+  // the page, in page coordinates. An empty list lifts every finger. Each
+  // step is one touchStart/touchMove/touchEnd, so a gesture is several steps.
+  // Or a JavaScript expression that returns that list.
+  | {touch: [number, number][] | string}
   // Prints the renderer's main-thread work (DevTools Performance metrics:
   // task, script, layout, style time) since the previous metrics step.
   | {metrics: string};
@@ -73,6 +86,7 @@ const runSteps = async (window: BrowserWindow, scriptPath: string) => {
     console.log(`[renderer ${event.level}] ${event.message}`);
   });
   await sleep(1500);
+  let touchCount = 0;
   for (const step of steps) {
     if ('wait' in step) {
       await sleep(step.wait);
@@ -193,7 +207,18 @@ const runSteps = async (window: BrowserWindow, scriptPath: string) => {
     } else if ('wheel' in step) {
       const [x, y, deltaY] = step.wheel;
       for (let i = 0; i < (step.times ?? 1); i++) {
-        contents.sendInputEvent({type: 'mouseWheel', x, y, deltaX: 0, deltaY});
+        contents.sendInputEvent({
+          type: 'mouseWheel',
+          x,
+          y,
+          deltaX: step.deltaX ?? 0,
+          deltaY,
+          // A mouse wheel reports notches (wheelTicks); a touchpad does not.
+          ...(step.touchpad
+            ? {hasPreciseScrollingDeltas: true, wheelTicksX: 0, wheelTicksY: 0}
+            : {wheelTicksX: 0, wheelTicksY: deltaY / 100}),
+          ...(step.ctrl ? {modifiers: ['control' as const]} : {}),
+        });
         await sleep(16);
       }
     } else if ('metrics' in step) {
@@ -227,6 +252,31 @@ const runSteps = async (window: BrowserWindow, scriptPath: string) => {
         rate: step.cpuThrottle,
       });
       console.log(`[ui] CPU throttling ×${step.cpuThrottle}`);
+    } else if ('touch' in step) {
+      if (!contents.debugger.isAttached()) {
+        contents.debugger.attach('1.3');
+      }
+      const fingers: [number, number][] =
+        typeof step.touch === 'string'
+          ? ((await contents.executeJavaScript(step.touch)) as [
+              number,
+              number,
+            ][])
+          : step.touch;
+      const points = fingers.map(([x, y], id) => ({x, y, id}));
+      const type =
+        points.length === 0
+          ? 'touchEnd'
+          : points.length > touchCount
+            ? 'touchStart'
+            : points.length < touchCount
+              ? 'touchEnd'
+              : 'touchMove';
+      await contents.debugger.sendCommand('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: points,
+      });
+      touchCount = points.length;
     } else if ('js' in step) {
       const result: unknown = await contents.executeJavaScript(step.js);
       console.log(`[ui] ${JSON.stringify(result)}`);

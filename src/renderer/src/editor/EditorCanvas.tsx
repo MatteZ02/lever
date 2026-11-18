@@ -5,8 +5,8 @@ import {
   addElements,
   elementPoints,
   extendPolyline,
-  insertTurnout,
   moveElements,
+  placeReplacing,
   replaceElement,
 } from '../../../model/editing';
 import {DiagramElement, Track, TurnoutType} from '../../../model/elements';
@@ -17,10 +17,16 @@ import {
   simplifyPolyline,
   snapToDirection,
 } from '../../../model/geometry';
-import {placeElement} from '../../../model/placement';
+import {
+  elementsReplacedBy,
+  holdsUserData,
+  placeElement,
+  sameAsExisting,
+} from '../../../model/placement';
 import {newId, Project, StationView} from '../../../model/project';
 import {strings} from '../../../shared/strings';
 import {color, diagramStroke} from '../../theme';
+import {Modal} from '../components/Modal';
 import {AreaBoundaries} from '../diagram/AreaBoundaries';
 import {
   DiagramPointer,
@@ -71,6 +77,22 @@ export const finishTrack = (viewId: string, points: GridPoint[]): void => {
   }
 };
 
+// "Turnout 13", "Station exit Nebenbahn", or just the kind.
+const describeElement = (element: DiagramElement): string => {
+  const kind = strings.kinds[element.kind] ?? element.kind;
+  const control = 'control' in element ? element.control : undefined;
+  const detail =
+    element.name.trim() ||
+    (control?.kind === 'dcc'
+      ? control.addresses.join('/')
+      : control?.kind === 'extended'
+        ? String(control.address)
+        : '');
+  return detail ? `${kind} ${detail}` : kind.toLowerCase();
+};
+
+type PendingReplace = {element: DiagramElement; replaced: DiagramElement[]};
+
 const hintFor = (reason: 'notOnTrack' | 'notAtTrackEnd') =>
   reason === 'notOnTrack'
     ? strings.editor.hints.notOnTrack
@@ -90,8 +112,20 @@ export const EditorCanvas = ({
   const tool = useProjectStore((state) => state.tool);
   const testMode = useProjectStore((state) => state.testMode);
   const [drag, setDrag] = useState<Drag | null>(null);
-  const [hover, setHover] = useState<GridPoint | null>(null);
+  const revision = useProjectStore((state) => state.revision);
+  // The grid point under the mouse, and the project revision it was seen at.
+  const [pointerAt, setPointerAt] = useState<{
+    grid: GridPoint;
+    revision: number;
+  } | null>(null);
+  const [pendingReplace, setPendingReplace] = useState<PendingReplace | null>(
+    null,
+  );
   const diagram = useRef<DiagramViewHandle>(null);
+  // After any change (placing, undo, redo) the preview waits for the mouse
+  // to move: otherwise it would hide the element undo just brought back.
+  const hover =
+    pointerAt && pointerAt.revision === revision ? pointerAt.grid : null;
 
   const selectionSet = useMemo(() => new Set(selection), [selection]);
   const selectedElements = useMemo(
@@ -194,16 +228,28 @@ export const EditorCanvas = ({
       return;
     }
     const element = result.element;
-    edit((p) =>
-      element.kind === 'turnout'
-        ? insertTurnout(p, view.id, element)
-        : addElements(p, view.id, [element]),
-    );
+    const replaced = elementsReplacedBy(view, element);
+    if (replaced.length === 1 && sameAsExisting(element, replaced[0])) {
+      // Already there (a double click or tap): just select it.
+      select([replaced[0].id]);
+      return;
+    }
+    if (replaced.some(holdsUserData)) {
+      setPendingReplace({element, replaced});
+      return;
+    }
+    commitPlace(element, replaced);
+  };
+
+  // One edit, so a single Ctrl+Z brings back what was replaced.
+  const commitPlace = (element: DiagramElement, replaced: DiagramElement[]) => {
+    const ids = replaced.map((old) => old.id);
+    edit((p) => placeReplacing(p, view.id, element, ids));
     select([element.id]);
   };
 
   const handleMove = (pointer: DiagramPointer) => {
-    setHover(pointer.grid);
+    setPointerAt({grid: pointer.grid, revision});
     if (!drag) {
       return;
     }
@@ -291,6 +337,22 @@ export const EditorCanvas = ({
     });
     ghost = result.ok ? result.element : undefined;
   }
+  // While previewing, hide what the new element would replace. Nothing to
+  // preview where the same element already is.
+  let replacedByGhost = ghost ? elementsReplacedBy(view, ghost) : [];
+  if (
+    ghost &&
+    replacedByGhost.length === 1 &&
+    sameAsExisting(ghost, replacedByGhost[0])
+  ) {
+    ghost = undefined;
+    replacedByGhost = [];
+  }
+  const hiddenIds = moving
+    ? selectionSet
+    : replacedByGhost.length > 0
+      ? new Set(replacedByGhost.map((element) => element.id))
+      : undefined;
 
   const drawingPreview =
     tool.kind === 'track' && drawing.length > 0 && hover
@@ -304,109 +366,141 @@ export const EditorCanvas = ({
       : 'crosshair';
 
   return (
-    <DiagramView
-      ref={diagram}
-      className="diagram"
-      project={project}
-      view={view}
-      viewport={viewport}
-      onViewportChange={(next) => setViewport(view.id, next)}
-      selection={selectionSet}
-      hidden={moving ? selectionSet : undefined}
-      onPointerDown={handleDown}
-      onPointerMove={handleMove}
-      onPointerUp={handleUp}
-      onDoubleClick={() => {
-        if (tool.kind === 'track' && drawing.length >= 2) {
-          finishTrack(view.id, drawing);
-          onDrawingChange([]);
-        }
-      }}
-      onContextMenu={() => {
-        if (tool.kind === 'track') {
-          finishTrack(view.id, drawing);
-          onDrawingChange([]);
-        }
-      }}
-      cursor={cursor}
-    >
-      {moving && (
-        <g
-          transform={`translate(${moveOffset.x} ${moveOffset.y})`}
-          opacity={0.7}
-        >
-          {selectedElements.map((element) => (
-            <ElementShape key={element.id} element={element} selected />
-          ))}
-        </g>
-      )}
-      {ghost && (
-        <g opacity={0.5} pointerEvents="none">
-          <ElementShape element={ghost} selected={false} />
-        </g>
-      )}
-      {drawingPreview.length > 0 && (
-        <polyline
-          points={drawingPreview.map((p) => `${p.x},${p.y}`).join(' ')}
-          pointerEvents="none"
-          style={{
-            fill: 'none',
-            stroke: color.accent,
-            strokeWidth: diagramStroke.track,
-            strokeDasharray: '0.3 0.15',
-            strokeLinecap: 'round',
-          }}
-        />
-      )}
-      {tool.kind === 'track' && hover && (
-        <circle
-          cx={hover.x}
-          cy={hover.y}
-          r={0.15}
-          pointerEvents="none"
-          style={{fill: color.accent}}
-        />
-      )}
-      {singleTrack &&
-        tool.kind === 'select' &&
-        !testMode &&
-        singleTrack.points.map((point, index) => {
-          const shown =
-            drag?.kind === 'vertex' && drag.index === index
-              ? drag.current
-              : point;
-          return (
-            <circle
-              key={index}
-              cx={shown.x}
-              cy={shown.y}
-              r={0.22}
-              data-vertex-index={index}
-              style={{
-                fill: color.surface,
-                stroke: color.accent,
-                strokeWidth: 0.07,
-                cursor: 'move',
+    <>
+      <DiagramView
+        ref={diagram}
+        className="diagram"
+        project={project}
+        view={view}
+        viewport={viewport}
+        onViewportChange={(next) => setViewport(view.id, next)}
+        selection={selectionSet}
+        hidden={hiddenIds}
+        onPointerDown={handleDown}
+        onPointerMove={handleMove}
+        onPointerUp={handleUp}
+        // A second finger turned the press into a pinch: drop the drag.
+        onPointerCancel={() => setDrag(null)}
+        onDoubleClick={() => {
+          if (tool.kind === 'track' && drawing.length >= 2) {
+            finishTrack(view.id, drawing);
+            onDrawingChange([]);
+          }
+        }}
+        onContextMenu={() => {
+          if (tool.kind === 'track') {
+            finishTrack(view.id, drawing);
+            onDrawingChange([]);
+          }
+        }}
+        cursor={cursor}
+      >
+        {moving && (
+          <g
+            transform={`translate(${moveOffset.x} ${moveOffset.y})`}
+            opacity={0.7}
+          >
+            {selectedElements.map((element) => (
+              <ElementShape key={element.id} element={element} selected />
+            ))}
+          </g>
+        )}
+        {ghost && (
+          <g opacity={0.5} pointerEvents="none">
+            <ElementShape element={ghost} selected={false} />
+          </g>
+        )}
+        {drawingPreview.length > 0 && (
+          <polyline
+            points={drawingPreview.map((p) => `${p.x},${p.y}`).join(' ')}
+            pointerEvents="none"
+            style={{
+              fill: 'none',
+              stroke: color.accent,
+              strokeWidth: diagramStroke.track,
+              strokeDasharray: '0.3 0.15',
+              strokeLinecap: 'round',
+            }}
+          />
+        )}
+        {tool.kind === 'track' && hover && (
+          <circle
+            cx={hover.x}
+            cy={hover.y}
+            r={0.15}
+            pointerEvents="none"
+            style={{fill: color.accent}}
+          />
+        )}
+        {singleTrack &&
+          tool.kind === 'select' &&
+          !testMode &&
+          singleTrack.points.map((point, index) => {
+            const shown =
+              drag?.kind === 'vertex' && drag.index === index
+                ? drag.current
+                : point;
+            return (
+              <circle
+                key={index}
+                cx={shown.x}
+                cy={shown.y}
+                r={0.22}
+                data-vertex-index={index}
+                style={{
+                  fill: color.surface,
+                  stroke: color.accent,
+                  strokeWidth: 0.07,
+                  cursor: 'move',
+                }}
+              />
+            );
+          })}
+        <AreaBoundaries project={project} view={view} />
+        {drag?.kind === 'rubber' && (
+          <rect
+            x={Math.min(drag.start.x, drag.current.x)}
+            y={Math.min(drag.start.y, drag.current.y)}
+            width={Math.abs(drag.current.x - drag.start.x)}
+            height={Math.abs(drag.current.y - drag.start.y)}
+            pointerEvents="none"
+            style={{
+              fill: color.accent,
+              fillOpacity: 0.1,
+              stroke: color.accent,
+              strokeWidth: 0.04,
+            }}
+          />
+        )}
+      </DiagramView>
+      {pendingReplace && (
+        <Modal title={strings.editor.replaceTitle}>
+          <p>
+            {strings.editor.confirmReplace(
+              pendingReplace.replaced.map(describeElement).join(', '),
+            )}
+          </p>
+          <div className="button-row">
+            <button
+              type="button"
+              className="button"
+              onClick={() => {
+                setPendingReplace(null);
+                commitPlace(pendingReplace.element, pendingReplace.replaced);
               }}
-            />
-          );
-        })}
-      <AreaBoundaries project={project} view={view} />
-      {drag?.kind === 'rubber' && (
-        <rect
-          x={Math.min(drag.start.x, drag.current.x)}
-          y={Math.min(drag.start.y, drag.current.y)}
-          width={Math.abs(drag.current.x - drag.start.x)}
-          height={Math.abs(drag.current.y - drag.start.y)}
-          pointerEvents="none"
-          style={{
-            fill: color.accent,
-            fillOpacity: 0.1,
-            stroke: color.accent,
-            strokeWidth: 0.04,
-          }}
-        />
+            >
+              {strings.editor.replace}
+            </button>
+            <button
+              type="button"
+              className="button"
+              onClick={() => setPendingReplace(null)}
+            >
+              {strings.modes.cancel}
+            </button>
+          </div>
+        </Modal>
       )}
-    </DiagramView>
+    </>
   );
 };

@@ -43,6 +43,9 @@ type ProjectStore = {
   // The project as edited here; same as document.project except while an
   // edit is on its way to the main process.
   project: Project | null;
+  // Counts every change of the project (edit, undo, redo, from elsewhere).
+  // Undo can bring back the very same object, so identity is not enough.
+  revision: number;
   past: Project[];
   future: Project[];
   mode: Mode;
@@ -60,6 +63,7 @@ type ProjectStore = {
 export const useProjectStore = create<ProjectStore>()(() => ({
   document: null,
   project: null,
+  revision: 0,
   past: [],
   future: [],
   mode: 'operate',
@@ -103,6 +107,7 @@ export const edit = (change: (project: Project) => Project): void => {
   }
   set((state) => ({
     project: next,
+    revision: state.revision + 1,
     past: [...state.past, project].slice(-UNDO_LIMIT),
     future: [],
     hint: null,
@@ -118,6 +123,7 @@ export const undo = (): void => {
   }
   set((state) => ({
     project: previous,
+    revision: state.revision + 1,
     past: state.past.slice(0, -1),
     future: [project, ...state.future],
     selection: keepExisting(previous, state.selection),
@@ -133,6 +139,7 @@ export const redo = (): void => {
   }
   set((state) => ({
     project: next,
+    revision: state.revision + 1,
     past: [...state.past, project],
     future: state.future.slice(1),
     selection: keepExisting(next, state.selection),
@@ -190,6 +197,7 @@ export const bindProjectStore = (): (() => void) => {
       set({
         document: state,
         project: state.project,
+        revision: current.revision + 1,
         // A different file: its own history. The same project changed by a
         // file action (restore) or another window: keep undo, it still works
         // on whole projects.

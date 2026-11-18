@@ -186,3 +186,92 @@ export const placeElement = (
       };
   }
 };
+
+// --- replacing what is already there ----------------------------------------
+
+// Elements that take up a spot: two of the same spot cannot share a point.
+// Buffer stops and station exits both close a track end. Labels, platforms
+// and accessories are free-standing and never replace anything.
+const spotOf = (element: DiagramElement): string | undefined => {
+  switch (element.kind) {
+    case 'bufferStop':
+    case 'connector':
+      return 'trackEnd';
+    case 'turnout':
+      return 'turnout';
+    case 'signal':
+      // One signal per direction: a signal for the other direction may stay.
+      return `signal:${element.facing}`;
+    case 'virtualPoint':
+      return 'virtualPoint';
+    default:
+      return undefined;
+  }
+};
+
+// The elements a new element would replace when placed (EDT-2).
+export const elementsReplacedBy = (
+  view: StationView,
+  element: DiagramElement,
+): DiagramElement[] => {
+  const spot = spotOf(element);
+  if (!spot || !('at' in element)) {
+    return [];
+  }
+  return view.elements.filter(
+    (other) =>
+      other.id !== element.id &&
+      spotOf(other) === spot &&
+      'at' in other &&
+      samePoint(other.at, element.at),
+  );
+};
+
+// Whether deleting the element loses something the user set up, so replacing
+// it needs a confirmation. Turnouts and signals always count (type,
+// direction, wiring); others only with a name, address, pairing or feedback.
+export const holdsUserData = (element: DiagramElement): boolean => {
+  if (element.kind === 'turnout' || element.kind === 'signal') {
+    return true;
+  }
+  if (element.name.trim() !== '') {
+    return true;
+  }
+  switch (element.kind) {
+    case 'accessory':
+      return element.control.kind !== 'manual';
+    case 'connector':
+      return element.pairedWith !== undefined;
+    default:
+      return false;
+  }
+};
+
+// Whether a new element would be the same as an existing one in that spot
+// (same kind, type and direction): placing it again then changes nothing.
+export const sameAsExisting = (
+  element: DiagramElement,
+  existing: DiagramElement,
+): boolean => {
+  if (element.kind !== existing.kind) {
+    return false;
+  }
+  switch (element.kind) {
+    case 'turnout':
+      return (
+        existing.kind === 'turnout' &&
+        existing.type === element.type &&
+        existing.orientation === element.orientation
+      );
+    case 'signal':
+      return existing.kind === 'signal' && existing.facing === element.facing;
+    case 'bufferStop':
+    case 'connector':
+      return (
+        (existing.kind === 'bufferStop' || existing.kind === 'connector') &&
+        existing.direction === element.direction
+      );
+    default:
+      return true;
+  }
+};

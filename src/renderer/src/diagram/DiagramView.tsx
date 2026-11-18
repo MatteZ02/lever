@@ -21,6 +21,8 @@ import {ElementDisplay, ElementShape, LAYER} from './shapes';
 
 export const MIN_SCALE = 4;
 export const MAX_SCALE = 160;
+// A finger moving less than this is still a tap.
+const TOUCH_SLOP_PX = 10;
 
 export type DiagramPointer = {
   // Exact position in grid units, and the nearest grid point.
@@ -50,6 +52,8 @@ type Props = {
   onPointerDown?: (pointer: DiagramPointer) => void;
   onPointerMove?: (pointer: DiagramPointer) => void;
   onPointerUp?: (pointer: DiagramPointer) => void;
+  // A press ended without a release: a second finger turned it into a pinch.
+  onPointerCancel?: () => void;
   onDoubleClick?: () => void;
   onContextMenu?: () => void;
   // Operating mode: dragging empty space with the left button pans.
@@ -58,6 +62,24 @@ type Props = {
   children?: ReactNode;
   className?: string;
   cursor?: string;
+};
+
+// A mouse wheel turns in notches: Chromium reports them as multiples of 120
+// (wheelDeltaY) and never sideways. A touchpad scrolls in small, smooth steps,
+// often sideways too. (An old touchpad driver that imitates a wheel still
+// zooms; Ctrl + wheel zooms either way.)
+const isMouseWheel = (event: WheelEvent<SVGSVGElement>): boolean => {
+  if (event.deltaMode !== 0) {
+    return true; // lines or pages: a wheel
+  }
+  if (event.deltaX !== 0) {
+    return false;
+  }
+  const native = event.nativeEvent as globalThis.WheelEvent & {
+    wheelDeltaY?: number;
+  };
+  const notch = native.wheelDeltaY;
+  return notch !== undefined && notch !== 0 && notch % 120 === 0;
 };
 
 const elementIdOf = (target: EventTarget | null): string | undefined => {
@@ -85,6 +107,7 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onPointerCancel,
       onDoubleClick,
       onContextMenu,
       panOnEmpty,
@@ -104,6 +127,24 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
     const pressedAt = useRef<{x: number; y: number; elementId?: string} | null>(
       null,
     );
+
+    // Touch: fingers on the screen, a pinch in progress, and a first touch
+    // held back until it moves or lifts. If a second finger lands first, the
+    // touch was the start of a pinch, not a tap, so it must not place an
+    // element or throw a turnout.
+    const touches = useRef(new Map<number, {x: number; y: number}>());
+    const pinch = useRef<{
+      distance: number;
+      // Grid point under the midpoint of the fingers when the pinch began.
+      anchor: {x: number; y: number};
+      scale: number;
+    } | null>(null);
+    const heldTouch = useRef<{
+      event: PointerEvent<SVGSVGElement>;
+      pointer: DiagramPointer;
+    } | null>(null);
+    // After a pinch, the remaining finger does nothing until all are lifted.
+    const ignoreTouches = useRef(false);
 
     useImperativeHandle(ref, () => ({size: () => size}), [size]);
 
@@ -173,9 +214,22 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
       };
     };
 
+    // Mouse wheel: zoom. Touchpad: two fingers move the view; a pinch (sent
+    // as a wheel event with Ctrl) or Ctrl + wheel zooms.
     const handleWheel = (event: WheelEvent<SVGSVGElement>) => {
       const rect = svgRef.current!.getBoundingClientRect();
-      const factor = Math.exp(-event.deltaY * 0.0015);
+      const notches = isMouseWheel(event);
+      if (!notches && !event.ctrlKey) {
+        const lines = event.deltaMode === 1 ? 16 : 1;
+        onViewportChange({
+          ...viewport,
+          x: viewport.x + (event.deltaX * lines) / viewport.scale,
+          y: viewport.y + (event.deltaY * lines) / viewport.scale,
+        });
+        return;
+      }
+      // A pinch comes in small steps; a wheel notch is about 100.
+      const factor = Math.exp(-event.deltaY * (notches ? 0.0015 : 0.01));
       const scale = Math.min(
         MAX_SCALE,
         Math.max(MIN_SCALE, viewport.scale * factor),
@@ -196,6 +250,176 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
       svgRef.current?.setPointerCapture(event.pointerId);
     };
 
+    const press = (
+      event: PointerEvent<SVGSVGElement>,
+      pointer: DiagramPointer,
+    ) => {
+      if (event.button === 0) {
+        pressedAt.current = {
+          x: event.clientX,
+          y: event.clientY,
+          elementId: pointer.elementId,
+        };
+      }
+      if (
+        event.button === 1 ||
+        (event.button === 0 && event.altKey) ||
+        (event.button === 0 && panOnEmpty && !pointer.elementId)
+      ) {
+        event.preventDefault();
+        startPan(event);
+        return;
+      }
+      if (event.button === 0) {
+        svgRef.current?.setPointerCapture(event.pointerId);
+        onPointerDown?.(pointer);
+      }
+    };
+
+    const move = (event: PointerEvent<SVGSVGElement>) => {
+      if (panning.current) {
+        const start = panning.current;
+        onViewportChange({
+          ...start.viewport,
+          x: start.viewport.x - (event.clientX - start.x) / viewport.scale,
+          y: start.viewport.y - (event.clientY - start.y) / viewport.scale,
+        });
+        return;
+      }
+      onPointerMove?.(toPointer(event));
+    };
+
+    const release = (event: PointerEvent<SVGSVGElement>) => {
+      const pressed = pressedAt.current;
+      pressedAt.current = null;
+      const moved =
+        pressed !== null &&
+        Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) > 5;
+      const wasPanning = panning.current !== null;
+      panning.current = null;
+      if (wasPanning && (moved || event.button !== 0)) {
+        return;
+      }
+      if (event.button === 0) {
+        onPointerUp?.({
+          ...toPointer(event),
+          elementId: pressed?.elementId,
+          moved,
+        });
+      }
+    };
+
+    // --- touch -------------------------------------------------------------
+
+    const pinchState = () => {
+      const [a, b] = [...touches.current.values()];
+      const rect = svgRef.current!.getBoundingClientRect();
+      return {
+        distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+        // Midpoint relative to the view, in pixels.
+        mid: {x: (a.x + b.x) / 2 - rect.left, y: (a.y + b.y) / 2 - rect.top},
+      };
+    };
+
+    const touchDown = (event: PointerEvent<SVGSVGElement>) => {
+      touches.current.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      });
+      svgRef.current?.setPointerCapture(event.pointerId);
+      if (ignoreTouches.current) {
+        return;
+      }
+      if (touches.current.size === 1) {
+        heldTouch.current = {event, pointer: toPointer(event)};
+        return;
+      }
+      if (touches.current.size === 2) {
+        // A second finger starts a pinch. Drop the first finger's press: held
+        // back, or already started (a drag), which the owner cancels.
+        if (heldTouch.current) {
+          heldTouch.current = null;
+        } else {
+          onPointerCancel?.();
+        }
+        pressedAt.current = null;
+        panning.current = null;
+        const {distance, mid} = pinchState();
+        pinch.current = {
+          distance,
+          scale: viewport.scale,
+          anchor: {
+            x: viewport.x + mid.x / viewport.scale,
+            y: viewport.y + mid.y / viewport.scale,
+          },
+        };
+      }
+    };
+
+    // True when the event is fully handled here.
+    const touchMove = (event: PointerEvent<SVGSVGElement>): boolean => {
+      if (!touches.current.has(event.pointerId)) {
+        return true;
+      }
+      touches.current.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      });
+      if (ignoreTouches.current) {
+        return true;
+      }
+      if (pinch.current) {
+        if (touches.current.size < 2) {
+          return true;
+        }
+        const start = pinch.current;
+        const {distance, mid} = pinchState();
+        const scale = Math.min(
+          MAX_SCALE,
+          Math.max(MIN_SCALE, (start.scale * distance) / start.distance),
+        );
+        // Zoom about the midpoint and follow it: the grid point that was
+        // under the fingers stays under them (pinch and two-finger pan).
+        onViewportChange({
+          scale,
+          x: start.anchor.x - mid.x / scale,
+          y: start.anchor.y - mid.y / scale,
+        });
+        return true;
+      }
+      const held = heldTouch.current;
+      if (held) {
+        const distance = Math.hypot(
+          event.clientX - held.event.clientX,
+          event.clientY - held.event.clientY,
+        );
+        if (distance <= TOUCH_SLOP_PX) {
+          return true;
+        }
+        // A one-finger drag: it starts where the finger went down.
+        heldTouch.current = null;
+        press(held.event, held.pointer);
+      }
+      return false;
+    };
+
+    // True when the event is fully handled here.
+    const touchUp = (event: PointerEvent<SVGSVGElement>): boolean => {
+      touches.current.delete(event.pointerId);
+      if (pinch.current || ignoreTouches.current) {
+        pinch.current = null;
+        ignoreTouches.current = touches.current.size > 0;
+        return true;
+      }
+      const held = heldTouch.current;
+      if (held) {
+        // A tap: press, then release below.
+        heldTouch.current = null;
+        press(held.event, held.pointer);
+      }
+      return false;
+    };
+
     const width = size.width / viewport.scale;
     const height = size.height / viewport.scale;
 
@@ -214,59 +438,34 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
         }}
         onWheel={handleWheel}
         onPointerDown={(event) => {
-          const pointer = toPointer(event);
-          if (event.button === 0) {
-            pressedAt.current = {
-              x: event.clientX,
-              y: event.clientY,
-              elementId: pointer.elementId,
-            };
-          }
-          if (
-            event.button === 1 ||
-            (event.button === 0 && event.altKey) ||
-            (event.button === 0 && panOnEmpty && !pointer.elementId)
-          ) {
-            event.preventDefault();
-            startPan(event);
+          if (event.pointerType === 'touch') {
+            touchDown(event);
             return;
           }
-          if (event.button === 0) {
-            svgRef.current?.setPointerCapture(event.pointerId);
-            onPointerDown?.(pointer);
-          }
+          press(event, toPointer(event));
         }}
         onPointerMove={(event) => {
-          if (panning.current) {
-            const start = panning.current;
-            onViewportChange({
-              ...start.viewport,
-              x: start.viewport.x - (event.clientX - start.x) / viewport.scale,
-              y: start.viewport.y - (event.clientY - start.y) / viewport.scale,
-            });
+          if (event.pointerType === 'touch' && touchMove(event)) {
             return;
           }
-          onPointerMove?.(toPointer(event));
+          move(event);
         }}
         onPointerUp={(event) => {
-          const pressed = pressedAt.current;
-          pressedAt.current = null;
-          const moved =
-            pressed !== null &&
-            Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) >
-              5;
-          const wasPanning = panning.current !== null;
-          panning.current = null;
-          if (wasPanning && (moved || event.button !== 0)) {
+          if (event.pointerType === 'touch' && touchUp(event)) {
             return;
           }
-          if (event.button === 0) {
-            onPointerUp?.({
-              ...toPointer(event),
-              elementId: pressed?.elementId,
-              moved,
-            });
+          release(event);
+        }}
+        onPointerCancel={(event) => {
+          if (event.pointerType === 'touch') {
+            touches.current.delete(event.pointerId);
+            heldTouch.current = null;
+            pinch.current = null;
+            ignoreTouches.current = touches.current.size > 0;
           }
+          pressedAt.current = null;
+          panning.current = null;
+          onPointerCancel?.();
         }}
         onDoubleClick={onDoubleClick}
         onContextMenu={(event) => {
