@@ -18,15 +18,15 @@ app), which must keep working without Lever.
 
 ## Status
 
-| Phase | Content                                                               | State                                                                                                                            |
-| ----- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 0     | Setup, process model, theme, lint, protocol package, packaged app     | done on Windows 10 against Z21Sim; approved 2026-11-17; Windows 11 and low-spec check pending (user)                             |
-| 1     | Dummy-server probe, accessory/feedback protocol, accessory queue      | done against Z21Sim (incl. two engines, MULTI-1) and the fake Z21 (feedback); z21 start protocol test pending (user connects it) |
-| 2     | Project files, single-view editor, validation, test mode              | done; verified with UI automation against the fake Z21 (test buttons send the right bytes); awaiting user review and layout test |
-| 3     | Operating mode Level 1, feedback monitor, areas                       | not started                                                                                                                      |
-| 4     | Several views, multiple windows, full layout view, station connectors | not started                                                                                                                      |
-| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                                                      |
-| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                                                      |
+| Phase | Content                                                               | State                                                                                                                                     |
+| ----- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | Setup, process model, theme, lint, protocol package, packaged app     | done on Windows 10 against Z21Sim; approved 2026-11-17; Windows 11 and low-spec check pending (user)                                      |
+| 1     | Dummy-server probe, accessory/feedback protocol, accessory queue      | done against Z21Sim (incl. two engines, MULTI-1) and the fake Z21 (feedback); z21 start protocol test pending (user connects it)          |
+| 2     | Project files, single-view editor, validation, test mode              | done; verified with UI automation against the fake Z21 (test buttons send the right bytes); awaiting user review and layout test          |
+| 3     | Operating mode Level 1, feedback monitor, areas                       | done; verified with UI automation against the fake Z21 (throw, aspect menu, manual turnout, occupancy, train label); awaiting user review |
+| 4     | Several views, multiple windows, full layout view, station connectors | not started                                                                                                                               |
+| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                                                               |
+| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                                                               |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
 screenshots (`Z21_control_station_*.PNG`: olten, inselburg-dettingen, Sissach), the JuliaData
@@ -84,6 +84,8 @@ src/main/project/       ProjectDocument (the open .lever: atomic writes, autosav
                         untitled), projectController (File menu dialogs), lockFile, backups.
                         Main owns the document; windows send whole projects (validated).
 src/main/uiAutomation.ts  Dev-only hidden-window UI automation (see pitfalls above).
+src/main/turnoutPositions.ts  Last known turnout positions per project (ACC-4), in user data,
+                        never in the .lever (engine reports them over parentPort).
 src/preload/            contextBridge API `window.lever` (types in api.ts). Holds the raw port.
 src/engine/             utilityProcess entry (index.ts) + Engine (no Electron imports; tested).
 src/connection/         ConnectionManager (from Throttle, see COPIED_FROM.md; runtime broadcast
@@ -97,7 +99,10 @@ src/model/              PURE: project.ts (schema v1, .lever), migrations.ts, ele
                         accessoryCommands.ts (element + position → FAdr/output/pulse),
                         topology.ts (derived graph), validation.ts, addressTable.ts,
                         editing.ts (pure edit ops), placement.ts.
-src/interlocking/       PURE: accessoryState.ts (commanded vs reported); later levels, routing.
+src/interlocking/       PURE: Interlocking.ts (Level 1 live state: positions/aspects from outputs,
+                        confirmation timeout + one retry, blocks with release delay, train
+                        labels, ACC-4 restore), levels.ts (per-level command checks),
+                        accessoryState.ts (commanded vs reported); later routing.
 src/shared/             PURE: engine API (Zod, versioned), settings schema, feedback types,
                         strings.ts.
 scripts/z21-probe.mjs   Raw protocol probe with 3 clients; run on Z21Sim, z21 start, DR5000.
@@ -110,7 +115,8 @@ src/renderer/src/       React app; Zustand stores (engineStore mirrors engine ev
                         projectStore = working copy + undo/redo + selection/tools/viewports);
                         diagram/ (SVG shapes and DiagramView, shared by operate and edit);
                         editor/ (canvas, toolbox, properties, problems, address table, test
-                        mode, keys); Workspace.tsx (layout); safety/shortcuts.ts.
+                        mode, keys); operate/ (OperateCanvas, FeedbackMonitor, AreasPanel);
+                        Workspace.tsx (layout); safety/shortcuts.ts.
 samples/club-layout.lever  Draft of olten, inselburg-dettingen, Sissach (generated by
                         scripts/make-sample-project.mjs; a test keeps it clean).
 scripts/make-stress-project.mjs  Large layout for performance checks (docs/performance.md).

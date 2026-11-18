@@ -35,7 +35,8 @@ test; nothing connected to the outputs):
 - [x] `LAN_X_TURNOUT_INFO` is sent on **activate** only, not on deactivate (same as Z21Sim).
 - [x] **No `ZZ=00`**: never-switched addresses report `ZZ=01` (output 1). Lever cannot tell a
       default or remembered position from a real one (MULTI-3). Only position feedback (ACC-3) or
-      switching the turnout gives certainty. To decide with the user how to show this.
+      switching the turnout gives certainty. Lever shows such positions as **reported** (fine
+      dashes) until it sees the turnout switch; the ACC-4 restore does not trust them either.
 - [x] Extended accessories: `LAN_X_GET_EXT_ACCESSORY_INFO` → `LAN_X_UNKNOWN_COMMAND`;
       `LAN_X_SET_EXT_ACCESSORY` silently ignored. Lever refuses both on FW 1.33 (notice).
 - [x] Feedback: `LAN_RMBUS_GETDATA` is answered (all inputs free). LocoNet and CAN detector
@@ -45,8 +46,8 @@ test; nothing connected to the outputs):
       another client still holds the other output of the same turnout active is **silently
       ignored** (no report, position unchanged). Different turnouts overlap fine. Within one Lever
       instance the queue prevents this; between clients it can happen (two Lever instances, Lever
-      and the Roco app). The position then stays unconfirmed. Planned for Phase 3: if no report
-      arrives within the confirmation timeout, send the command once more, then warn.
+      and the Roco app). The position then stays unconfirmed. Since Phase 3, if no report arrives
+      within the confirmation timeout, Lever sends the command once more, then shows **failed**.
 
 On the layout, with real turnouts (later):
 
@@ -54,6 +55,8 @@ On the layout, with real turnouts (later):
       turnout #N in Lever's developer panel and check that the same turnout moves as in the Roco app.
 - [ ] Default pulse 150 ms and gap 150 ms throw the club's turnouts reliably.
 - [ ] Double slips with one address switch both ends together.
+- [ ] Operating mode: throwing from the diagram, signal aspects, occupancy from the layout's
+      detectors, and ACC-4 restore (setting on) after a Lever restart.
 
 Tools, the same for every central unit:
 

@@ -1,7 +1,7 @@
 # Lever user guide
 
-> Work in progress. This version covers the layout editor (Phase 2). Operating mode, routes and
-> automation levels are added in later phases.
+> Work in progress. This version covers the layout editor (Phase 2) and operating at Level 1
+> (Phase 3). Several windows, routes (Level 2) and the full layout view come in later phases.
 
 ## Layout files
 
@@ -32,6 +32,44 @@ edit password, Lever asks for it. While editing, an orange line and the word **E
 Stations appear as tabs. **+ Add station** creates a new one; its name and default automation level
 are set in the properties when nothing is selected.
 
+## Operating (Level 1)
+
+In **Operate**, click an element on the diagram:
+
+| Element                   | Click does                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Turnout**               | Throws it to the next position (straight → diverging → …).                                                         |
+| **Signal**                | Opens a menu of its aspects (Stop, Proceed, …).                                                                    |
+| **Uncoupler / accessory** | Presses it (a momentary button) or switches it on/off.                                                             |
+| **Occupied track**        | Lets you type a train number or name, shown on the track while it stays occupied. Needs feedback on that block.    |
+| **Manual turnout**        | Records the position you set by hand on the layout (marked **M**). Lever cannot check it; it is "recorded by you". |
+
+What the diagram shows never claims more than the central unit has reported:
+
+| Turnout drawn as                   | Meaning                                                                                                          |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| solid set leg, other leg cut short | **confirmed**: seen switching (by Lever, a Throttle or the Roco app) or confirmed by position feedback           |
+| set leg in fine dashes             | **reported**: only the start-up answer of the central unit; it may be a default, not where the turnout really is |
+| set leg dotted, in another colour  | **commanded**: sent, waiting for the central unit to report it (one retry)                                       |
+| both legs cut short, **?**         | **unknown**: nothing reported yet (also after the connection was lost), or outputs that fit no position          |
+| **!** below the turnout            | **failed** (no report after the retry) or **mismatch** (position feedback disagrees with the central unit)       |
+
+Occupied track is **solid red**. A block stays red for its release delay after its detectors become
+free. Status is never shown by colour alone: there is always a pattern, marker or text too.
+
+**Feedback** (top bar) opens the feedback monitor: every detector input in the layout or reported
+by the central unit, whether it is occupied, and which block or turnout uses it. Use it to check
+wiring.
+
+**Levels** shows the automation areas and their level. You can change a level while operating,
+without the edit password. Lowering a level never moves turnouts or changes signals. Level 3 and 4
+are not available yet.
+
+**Restore turnout positions on startup** (layout properties, off by default): when Lever opens the
+layout, it switches every connected turnout to the last position the central unit confirmed, one
+after another through the normal queue. Lever only knows the positions it saw on this PC; manual
+turnouts are not touched.
+
 ## Drawing
 
 | Tool                                                               | How                                                                                                                                                                 |
@@ -60,6 +98,9 @@ Select an element to see its properties on the right:
   addresses, and for distant signals the main signal they repeat.
 - **Track**: the block it belongs to, with feedback inputs (R-Bus module/input, LocoNet address,
   CAN module/port) and the release delay.
+- **Area**: every station is one automation area. Add areas (layout properties, **Automation
+  areas**) for parts of a station or the line between stations, then choose the area for an
+  element, or for several selected elements at once. Area borders are drawn while editing.
 
 Nothing selected: the station, the layout, the **central unit settings** and the **edit password**.
 

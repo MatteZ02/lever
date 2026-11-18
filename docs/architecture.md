@@ -267,6 +267,7 @@ type Project = {
     pulseMs: number; // default 150, per accessory override
     blockReleaseDelayMs: number;
     autoSignalsOnRoute: boolean; // RTE-5, default true
+    restoreTurnoutsOnStartup: boolean; // ACC-4, default false
   };
   views: StationView[]; // {id, name, elements: DiagramElement[]}
   arrangements: Arrangement[]; // full-layout panels: {viewId, x, y, scale}
@@ -280,6 +281,13 @@ type Project = {
 Saved as pretty-printed JSON (diffable) with the extension **`.lever`** (decided by the user).
 Autosave and rotating backups go next to the file in a
 `.lever-backups/` folder; settings stay in the user data folder.
+
+Last known turnout positions (ACC-4) are **not** in the project: throwing a turnout must not change
+the file. The engine reports positions the central unit confirmed (seen switching; start-up reports
+may be defaults) to main over parentPort (`engineReportSchema`); main keeps them per project id in
+`turnout-positions.json` in the user data folder. The first time a project is operated in a run
+and its setting is on, main sends `restoreTurnouts`; the engine commands them once after
+connecting, through the interlocking and the queue, after the start-up queries.
 
 ## 5. Interlocking engine _(proposed)_
 
