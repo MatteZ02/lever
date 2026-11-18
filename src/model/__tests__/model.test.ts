@@ -52,6 +52,11 @@ describe('geometry', () => {
     expect(snapToDirection(point(0, 0), point(5, 1))).toEqual(point(5, 0));
     expect(snapToDirection(point(0, 0), point(3, -2))).toEqual(point(3, -3));
     expect(snapToDirection(point(0, 0), point(0, 4))).toEqual(point(0, 4));
+    // The exact mouse position: always lands on a grid point.
+    expect(snapToDirection(point(0, 0), {x: 5.2, y: 0.4})).toEqual(point(5, 0));
+    expect(snapToDirection(point(0, 0), {x: -0.3, y: 3.6})).toEqual(
+      point(0, 4),
+    );
   });
 
   it('expands and simplifies polylines', () => {

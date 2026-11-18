@@ -2,9 +2,7 @@
 // track, placing elements, dragging track corners, and test-mode clicks.
 import {useMemo, useRef, useState} from 'react';
 import {
-  addElements,
   elementPoints,
-  extendPolyline,
   moveElements,
   placeReplacing,
   replaceElement,
@@ -13,9 +11,8 @@ import {DiagramElement, Track, TurnoutType} from '../../../model/elements';
 import {
   GridPoint,
   isValidPolyline,
-  samePoint,
+  pointKey,
   simplifyPolyline,
-  snapToDirection,
 } from '../../../model/geometry';
 import {
   elementsReplacedBy,
@@ -24,6 +21,12 @@ import {
   sameAsExisting,
 } from '../../../model/placement';
 import {newId, Project, StationView} from '../../../model/project';
+import {
+  addTrackJoined,
+  attachPoints,
+  dragCorner,
+  nextDrawingPoints,
+} from '../../../model/trackDrawing';
 import {strings} from '../../../shared/strings';
 import {color, diagramStroke} from '../../theme';
 import {Modal} from '../components/Modal';
@@ -64,6 +67,8 @@ type Props = {
   onDrawingChange: (points: GridPoint[]) => void;
 };
 
+// Adds the drawn track; drawn from or to the free end of another track, it
+// becomes part of that track (addTrackJoined).
 export const finishTrack = (viewId: string, points: GridPoint[]): void => {
   const simplified = simplifyPolyline(points);
   if (simplified.length >= 2 && isValidPolyline(simplified)) {
@@ -73,7 +78,12 @@ export const finishTrack = (viewId: string, points: GridPoint[]): void => {
       name: '',
       points: simplified,
     };
-    edit((project) => addElements(project, viewId, [track]));
+    edit((project) => ({
+      ...project,
+      views: project.views.map((view) =>
+        view.id === viewId ? addTrackJoined(view, track) : view,
+      ),
+    }));
   }
 };
 
@@ -112,6 +122,8 @@ export const EditorCanvas = ({
   const tool = useProjectStore((state) => state.tool);
   const testMode = useProjectStore((state) => state.testMode);
   const [drag, setDrag] = useState<Drag | null>(null);
+  // The dragged track's new shape while a corner is dragged.
+  const [vertexPoints, setVertexPoints] = useState<GridPoint[] | undefined>();
   const revision = useProjectStore((state) => state.revision);
   // The grid point under the mouse, and the project revision it was seen at.
   const [pointerAt, setPointerAt] = useState<{
@@ -157,17 +169,26 @@ export const EditorCanvas = ({
           onDrawingChange([grid]);
           return;
         }
-        const last = drawing[drawing.length - 1];
-        const next = snapToDirection(last, {x: pointer.x, y: pointer.y});
-        if (samePoint(next, last)) {
+        // Onto a track end or turnout leg: exactly there (with a bend if it
+        // is not in line), and the track is finished.
+        const added = nextDrawingPoints(
+          view,
+          drawing,
+          {x: pointer.x, y: pointer.y},
+          grid,
+        );
+        if (added.length === 0) {
           finishTrack(view.id, drawing);
           onDrawingChange([]);
           return;
         }
-        const extended = extendPolyline(drawing, next);
-        if (extended) {
-          onDrawingChange(extended);
+        const extended = simplifyPolyline([...drawing, ...added]);
+        if (attachPoints(view).has(pointKey(grid))) {
+          finishTrack(view.id, extended);
+          onDrawingChange([]);
+          return;
         }
+        onDrawingChange(extended);
         return;
       }
       case 'place':
@@ -184,6 +205,7 @@ export const EditorCanvas = ({
             index: Number(vertex),
             current: grid,
           });
+          setVertexPoints(undefined);
           return;
         }
         if (elementId) {
@@ -255,9 +277,27 @@ export const EditorCanvas = ({
     }
     switch (drag.kind) {
       case 'move':
-      case 'vertex':
         setDrag({...drag, current: pointer.grid});
         return;
+      case 'vertex': {
+        // Along 45° lines, or exactly onto a connection (dragCorner); keeps
+        // the last valid shape while the pointer is somewhere impossible.
+        const track = view.elements.find((e) => e.id === drag.trackId);
+        if (track?.kind === 'track') {
+          const points = dragCorner(
+            view,
+            track,
+            drag.index,
+            {x: pointer.x, y: pointer.y},
+            pointer.grid,
+          );
+          if (points) {
+            setVertexPoints(points);
+          }
+        }
+        setDrag({...drag, current: pointer.grid});
+        return;
+      }
       case 'rubber':
         setDrag({...drag, current: {x: pointer.x, y: pointer.y}});
         return;
@@ -284,19 +324,17 @@ export const EditorCanvas = ({
         const track = view.elements.find(
           (element) => element.id === drag.trackId,
         );
-        if (track?.kind !== 'track') {
+        const points = vertexPoints;
+        setVertexPoints(undefined);
+        if (
+          track?.kind !== 'track' ||
+          !points ||
+          !isValidPolyline(points) ||
+          JSON.stringify(points) === JSON.stringify(track.points)
+        ) {
           return;
         }
-        const points = track.points.map((point, index) =>
-          index === drag.index ? drag.current : point,
-        );
-        if (isValidPolyline(simplifyPolyline(points))) {
-          edit((p) =>
-            replaceElement(p, {...track, points: simplifyPolyline(points)}),
-          );
-        } else {
-          setHint(strings.editor.hints.notStraight);
-        }
+        edit((p) => replaceElement(p, {...track, points}));
         return;
       }
       case 'rubber': {
@@ -348,15 +386,22 @@ export const EditorCanvas = ({
     ghost = undefined;
     replacedByGhost = [];
   }
+  // While a corner is dragged, the track is drawn in its new shape.
+  const reshaped =
+    drag?.kind === 'vertex' && vertexPoints && singleTrack
+      ? {...singleTrack, points: vertexPoints}
+      : undefined;
   const hiddenIds = moving
     ? selectionSet
-    : replacedByGhost.length > 0
-      ? new Set(replacedByGhost.map((element) => element.id))
-      : undefined;
+    : reshaped
+      ? new Set([reshaped.id])
+      : replacedByGhost.length > 0
+        ? new Set(replacedByGhost.map((element) => element.id))
+        : undefined;
 
   const drawingPreview =
     tool.kind === 'track' && drawing.length > 0 && hover
-      ? [...drawing, snapToDirection(drawing[drawing.length - 1], hover)]
+      ? [...drawing, ...nextDrawingPoints(view, drawing, hover, hover)]
       : drawing;
 
   const cursor = testMode
@@ -405,6 +450,11 @@ export const EditorCanvas = ({
             ))}
           </g>
         )}
+        {reshaped && (
+          <g pointerEvents="none">
+            <ElementShape element={reshaped} selected />
+          </g>
+        )}
         {ghost && (
           <g opacity={0.5} pointerEvents="none">
             <ElementShape element={ghost} selected={false} />
@@ -435,11 +485,7 @@ export const EditorCanvas = ({
         {singleTrack &&
           tool.kind === 'select' &&
           !testMode &&
-          singleTrack.points.map((point, index) => {
-            const shown =
-              drag?.kind === 'vertex' && drag.index === index
-                ? drag.current
-                : point;
+          (reshaped ?? singleTrack).points.map((shown, index) => {
             return (
               <circle
                 key={index}

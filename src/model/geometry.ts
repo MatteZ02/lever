@@ -105,7 +105,7 @@ export const snapToDirection = (
   const length =
     v.x !== 0 && v.y !== 0
       ? Math.round((Math.abs(dx) + Math.abs(dy)) / 2)
-      : Math.abs(v.x !== 0 ? dx : dy);
+      : Math.round(Math.abs(v.x !== 0 ? dx : dy));
   return add(from, v, Math.max(1, length));
 };
 
