@@ -149,8 +149,9 @@ const olten = (() => {
   s.track([29, 34], [48, 34]);
   s.exit([48, 34], 'E', 'Main line (spiral)');
   // The two signals visible on the screenshot, east of tracks 3 and 4.
-  s.signal([34, 6], 'W', 'Signal 3');
-  s.signal([33, 8], 'W', 'Signal 4');
+  // Departure signals for tracks 3 and 4 towards the east (user, 2026-11-18).
+  s.signal([34, 6], 'E', 'Signal 3');
+  s.signal([33, 8], 'E', 'Signal 4');
   for (const [number, y] of [
     [1, 0],
     [2, 2],
@@ -169,8 +170,8 @@ const olten = (() => {
 })();
 
 // --- inselburg-dettingen -----------------------------------------------------------
-// Two return loops on the west side lead the main lines to the bottom exits;
-// they cross each other (drawn as an overpass until confirmed).
+// Two return loops on the west side lead the main lines to the south exits;
+// Dettingen is the double crossover there.
 const inselburg = (() => {
   const s = station('inselburg-dettingen');
   s.label(
@@ -178,11 +179,8 @@ const inselburg = (() => {
     'Inselburg-Dettingen (draft from the Z21 screenshot)',
     'normal',
   );
-  // Outer loop: bottom exit → around → track 3 → east exit Päärata Kel.
-  s.exit([16, 18], 'E', 'Päärata Pun (south)');
+  // Outer loop (Päärata Kel): south → around → track 3 → east exit.
   s.track(
-    [16, 18],
-    [10, 18],
     [8, 20],
     [3, 20],
     [2, 19],
@@ -209,18 +207,29 @@ const inselburg = (() => {
   s.stop([34, -2], 'W');
   s.track([28, -3], [29, -4], [34, -4]);
   s.stop([34, -4], 'W');
-  // Inner loop: bottom exit → around → track 2 → east exit Päärata Pun.
-  s.exit([16, 20], 'E', 'Päärata Kel (south)');
+  // Inner loop (Päärata Pun): south → around → track 2 → east exit.
   s.track(
-    [16, 20],
-    [10, 20],
-    [8, 18],
+    [10, 18],
     [5, 18],
     [4, 17],
     [4, 11],
     [5, 10],
     [9, 10],
   );
+  // Dettingen: double crossover between the two main lines at the south end
+  // (user, 2026-11-18), drawn as two crossovers in a row.
+  s.turnout('left', [9, 20], 'E', 'Dettingen 1');
+  s.turnout('left', [11, 18], 'W', 'Dettingen 2');
+  s.turnout('right', [13, 18], 'E', 'Dettingen 3');
+  s.turnout('right', [15, 20], 'W', 'Dettingen 4');
+  s.track([10, 20], [14, 20]);
+  s.track([16, 20], [22, 20]);
+  s.exit([22, 20], 'E', 'Päärata Kel (south)');
+  s.track([14, 18], [22, 18]);
+  s.exit([22, 18], 'E', 'Päärata Pun (south)');
+  s.label([10, 23], 'Dettingen');
+  // Only a note in the Z21 app: no track connects here (user, 2026-11-18).
+  s.label([4, 6], 'Päärata Kel');
   s.turnout('right', [10, 10], 'E');
   s.track([11, 10], [29, 10]);
   s.turnout('left', [30, 10], 'W');

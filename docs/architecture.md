@@ -330,6 +330,15 @@ Answers from the user (2026-11-17), for the sample project:
 - _Pun_ / _Kel_ (_Punainen_ / _Keltainen_, red / yellow) are the colour names of the **two main
   lines**. Exits are named after the line they lead to.
 
+More answers (2026-11-18):
+
+- inselburg-dettingen: the X at the south end is a **double crossover** between the two main
+  lines (switching from either to the other). **Dettingen is that crossover** (the Z21 app's
+  separate _dettingen_ page); it belongs to inselburg-dettingen. Drawn as two crossovers in a row.
+- inselburg-dettingen: the left _Päärata Kel_ is only a note; no track connects there.
+- olten: every drawn line exists on the layout; the user corrects inconsistencies in the editor.
+- olten: the two signals are **departure signals for tracks 3 and 4 towards the east**.
+
 ## 7. Plan
 
 The phases of the brief, unchanged:

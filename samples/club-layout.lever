@@ -1101,7 +1101,7 @@
             "x": 34,
             "y": 6
           },
-          "facing": "W",
+          "facing": "E",
           "side": "right",
           "signalTypeId": "builtin:main2",
           "control": {
@@ -1118,7 +1118,7 @@
             "x": 33,
             "y": 8
           },
-          "facing": "W",
+          "facing": "E",
           "side": "right",
           "signalTypeId": "builtin:main2",
           "control": {
@@ -1256,28 +1256,10 @@
           "size": "normal"
         },
         {
-          "name": "Päärata Pun (south)",
-          "kind": "connector",
-          "id": "exit-02h",
-          "at": {
-            "x": 16,
-            "y": 18
-          },
-          "direction": "E"
-        },
-        {
           "name": "",
           "kind": "track",
-          "id": "track-02i",
+          "id": "track-02h",
           "points": [
-            {
-              "x": 16,
-              "y": 18
-            },
-            {
-              "x": 10,
-              "y": 18
-            },
             {
               "x": 8,
               "y": 20
@@ -1307,7 +1289,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-02j",
+          "id": "turnout-02i",
           "type": "left",
           "at": {
             "x": 12,
@@ -1323,7 +1305,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-02k",
+          "id": "track-02j",
           "points": [
             {
               "x": 13,
@@ -1338,7 +1320,7 @@
         {
           "name": "Päärata Kel",
           "kind": "connector",
-          "id": "exit-02l",
+          "id": "exit-02k",
           "at": {
             "x": 40,
             "y": 8
@@ -1348,7 +1330,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-02m",
+          "id": "track-02l",
           "points": [
             {
               "x": 13,
@@ -1367,7 +1349,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-02n",
+          "id": "turnout-02m",
           "type": "left",
           "at": {
             "x": 21,
@@ -1383,7 +1365,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-02o",
+          "id": "track-02n",
           "points": [
             {
               "x": 22,
@@ -1398,7 +1380,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-02p",
+          "id": "stop-02o",
           "at": {
             "x": 34,
             "y": 4
@@ -1408,7 +1390,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-02q",
+          "id": "turnout-02p",
           "type": "right",
           "at": {
             "x": 23,
@@ -1424,7 +1406,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-02r",
+          "id": "track-02q",
           "points": [
             {
               "x": 24,
@@ -1439,7 +1421,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-02s",
+          "id": "stop-02r",
           "at": {
             "x": 34,
             "y": 2
@@ -1449,7 +1431,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-02t",
+          "id": "turnout-02s",
           "type": "right",
           "at": {
             "x": 25,
@@ -1465,7 +1447,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-02u",
+          "id": "track-02t",
           "points": [
             {
               "x": 26,
@@ -1480,7 +1462,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-02v",
+          "id": "stop-02u",
           "at": {
             "x": 34,
             "y": 0
@@ -1490,7 +1472,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-02w",
+          "id": "turnout-02v",
           "type": "right",
           "at": {
             "x": 27,
@@ -1506,7 +1488,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-02x",
+          "id": "track-02w",
           "points": [
             {
               "x": 28,
@@ -1521,7 +1503,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-02y",
+          "id": "stop-02x",
           "at": {
             "x": 34,
             "y": -2
@@ -1531,7 +1513,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-02z",
+          "id": "track-02y",
           "points": [
             {
               "x": 28,
@@ -1550,7 +1532,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-030",
+          "id": "stop-02z",
           "at": {
             "x": 34,
             "y": -4
@@ -1558,30 +1540,12 @@
           "direction": "W"
         },
         {
-          "name": "Päärata Kel (south)",
-          "kind": "connector",
-          "id": "exit-031",
-          "at": {
-            "x": 16,
-            "y": 20
-          },
-          "direction": "E"
-        },
-        {
           "name": "",
           "kind": "track",
-          "id": "track-032",
+          "id": "track-030",
           "points": [
             {
-              "x": 16,
-              "y": 20
-            },
-            {
               "x": 10,
-              "y": 20
-            },
-            {
-              "x": 8,
               "y": 18
             },
             {
@@ -1607,9 +1571,160 @@
           ]
         },
         {
-          "name": "",
+          "name": "Dettingen 1",
+          "kind": "turnout",
+          "id": "turnout-031",
+          "type": "left",
+          "at": {
+            "x": 9,
+            "y": 20
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "Dettingen 2",
+          "kind": "turnout",
+          "id": "turnout-032",
+          "type": "left",
+          "at": {
+            "x": 11,
+            "y": 18
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "Dettingen 3",
           "kind": "turnout",
           "id": "turnout-033",
+          "type": "right",
+          "at": {
+            "x": 13,
+            "y": 18
+          },
+          "orientation": "E",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "Dettingen 4",
+          "kind": "turnout",
+          "id": "turnout-034",
+          "type": "right",
+          "at": {
+            "x": 15,
+            "y": 20
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "dcc",
+            "addresses": [],
+            "invert": false
+          }
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-035",
+          "points": [
+            {
+              "x": 10,
+              "y": 20
+            },
+            {
+              "x": 14,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-036",
+          "points": [
+            {
+              "x": 16,
+              "y": 20
+            },
+            {
+              "x": 22,
+              "y": 20
+            }
+          ]
+        },
+        {
+          "name": "Päärata Kel (south)",
+          "kind": "connector",
+          "id": "exit-037",
+          "at": {
+            "x": 22,
+            "y": 20
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "track",
+          "id": "track-038",
+          "points": [
+            {
+              "x": 14,
+              "y": 18
+            },
+            {
+              "x": 22,
+              "y": 18
+            }
+          ]
+        },
+        {
+          "name": "Päärata Pun (south)",
+          "kind": "connector",
+          "id": "exit-039",
+          "at": {
+            "x": 22,
+            "y": 18
+          },
+          "direction": "E"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-03a",
+          "at": {
+            "x": 10,
+            "y": 23
+          },
+          "text": "Dettingen",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "label",
+          "id": "label-03b",
+          "at": {
+            "x": 4,
+            "y": 6
+          },
+          "text": "Päärata Kel",
+          "size": "small"
+        },
+        {
+          "name": "",
+          "kind": "turnout",
+          "id": "turnout-03c",
           "type": "right",
           "at": {
             "x": 10,
@@ -1625,7 +1740,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-034",
+          "id": "track-03d",
           "points": [
             {
               "x": 11,
@@ -1640,7 +1755,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-035",
+          "id": "turnout-03e",
           "type": "left",
           "at": {
             "x": 30,
@@ -1656,7 +1771,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-036",
+          "id": "track-03f",
           "points": [
             {
               "x": 31,
@@ -1671,7 +1786,7 @@
         {
           "name": "Päärata Pun",
           "kind": "connector",
-          "id": "exit-037",
+          "id": "exit-03g",
           "at": {
             "x": 40,
             "y": 10
@@ -1681,7 +1796,7 @@
         {
           "name": "Päärata Pun (west)",
           "kind": "connector",
-          "id": "exit-038",
+          "id": "exit-03h",
           "at": {
             "x": 6,
             "y": 12
@@ -1691,7 +1806,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-039",
+          "id": "track-03i",
           "points": [
             {
               "x": 6,
@@ -1706,7 +1821,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-03a",
+          "id": "turnout-03j",
           "type": "right",
           "at": {
             "x": 12,
@@ -1722,7 +1837,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03b",
+          "id": "track-03k",
           "points": [
             {
               "x": 13,
@@ -1737,7 +1852,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-03c",
+          "id": "turnout-03l",
           "type": "left",
           "at": {
             "x": 28,
@@ -1753,7 +1868,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03d",
+          "id": "track-03m",
           "points": [
             {
               "x": 29,
@@ -1768,7 +1883,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-03e",
+          "id": "stop-03n",
           "at": {
             "x": 32,
             "y": 12
@@ -1778,7 +1893,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-03f",
+          "id": "label-03o",
           "at": {
             "x": 20,
             "y": 12
@@ -1789,7 +1904,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-03g",
+          "id": "label-03p",
           "at": {
             "x": 20,
             "y": 10
@@ -1800,7 +1915,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-03h",
+          "id": "label-03q",
           "at": {
             "x": 20,
             "y": 8
@@ -1811,7 +1926,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-03i",
+          "id": "label-03r",
           "at": {
             "x": 20,
             "y": 4
@@ -1829,7 +1944,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-03j",
+          "id": "label-03s",
           "at": {
             "x": 0,
             "y": -3
@@ -1840,7 +1955,7 @@
         {
           "name": "Päärata Pun",
           "kind": "connector",
-          "id": "exit-03k",
+          "id": "exit-03t",
           "at": {
             "x": 0,
             "y": 2
@@ -1850,7 +1965,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03l",
+          "id": "track-03u",
           "points": [
             {
               "x": 0,
@@ -1865,7 +1980,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-03m",
+          "id": "turnout-03v",
           "type": "left",
           "at": {
             "x": 8,
@@ -1881,7 +1996,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03n",
+          "id": "track-03w",
           "points": [
             {
               "x": 9,
@@ -1896,7 +2011,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-03o",
+          "id": "turnout-03x",
           "type": "right",
           "at": {
             "x": 32,
@@ -1912,7 +2027,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03p",
+          "id": "track-03y",
           "points": [
             {
               "x": 33,
@@ -1927,7 +2042,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-03q",
+          "id": "turnout-03z",
           "type": "left",
           "at": {
             "x": 38,
@@ -1943,7 +2058,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-03r",
+          "id": "turnout-040",
           "type": "right",
           "at": {
             "x": 40,
@@ -1959,7 +2074,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03s",
+          "id": "track-041",
           "points": [
             {
               "x": 41,
@@ -1974,7 +2089,7 @@
         {
           "name": "Päärata Pun",
           "kind": "connector",
-          "id": "exit-03t",
+          "id": "exit-042",
           "at": {
             "x": 46,
             "y": 2
@@ -1984,7 +2099,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-03u",
+          "id": "stop-043",
           "at": {
             "x": 5,
             "y": 0
@@ -1994,7 +2109,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03v",
+          "id": "track-044",
           "points": [
             {
               "x": 5,
@@ -2009,7 +2124,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-03w",
+          "id": "turnout-045",
           "type": "left",
           "at": {
             "x": 10,
@@ -2025,7 +2140,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03x",
+          "id": "track-046",
           "points": [
             {
               "x": 11,
@@ -2040,7 +2155,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-03y",
+          "id": "turnout-047",
           "type": "right",
           "at": {
             "x": 30,
@@ -2056,7 +2171,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-03z",
+          "id": "track-048",
           "points": [
             {
               "x": 31,
@@ -2071,7 +2186,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-040",
+          "id": "stop-049",
           "at": {
             "x": 35,
             "y": 0
@@ -2081,7 +2196,7 @@
         {
           "name": "Päärata Kel",
           "kind": "connector",
-          "id": "exit-041",
+          "id": "exit-04a",
           "at": {
             "x": 0,
             "y": 4
@@ -2091,7 +2206,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-042",
+          "id": "track-04b",
           "points": [
             {
               "x": 0,
@@ -2106,7 +2221,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-043",
+          "id": "turnout-04c",
           "type": "right",
           "at": {
             "x": 8,
@@ -2122,7 +2237,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-044",
+          "id": "track-04d",
           "points": [
             {
               "x": 9,
@@ -2137,7 +2252,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-045",
+          "id": "turnout-04e",
           "type": "left",
           "at": {
             "x": 32,
@@ -2153,7 +2268,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-046",
+          "id": "track-04f",
           "points": [
             {
               "x": 33,
@@ -2168,7 +2283,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-047",
+          "id": "turnout-04g",
           "type": "left",
           "at": {
             "x": 36,
@@ -2184,7 +2299,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-048",
+          "id": "track-04h",
           "points": [
             {
               "x": 37,
@@ -2199,7 +2314,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-049",
+          "id": "turnout-04i",
           "type": "right",
           "at": {
             "x": 42,
@@ -2215,7 +2330,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-04a",
+          "id": "track-04j",
           "points": [
             {
               "x": 43,
@@ -2230,7 +2345,7 @@
         {
           "name": "Päärata Kel",
           "kind": "connector",
-          "id": "exit-04b",
+          "id": "exit-04k",
           "at": {
             "x": 46,
             "y": 4
@@ -2240,7 +2355,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-04c",
+          "id": "stop-04l",
           "at": {
             "x": 5,
             "y": 6
@@ -2250,7 +2365,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-04d",
+          "id": "track-04m",
           "points": [
             {
               "x": 5,
@@ -2265,7 +2380,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-04e",
+          "id": "turnout-04n",
           "type": "right",
           "at": {
             "x": 10,
@@ -2281,7 +2396,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-04f",
+          "id": "track-04o",
           "points": [
             {
               "x": 11,
@@ -2296,7 +2411,7 @@
         {
           "name": "",
           "kind": "turnout",
-          "id": "turnout-04g",
+          "id": "turnout-04p",
           "type": "left",
           "at": {
             "x": 30,
@@ -2312,7 +2427,7 @@
         {
           "name": "",
           "kind": "track",
-          "id": "track-04h",
+          "id": "track-04q",
           "points": [
             {
               "x": 31,
@@ -2327,7 +2442,7 @@
         {
           "name": "",
           "kind": "bufferStop",
-          "id": "stop-04i",
+          "id": "stop-04r",
           "at": {
             "x": 35,
             "y": 6
@@ -2337,7 +2452,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-04j",
+          "id": "label-04s",
           "at": {
             "x": 20,
             "y": 0
@@ -2348,7 +2463,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-04k",
+          "id": "label-04t",
           "at": {
             "x": 20,
             "y": 2
@@ -2359,7 +2474,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-04l",
+          "id": "label-04u",
           "at": {
             "x": 20,
             "y": 4
@@ -2370,7 +2485,7 @@
         {
           "name": "",
           "kind": "label",
-          "id": "label-04m",
+          "id": "label-04v",
           "at": {
             "x": 20,
             "y": 6
