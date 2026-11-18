@@ -4,6 +4,13 @@ import {
   requiredAddressCount,
 } from '../../../../model/accessoryCommands';
 import {
+  allConnectors,
+  ConnectorInfo,
+  pairConnectors,
+  partnerOf,
+  unpairConnector,
+} from '../../../../model/connectors';
+import {
   deleteElements,
   replaceElement,
   rotateElements,
@@ -12,6 +19,7 @@ import {
   DiagramElement,
   GenericAccessory,
   Signal,
+  StationConnector,
   Track,
   TURNOUT_TYPES,
   Turnout,
@@ -148,6 +156,66 @@ const SelectionButtons = ({viewId, ids}: {viewId: string; ids: string[]}) => (
   </div>
 );
 
+// FULL-3: which exit (in another station, or this one) this exit leads to.
+// Pairing is optional; choosing a partner unpairs both sides' old partners.
+const ConnectorPairing = ({
+  project,
+  connector,
+}: {
+  project: Project;
+  connector: StationConnector;
+}) => {
+  const partner = partnerOf(project, connector);
+  const all = allConnectors(project);
+  const ownView = all.find(
+    (info) => info.connector.id === connector.id,
+  )?.viewId;
+  // Other stations first: that is where the other end usually is.
+  const others = [
+    ...all.filter((info) => info.viewId !== ownView),
+    ...all.filter(
+      (info) => info.viewId === ownView && info.connector.id !== connector.id,
+    ),
+  ];
+  const describe = (info: ConnectorInfo) => {
+    const {at, direction} = info.connector;
+    const name =
+      info.connector.name ||
+      strings.properties.unnamedExitAt(
+        strings.directionArrows[direction],
+        at.x,
+        at.y,
+      );
+    const taken =
+      info.connector.pairedWith &&
+      info.connector.pairedWith.connectorId !== connector.id;
+    return `${info.viewName} · ${name}${taken ? ` (${strings.properties.linkedElsewhere})` : ''}`;
+  };
+  return (
+    <>
+      <SelectField
+        label={strings.properties.pairedWith}
+        value={partner?.connector.id ?? ''}
+        options={[
+          {value: '', label: strings.properties.notPaired},
+          ...others.map((info) => ({
+            value: info.connector.id,
+            label: describe(info),
+          })),
+        ]}
+        onCommit={(otherId) =>
+          edit((p) =>
+            otherId
+              ? pairConnectors(p, connector.id, otherId)
+              : unpairConnector(p, connector.id),
+          )
+        }
+      />
+      <p className="muted small">{strings.properties.pairingHelp}</p>
+    </>
+  );
+};
+
 const ElementProperties = ({
   project,
   view,
@@ -208,6 +276,9 @@ const ElementProperties = ({
       )}
       {element.kind === 'accessory' && (
         <AccessoryProperties project={project} accessory={element} />
+      )}
+      {element.kind === 'connector' && (
+        <ConnectorPairing project={project} connector={element} />
       )}
       {element.kind === 'label' && (
         <>

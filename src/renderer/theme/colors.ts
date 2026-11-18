@@ -57,6 +57,11 @@ export type ColorTokens = {
   // The switch point of a turnout and the start of its set leg(s).
   turnoutSet: string;
   connectorUnpaired: string;
+  // Dashed line between paired station exits in the full view (FULL-4).
+  connectorLine: string;
+  // Station panel frame and title in the full view.
+  panelBorder: string;
+  panelTitle: string;
   areaLevel1: string;
   areaLevel2: string;
   areaLevel3: string;
@@ -122,6 +127,9 @@ export const lightColors: ColorTokens = {
   turnoutManual: palette.cyan700,
   turnoutSet: palette.yellow700,
   connectorUnpaired: palette.grey500,
+  connectorLine: palette.grey500,
+  panelBorder: palette.grey200,
+  panelTitle: palette.grey700,
   areaLevel1: palette.grey500,
   areaLevel2: palette.blue500,
   areaLevel3: palette.violet600,
@@ -185,6 +193,9 @@ export const darkColors: ColorTokens = {
   turnoutManual: palette.cyan300,
   turnoutSet: palette.yellow300,
   connectorUnpaired: palette.grey400,
+  connectorLine: palette.grey400,
+  panelBorder: palette.grey700,
+  panelTitle: palette.grey300,
   areaLevel1: palette.grey500,
   areaLevel2: palette.blue300,
   areaLevel3: palette.violet300,

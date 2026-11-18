@@ -145,6 +145,10 @@ describe('full layout arrangements (FULL-2, FULL-5)', () => {
   it('is not saved until changed, and keeps up with added and deleted stations', () => {
     const project = twoStations();
     expect(arrangementsOf(project, 'Full layout')).toHaveLength(1);
+    // Stable until saved, so a change can find it again.
+    expect(arrangementsOf(project, 'Full layout')[0].id).toBe(
+      arrangementsOf(project, 'Full layout')[0].id,
+    );
     expect(project.arrangements).toEqual([]);
 
     const saved = defaultArrangement(project, 'Full layout');

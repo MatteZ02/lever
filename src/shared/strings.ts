@@ -155,6 +155,44 @@ export const strings = {
     invalidTurnoutNumber: 'Enter a turnout number between 1 and 2048.',
   },
 
+  // The eight grid directions as arrows (screen up = north).
+  directionArrows: {
+    E: '→',
+    NE: '↗',
+    N: '↑',
+    NW: '↖',
+    W: '←',
+    SW: '↙',
+    S: '↓',
+    SE: '↘',
+  } as Record<string, string>,
+
+  windows: {
+    open: 'New window',
+    openHelp:
+      'Open what is shown here in a new window, e.g. for a second monitor. Lever reopens its windows where they were.',
+  },
+
+  full: {
+    title: 'Full layout',
+    defaultName: 'Full layout',
+    tab: 'Full layout',
+    editHelp:
+      'Drag a station by its frame or title to move it; click it to change its size. Double-click a title to open that station.',
+    arrangement: 'Arrangement',
+    name: 'Name',
+    connectorLines: 'Lines between linked exits',
+    add: 'New arrangement',
+    reset: 'Stations below each other',
+    remove: 'Delete arrangement',
+    newName: (n: number) => `Arrangement ${n}`,
+    scale: 'Size (%)',
+    smaller: 'Smaller',
+    larger: 'Larger',
+    openStation: 'Open station',
+    selectPanel: 'Click a station to change its size.',
+  },
+
   operate: {
     trainNumber: 'Train number or name',
     setLabel: 'Show',
@@ -356,6 +394,13 @@ export const strings = {
     feedbackSources: 'Feedback buses used',
     blockReleaseDelay: 'Default block release delay (ms)',
     autoSignals: 'Set signals along routes automatically',
+    pairedWith: 'Leads to',
+    notPaired: 'Not linked (line not drawn)',
+    unnamedExitAt: (arrow: string, x: number, y: number) =>
+      `exit ${arrow} at ${x}, ${y}`,
+    linkedElsewhere: 'linked elsewhere',
+    pairingHelp:
+      'Link this exit with the exit at the other end of the line, in another station or in this one. Routes then continue through it, and in operating mode clicking the exit opens the other end.',
     restoreTurnouts: 'Restore turnout positions on startup',
     restoreTurnoutsHelp:
       'When Lever opens this project, it switches every connected turnout to its last confirmed position, one after another. Only the positions this PC saw are known.',

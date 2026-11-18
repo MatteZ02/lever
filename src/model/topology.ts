@@ -6,6 +6,7 @@
 // signals, virtual points, connectors, buffer stops. Track edges run between
 // nodes along the drawn track; a turnout contributes one internal edge per
 // passage (tip↔leg), labelled with the positions that open it.
+import {allConnectors, partnerOf} from './connectors';
 import {DiagramElement, StationConnector, Track, Turnout} from './elements';
 import {
   Direction,
@@ -15,7 +16,6 @@ import {
   GridPoint,
   pointKey,
 } from './geometry';
-import {allConnectors, partnerOf} from './connectors';
 import {turnoutGeometry, turnoutPorts} from './ports';
 import {Project, StationView} from './project';
 

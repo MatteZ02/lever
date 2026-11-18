@@ -88,10 +88,15 @@ const bottomOf = (project: Project, panels: Panel[]): number =>
     }),
   );
 
+// Id of the arrangement shown before any is saved; stable, so a change to
+// it (which saves it) keeps the same viewport and selection.
+export const DEFAULT_ARRANGEMENT_ID = 'arrangement-default';
+
 // Every station, one below the other, at full size.
 export const defaultArrangement = (
   project: Project,
   name: string,
+  id: string = newId('arrangement'),
 ): Arrangement => {
   const panels: Panel[] = [];
   let top = 0;
@@ -100,7 +105,7 @@ export const defaultArrangement = (
     panels.push(panel);
     top = bottomOf(project, [panel]) + PANEL_GAP;
   }
-  return {id: newId('arrangement'), name, panels, showConnectorLines: true};
+  return {id, name, panels, showConnectorLines: true};
 };
 
 // The arrangement with a panel for every view: new stations go below the
@@ -133,7 +138,7 @@ export const arrangementsOf = (
 ): Arrangement[] =>
   project.arrangements.length > 0
     ? project.arrangements.map((a) => syncArrangement(project, a))
-    : [defaultArrangement(project, defaultName)];
+    : [defaultArrangement(project, defaultName, DEFAULT_ARRANGEMENT_ID)];
 
 // Applies a change to one arrangement and saves all of them (the default
 // one too, the first time).

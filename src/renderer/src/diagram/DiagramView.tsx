@@ -3,6 +3,7 @@
 // pointer handling through props.
 import {
   forwardRef,
+  memo,
   PointerEvent,
   ReactNode,
   useImperativeHandle,
@@ -42,7 +43,9 @@ export type DiagramViewHandle = {
 
 type Props = {
   project: Project;
-  view: StationView;
+  // The station drawn; none for the full layout view, which draws its
+  // panels as children.
+  view?: StationView;
   viewport: Viewport;
   onViewportChange: (viewport: Viewport) => void;
   selection?: ReadonlySet<string>;
@@ -162,44 +165,6 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
       observer.observe(svg);
       return () => observer.disconnect();
     }, []);
-
-    const sorted = useMemo(
-      () => [...view.elements].sort((a, b) => LAYER[a.kind] - LAYER[b.kind]),
-      [view.elements],
-    );
-
-    const signalCategories = useMemo(() => {
-      const categories = new Map<string, 'main' | 'distant' | 'shunting'>();
-      for (const element of view.elements) {
-        if (element.kind === 'signal') {
-          categories.set(
-            element.id,
-            findSignalType(project.signalTypes, element.signalTypeId)
-              ?.category ?? 'main',
-          );
-        }
-      }
-      return categories;
-    }, [view.elements, project.signalTypes]);
-
-    // The element layer depends only on the elements and their state, not on
-    // the viewport: zooming and panning then only change the viewBox, and
-    // React does not walk thousands of elements per step (STK-8).
-    const layer = useMemo(
-      () =>
-        sorted.map((element: DiagramElement) =>
-          hidden?.has(element.id) ? null : (
-            <ElementShape
-              key={element.id}
-              element={element}
-              selected={selection?.has(element.id) ?? false}
-              signalCategory={signalCategories.get(element.id)}
-              display={displays?.[element.id]}
-            />
-          ),
-        ),
-      [sorted, hidden, selection, signalCategories, displays],
-    );
 
     const toPointer = (event: PointerEvent<SVGSVGElement>): DiagramPointer => {
       const rect = svgRef.current!.getBoundingClientRect();
@@ -499,12 +464,70 @@ export const DiagramView = forwardRef<DiagramViewHandle, Props>(
             fill="url(#grid-dots)"
           />
         )}
-        {layer}
+        {view && (
+          <ViewLayer
+            project={project}
+            view={view}
+            selection={selection}
+            hidden={hidden}
+            displays={displays}
+          />
+        )}
         {children}
       </svg>
     );
   },
 );
+
+// The elements of one view. Memoised on the elements and their state, not
+// the viewport: zooming and panning then only change the viewBox, and React
+// does not walk thousands of elements per step (STK-8).
+export const ViewLayer = memo(function ViewLayer({
+  project,
+  view,
+  selection,
+  hidden,
+  displays,
+}: {
+  project: Project;
+  view: StationView;
+  selection?: ReadonlySet<string>;
+  hidden?: ReadonlySet<string>;
+  displays?: Record<string, ElementDisplay>;
+}) {
+  const sorted = useMemo(
+    () => [...view.elements].sort((a, b) => LAYER[a.kind] - LAYER[b.kind]),
+    [view.elements],
+  );
+  const signalCategories = useMemo(() => {
+    const categories = new Map<string, 'main' | 'distant' | 'shunting'>();
+    for (const element of view.elements) {
+      if (element.kind === 'signal') {
+        categories.set(
+          element.id,
+          findSignalType(project.signalTypes, element.signalTypeId)?.category ??
+            'main',
+        );
+      }
+    }
+    return categories;
+  }, [view.elements, project.signalTypes]);
+  return (
+    <>
+      {sorted.map((element: DiagramElement) =>
+        hidden?.has(element.id) ? null : (
+          <ElementShape
+            key={element.id}
+            element={element}
+            selected={selection?.has(element.id) ?? false}
+            signalCategory={signalCategories.get(element.id)}
+            display={displays?.[element.id]}
+          />
+        ),
+      )}
+    </>
+  );
+});
 
 // Viewport that shows all elements of a view, with a margin.
 export const fitViewport = (

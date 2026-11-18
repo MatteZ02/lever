@@ -5,6 +5,7 @@ import {create} from 'zustand';
 import {DiagramElement} from '../../../model/elements';
 import {Project} from '../../../model/project';
 import {ProjectState} from '../../../shared/projectApi';
+import {parseWindowTarget} from '../../../shared/windowTarget';
 
 export const UNDO_LIMIT = 100;
 
@@ -34,6 +35,14 @@ export type Viewport = {
 
 export const DEFAULT_VIEWPORT: Viewport = {x: -2, y: -2, scale: 24};
 
+// activeViewId of the full layout view (FULL-1); its arrangement is
+// activeArrangementId.
+export const FULL_VIEW = '__full';
+
+// Viewport key of an arrangement in the full view.
+export const fullViewportKey = (arrangementId: string) =>
+  `full:${arrangementId}`;
+
 // Identifies this window to the main process (ProjectState.editedBy).
 export const CLIENT_ID = `window-${Math.random().toString(36).slice(2, 10)}`;
 
@@ -51,6 +60,8 @@ type ProjectStore = {
   mode: Mode;
   testMode: boolean;
   activeViewId: string | null;
+  // Which arrangement the full view shows (null: the first).
+  activeArrangementId: string | null;
   selection: string[];
   tool: Tool;
   clipboard: DiagramElement[];
@@ -69,6 +80,7 @@ export const useProjectStore = create<ProjectStore>()(() => ({
   mode: 'operate',
   testMode: false,
   activeViewId: null,
+  activeArrangementId: null,
   selection: [],
   tool: {kind: 'select'},
   clipboard: [],
@@ -79,12 +91,25 @@ export const useProjectStore = create<ProjectStore>()(() => ({
 const get = useProjectStore.getState;
 const set = useProjectStore.setState;
 
+// The station shown; undefined in the full layout view.
 export const activeView = () => {
   const {project, activeViewId} = get();
+  if (activeViewId === FULL_VIEW) {
+    return undefined;
+  }
   return (
     project?.views.find((view) => view.id === activeViewId) ?? project?.views[0]
   );
 };
+
+export const isFullView = () => get().activeViewId === FULL_VIEW;
+
+export const setActiveArrangement = (arrangementId: string) =>
+  set({
+    activeViewId: FULL_VIEW,
+    activeArrangementId: arrangementId,
+    selection: [],
+  });
 
 const send = (project: Project) => {
   void window.lever.project.update(project, CLIENT_ID).then((result) => {
@@ -184,10 +209,28 @@ export const copySelection = (): void => {
   }
 };
 
+// What a window opened with "Open in new window" shows first (VIEW-2).
+const initialTarget = () =>
+  parseWindowTarget(decodeURIComponent(window.location.hash.slice(1)));
+
 // Keeps the store in sync with the main process. Call once.
 export const bindProjectStore = (): (() => void) => {
   const apply = (state: ProjectState) => {
     const current = get();
+    if (current.document === null) {
+      const target = initialTarget();
+      if (
+        target?.kind === 'view' &&
+        state.project.views.some((view) => view.id === target.viewId)
+      ) {
+        set({activeViewId: target.viewId});
+      } else if (target?.kind === 'full') {
+        set({
+          activeViewId: FULL_VIEW,
+          activeArrangementId: target.arrangementId,
+        });
+      }
+    }
     const fromElsewhere =
       state.origin === 'file' ||
       (state.origin === 'edit' && state.editedBy !== CLIENT_ID);
@@ -203,11 +246,11 @@ export const bindProjectStore = (): (() => void) => {
         // on whole projects.
         past: sameProject ? current.past : [],
         future: sameProject ? current.future : [],
-        activeViewId: state.project.views.some(
-          (view) => view.id === current.activeViewId,
-        )
-          ? current.activeViewId
-          : (state.project.views[0]?.id ?? null),
+        activeViewId:
+          get().activeViewId === FULL_VIEW ||
+          state.project.views.some((view) => view.id === get().activeViewId)
+            ? get().activeViewId
+            : (state.project.views[0]?.id ?? null),
         selection: keepExisting(state.project, current.selection),
         mode: state.readOnly ? 'operate' : current.mode,
       });
