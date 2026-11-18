@@ -258,7 +258,7 @@ export const strings = {
     redo: 'Redo',
     rotate: 'Rotate (R)',
     delete: 'Delete',
-    fit: 'Show all',
+    fit: 'Fit to view',
     testMode: 'Test outputs',
     testModeHelp:
       'Test mode: click a turnout, signal or accessory to step through its positions. Commands are sent to the layout.',
