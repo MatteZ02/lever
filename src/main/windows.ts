@@ -26,6 +26,10 @@ export type WindowManagerOptions = {
   // plain windows have no menu, settings or editor of their own.
   onCloseMain: () => void;
   isQuitting: () => boolean;
+  // Something about the windows changed (opened, closed, moved, resized,
+  // other station shown): save them, so they come back even if Lever is
+  // not quit normally.
+  onChange?: () => void;
 };
 
 // Part of a window on screen, so a window saved on a monitor that is gone
@@ -109,7 +113,19 @@ export class WindowManager {
     window.on('closed', () => {
       this.targets.delete(id);
       this.plain.delete(id);
+      // Windows closed by quitting stay in the saved list.
+      if (!this.options.isQuitting()) {
+        this.options.onChange?.();
+      }
     });
+    for (const change of [
+      'moved',
+      'resized',
+      'maximize',
+      'unmaximize',
+    ] as const) {
+      window.on(change as 'moved', () => this.options.onChange?.());
+    }
     window.once('ready-to-show', () => {
       if (!this.options.hidden) {
         if (placement?.maximized) {
@@ -118,6 +134,7 @@ export class WindowManager {
         window.show();
       }
       this.options.onReady?.(window, first);
+      this.options.onChange?.();
     });
 
     const hash = encodeURIComponent(formatWindowHash(target, plain));
@@ -134,6 +151,7 @@ export class WindowManager {
   setTarget(webContentsId: number, target: string): void {
     if (this.targets.has(webContentsId)) {
       this.targets.set(webContentsId, target);
+      this.options.onChange?.();
     }
   }
 
@@ -160,7 +178,7 @@ export class WindowManager {
 
   // Reopens saved windows, or one default window.
   restore(saved: SavedWindow[]): void {
-    if (saved.length === 0 || this.options.hidden) {
+    if (saved.length === 0) {
       this.open();
       return;
     }

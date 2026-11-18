@@ -321,6 +321,7 @@ const start = async (): Promise<void> => {
     hidden: uiScript !== undefined,
     isQuitting: () => stopping,
     onCloseMain: () => app.quit(),
+    onChange: saveWindowsSoon,
     onReady: (window, first) => {
       if (uiScript && first) {
         void runUiScript(window, uiScript);
@@ -331,6 +332,27 @@ const start = async (): Promise<void> => {
 };
 
 let stopping = false;
+// The open windows are saved shortly after any change (and at quit), so they
+// are reopened even if Lever is ended without quitting (e.g. stopping the
+// development server). UI automation saves into its own user data folder.
+const WINDOWS_SAVE_DELAY_MS = 1000;
+let windowsSaveTimer: ReturnType<typeof setTimeout> | null = null;
+function saveWindowsSoon(): void {
+  if (windowsSaveTimer) {
+    clearTimeout(windowsSaveTimer);
+  }
+  windowsSaveTimer = setTimeout(() => {
+    windowsSaveTimer = null;
+    if (stopping) {
+      return;
+    }
+    settings = {...settings, windows: windows.snapshot()};
+    void saveSettings(settings).catch((error: unknown) =>
+      console.error('Windows not saved:', error),
+    );
+  }, WINDOWS_SAVE_DELAY_MS);
+}
+
 app.on('before-quit', (event) => {
   if (stopping) {
     return;
@@ -345,11 +367,12 @@ app.on('before-quit', (event) => {
       return;
     }
     stopping = true;
-    // Reopen the same windows next time (not for UI automation).
-    if (!uiScript) {
-      settings = {...settings, windows: windows.snapshot()};
+    if (windowsSaveTimer) {
+      clearTimeout(windowsSaveTimer);
     }
-    void (uiScript ? Promise.resolve() : saveSettings(settings))
+    // Reopen the same windows next time.
+    settings = {...settings, windows: windows.snapshot()};
+    void saveSettings(settings)
       .catch((error: unknown) => console.error('Settings not saved:', error))
       .then(() => turnoutPositions.flush())
       .then(() => engine.stop())
