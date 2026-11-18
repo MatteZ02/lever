@@ -126,16 +126,16 @@ export class ConnectionManager {
   }
 
   // Changes the broadcast flags, e.g. when the project's feedback sources
-  // change (LOAD-1). Sent at once when connected, and on every reconnect.
+  // change (LOAD-1). Sent at once whenever a socket is open — also while
+  // still connecting, because the login datagram may already have carried
+  // the old flags — and again on every reconnect.
   setBroadcastFlags(flags: number): void {
     const checked = checkFlags(flags);
     if (checked === this.broadcastFlags) {
       return;
     }
     this.broadcastFlags = checked;
-    if (this.state === 'connected') {
-      this.sendNow([lanSetBroadcastFlags(checked)]);
-    }
+    this.sendNow([lanSetBroadcastFlags(checked)]);
   }
 
   getBroadcastFlags(): number {

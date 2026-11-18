@@ -191,6 +191,18 @@ describe('broadcast flags', () => {
     );
   });
 
+  it('sends flags changed while still waiting for the first reply', async () => {
+    // Given the login datagram went out with the old flags
+    const {manager, current} = setup();
+    manager.connect('192.168.0.111');
+    await settle();
+    expect(current().takeSent()).toEqual([SET_FLAGS_AND_STATUS]);
+    // When the flags change before the central unit has answered
+    manager.setBroadcastFlags(0x00000003);
+    // Then the new flags are sent at once, not only after a reconnect
+    expect(current().takeSent()).toEqual(['08 00 50 00 03 00 00 00']);
+  });
+
   it('refuses the all-locos flag', () => {
     const {manager} = setup();
     expect(() => manager.setBroadcastFlags(0x00010001)).toThrow();
