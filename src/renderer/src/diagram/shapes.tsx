@@ -5,7 +5,7 @@
 // Every shape draws an invisible, wider hit area with data-element-id, so
 // clicks are easy at any zoom. Live state (positions, aspects, occupancy) is
 // optional: the editor draws plain geometry.
-import {memo} from 'react';
+import {CSSProperties, memo} from 'react';
 import {
   BufferStop,
   DiagramElement,
@@ -205,56 +205,105 @@ const TurnoutShape = ({
   const legsPath = ports
     .map((port) => `M${centre.x} ${centre.y} L${port.at.x} ${port.at.y}`)
     .join(' ');
+  const isSlip = turnout.type === 'singleSlip' || turnout.type === 'doubleSlip';
+  const switchable = geometry.positions.length > 0;
+  // The set leg (or slip paths) is drawn as plain track and again in the
+  // turnout colour on top; patterns let the plain track show through.
+  const setStroke = {
+    ...trackStroke,
+    stroke: color.trackFree,
+    strokeWidth: diagramStroke.track,
+  };
+  const pointsStroke = {
+    ...trackStroke,
+    stroke: waiting ? color.turnoutUnconfirmed : color.turnoutSet,
+    strokeWidth: diagramStroke.track,
+    // Dots: commanded, waiting for the report. Fine dashes: only reported at
+    // start-up, not seen switching (LOOK-3).
+    strokeDasharray: waiting
+      ? diagramDash.turnoutUnconfirmed
+      : status === 'reported'
+        ? diagramDash.turnoutReported
+        : undefined,
+  };
+  const unsetStroke = {
+    ...trackStroke,
+    stroke: color.trackInactiveLeg,
+    strokeWidth: diagramStroke.inactiveLeg,
+  };
+  // Yellow: the leg the turnout is set to, its whole length (not the tip
+  // side, which every position uses), once the position is known. Slips:
+  // their set paths (X = straight, curves = diverging).
+  const setLegs = ports.filter(
+    (port) => port.name !== 'tip' && activePorts.has(port.name),
+  );
 
   return (
     <g>
       {selected && <Halo d={legsPath} />}
-      {ports.map((port) => {
-        const active = activePorts.has(port.name);
-        const start = active ? centre : along(centre, port.direction, GAP);
-        return (
-          <line
-            key={port.name}
-            x1={start.x}
-            y1={start.y}
-            x2={port.at.x}
-            y2={port.at.y}
-            style={{
-              ...trackStroke,
-              stroke: !active
-                ? color.trackInactiveLeg
-                : waiting
-                  ? color.turnoutUnconfirmed
-                  : color.trackFree,
-              strokeWidth: active
-                ? diagramStroke.track
-                : diagramStroke.inactiveLeg,
-              // Dots: commanded, waiting for the report. Fine dashes: only
-              // reported at start-up, not seen switching (LOOK-3).
-              strokeDasharray: !active
-                ? undefined
-                : waiting
-                  ? diagramDash.turnoutUnconfirmed
-                  : status === 'reported'
-                    ? diagramDash.turnoutReported
-                    : undefined,
-            }}
-          />
-        );
-      })}
-      {(turnout.type === 'singleSlip' || turnout.type === 'doubleSlip') && (
-        <SlipMarks turnout={turnout} />
+      {isSlip ? (
+        // Slips are drawn per path, since every leg is used in both positions:
+        // straight = the two lines crossing at the centre, diverging = curves
+        // that pass beside the centre. Paths not set are thin underneath.
+        <SlipPaths
+          turnout={turnout}
+          display={display}
+          setStroke={setStroke}
+          unsetStroke={unsetStroke}
+        />
+      ) : (
+        ports.map((port) => {
+          const active = activePorts.has(port.name);
+          const start = active ? centre : along(centre, port.direction, GAP);
+          return (
+            <line
+              key={port.name}
+              x1={start.x}
+              y1={start.y}
+              x2={port.at.x}
+              y2={port.at.y}
+              style={active ? setStroke : unsetStroke}
+            />
+          );
+        })
+      )}
+      {/* Dotted while commanded, fine dashes when only reported. */}
+      {switchable && (
+        <>
+          <g>
+            {isSlip ? (
+              <SlipPaths
+                turnout={turnout}
+                display={display}
+                setStroke={pointsStroke}
+                unsetStroke={unsetStroke}
+                onlySet
+              />
+            ) : (
+              setLegs.map((port) => (
+                <line
+                  key={port.name}
+                  x1={centre.x}
+                  y1={centre.y}
+                  x2={port.at.x}
+                  y2={port.at.y}
+                  style={pointsStroke}
+                />
+              ))
+            )}
+          </g>
+        </>
       )}
       {/* Switch point: a dot, hollow and coloured for manual turnouts. */}
       {geometry.positions.length > 0 && (
         <circle
           cx={centre.x}
           cy={centre.y}
-          r={manual ? 0.16 : 0.11}
+          r={manual ? 0.2 : isSlip ? 0.13 : 0.17}
           style={{
-            fill: manual ? 'none' : color.trackFree,
-            stroke: manual ? color.turnoutManual : 'none',
-            strokeWidth: 0.06,
+            fill: manual ? color.diagramBackground : color.turnoutSet,
+            stroke: manual ? color.turnoutManual : color.diagramBackground,
+            strokeWidth: manual ? 0.08 : 0.05,
           }}
         />
       )}
@@ -293,27 +342,62 @@ const TurnoutShape = ({
   );
 };
 
-// Small dots beside the crossing point mark a slip (as on the Z21 panel).
-const SlipMarks = ({turnout}: {turnout: Turnout}) => {
-  const d = turnout.orientation;
-  const sides =
-    turnout.type === 'doubleSlip'
-      ? [rotateDirection(d, 2), rotateDirection(d, -2)]
-      : [rotateDirection(d, 2)];
+type Stroke = CSSProperties;
+
+// The paths through a slip: set paths in the turnout style, others thin.
+const SlipPaths = ({
+  turnout,
+  display,
+  setStroke,
+  unsetStroke,
+  onlySet = false,
+}: {
+  turnout: Turnout;
+  display?: TurnoutDisplay;
+  setStroke: Stroke;
+  unsetStroke: Stroke;
+  // Only the set paths (for the highlighted points).
+  onlySet?: boolean;
+}) => {
+  const geometry = turnoutGeometry(turnout.type, turnout.orientation);
+  const at = new Map(turnoutPorts(turnout).map((port) => [port.name, port.at]));
+  const centre = turnout.at;
+  const isSet = (positions: string[]) =>
+    !display || (!!display.position && positions.includes(display.position));
+  const paths = geometry.transitions.map((transition) => {
+    const from = at.get(transition.from)!;
+    const to = at.get(transition.to)!;
+    // A diverging path bends at the centre; as a curve it passes beside it,
+    // so the two slip curves never look like the straight crossing.
+    const d = transition.diverging
+      ? `M${from.x} ${from.y} Q${centre.x} ${centre.y} ${to.x} ${to.y}`
+      : `M${from.x} ${from.y} L${to.x} ${to.y}`;
+    return {
+      key: `${transition.from}-${transition.to}`,
+      d,
+      set: isSet(transition.positions),
+    };
+  });
   return (
     <>
-      {sides.map((side) => {
-        const p = along(turnout.at, side, 0.32);
-        return (
-          <circle
-            key={side}
-            cx={p.x}
-            cy={p.y}
-            r={0.08}
-            style={{fill: color.trackFree}}
+      {paths
+        .filter((path) => !path.set && !onlySet)
+        .map((path) => (
+          <path
+            key={path.key}
+            d={path.d}
+            style={{...unsetStroke, fill: 'none'}}
           />
-        );
-      })}
+        ))}
+      {paths
+        .filter((path) => path.set)
+        .map((path) => (
+          <path
+            key={path.key}
+            d={path.d}
+            style={{...setStroke, fill: 'none'}}
+          />
+        ))}
     </>
   );
 };

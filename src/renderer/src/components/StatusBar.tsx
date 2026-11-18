@@ -63,22 +63,77 @@ export const ConnectionIndicator = () => {
   );
 };
 
+// Drawn, not a font character: the power symbol is missing from many fonts.
+const PowerIcon = () => (
+  <svg
+    className="track-status-power-icon"
+    viewBox="0 0 24 24"
+    aria-hidden
+    focusable="false"
+  >
+    <path d="M12 3v9" />
+    <path d="M6.6 6.6a7.6 7.6 0 1 0 10.8 0" />
+  </svg>
+);
+
+// While the track is stopped or off, the status itself is the resume button
+// (as in Throttle), right beside STOP, so it is found at once. STOP never
+// changes. Changes made by other devices appear here when the central unit
+// reports them.
 export const TrackStatusChip = () => {
   const status = useEngineStore((state) => state.trackStatus);
-  return (
-    <div
-      className={`track-status track-status--${status}`}
-      style={{backgroundColor: trackStatusColor[status]}}
-      role="status"
-      aria-live="assertive"
-    >
+  const connected = useEngineStore(
+    (state) => state.connection.state === 'connected',
+  );
+  const canRestore =
+    connected &&
+    (status === 'emergencyStop' ||
+      status === 'powerOff' ||
+      status === 'shortCircuit');
+  const content = (
+    <>
       {status === 'shortCircuit' && (
         <span className="track-status-icon" aria-hidden>
           ⚠
         </span>
       )}
-      {strings.trackStatus[status]}
-    </div>
+      <span className="track-status-text">
+        {strings.trackStatus[status]}
+        {canRestore && (
+          <span className="track-status-action">
+            <PowerIcon />
+            {status === 'emergencyStop'
+              ? strings.stop.clickToResume
+              : strings.stop.clickToPowerOn}
+          </span>
+        )}
+      </span>
+    </>
+  );
+  const className = `track-status track-status--${status}`;
+  const style = {backgroundColor: trackStatusColor[status]};
+  if (!canRestore) {
+    return (
+      <div
+        className={className}
+        style={style}
+        role="status"
+        aria-live="assertive"
+      >
+        {content}
+      </div>
+    );
+  }
+  return (
+    <button
+      type="button"
+      className={`${className} track-status--action`}
+      style={style}
+      aria-live="assertive"
+      onClick={() => sendCommand({type: 'setTrackPower', on: true})}
+    >
+      {content}
+    </button>
   );
 };
 

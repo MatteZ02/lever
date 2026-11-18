@@ -1,6 +1,8 @@
 // Notices from the engine (e.g. a command the central unit cannot do). Shown
-// with text and an icon; dismissed with a button, never with Esc (Esc is
-// STOP).
+// with text and an icon; they fade out by themselves after a while (the
+// diagram keeps its own marker, e.g. "!" on a failed turnout), or are
+// dismissed with a button, never with Esc (Esc is STOP). Hovering pauses the
+// fade.
 import {findElement} from '../../../model/validation';
 import {EngineNotice} from '../../../shared/engineApi';
 import {strings} from '../../../shared/strings';
@@ -35,6 +37,9 @@ const noticeText = (notice: EngineNotice): string => {
   }
 };
 
+// How long a notice stays before it has faded out.
+const NOTICE_SHOWN_MS = 10000;
+
 export const Notices = () => {
   const notices = useEngineStore((state) => state.notices);
   const dismiss = useEngineStore((state) => state.dismissNotice);
@@ -44,7 +49,12 @@ export const Notices = () => {
   return (
     <div className="notices" role="status" aria-live="polite">
       {notices.map((notice) => (
-        <div key={notice.time} className="notice">
+        <div
+          key={notice.time}
+          className="notice fading"
+          style={{animationDuration: `${NOTICE_SHOWN_MS}ms`}}
+          onAnimationEnd={() => dismiss(notice.time)}
+        >
           <span aria-hidden>ⓘ</span>
           <span className="notice-text">{noticeText(notice)}</span>
           <button

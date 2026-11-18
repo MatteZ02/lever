@@ -54,6 +54,8 @@ export type ColorTokens = {
   turnoutUnknown: string;
   turnoutUnconfirmed: string;
   turnoutManual: string;
+  // The switch point of a turnout and the start of its set leg(s).
+  turnoutSet: string;
   connectorUnpaired: string;
   areaLevel1: string;
   areaLevel2: string;
@@ -118,6 +120,7 @@ export const lightColors: ColorTokens = {
   turnoutUnknown: palette.violet600,
   turnoutUnconfirmed: palette.amber700,
   turnoutManual: palette.cyan700,
+  turnoutSet: palette.yellow700,
   connectorUnpaired: palette.grey500,
   areaLevel1: palette.grey500,
   areaLevel2: palette.blue500,
@@ -180,6 +183,7 @@ export const darkColors: ColorTokens = {
   turnoutUnknown: palette.violet300,
   turnoutUnconfirmed: palette.amber300,
   turnoutManual: palette.cyan300,
+  turnoutSet: palette.yellow300,
   connectorUnpaired: palette.grey400,
   areaLevel1: palette.grey500,
   areaLevel2: palette.blue300,

@@ -10,7 +10,9 @@
 // | Route being set                  | trackRouteSetting     | the same dashes, moving (animated)         |
 // | Route locked (Level 3, later)    | trackRouteLocked      | dashes plus a thin solid centre line       |
 // | Route broken (RTE-6c)            | trackRouteBroken      | short dash-dot, with a "!" marker          |
+// | Turnout set leg (position known) | turnoutSet            | the set leg (not the tip side), full length|
 // | Turnout inactive leg (LOOK-5)    | trackInactiveLeg      | interrupted near the switch point, dimmed  |
+// | Slip position                    | turnoutSet            | X = straight, two curves = diverging       |
 // | Turnout position unknown         | turnoutUnknown        | both legs interrupted, "?" marker          |
 // | Turnout commanded, unconfirmed   | turnoutUnconfirmed    | new leg drawn dotted until confirmed       |
 // | Turnout only reported at start   | trackFree             | active leg in fine dashes                  |

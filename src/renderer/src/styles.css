@@ -101,6 +101,47 @@ body {
   justify-content: center;
 }
 
+.track-status-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+}
+
+.track-status-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.track-status-power-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+button.track-status--action {
+  border: 2px solid var(--color-textOnStatus);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button.track-status--action:hover {
+  filter: brightness(1.12);
+}
+
+button.track-status--action:focus-visible {
+  outline: 3px solid var(--color-focusRing);
+  outline-offset: 2px;
+}
+
 .track-status--shortCircuit {
   color: var(--color-textOnShortCircuit);
   font-size: 22px;
@@ -338,6 +379,45 @@ select {
   flex: 1;
 }
 
+/* Notices and hints fade out by themselves (the duration is set inline);
+   the element is removed when the animation ends. Hover pauses it. */
+.fading {
+  animation-name: fade-out;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.fading:hover {
+  animation-play-state: paused;
+}
+
+@keyframes fade-out {
+  0%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Without motion: shown in full, then gone at the same time. */
+@keyframes vanish {
+  0%,
+  99.9% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fading {
+    animation-name: vanish;
+  }
+}
+
 /* --- Workspace layout ---------------------------------------------------- */
 
 .small {
@@ -565,6 +645,13 @@ select {
 
 .tool-button:disabled {
   opacity: 0.5;
+}
+
+/* Touchscreens: larger targets for fingers. */
+@media (pointer: coarse) {
+  .tool-button {
+    min-height: 44px;
+  }
 }
 
 .toolbox-help {

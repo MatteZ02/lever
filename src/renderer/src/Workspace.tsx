@@ -2,7 +2,7 @@
 // diagram, and in edit mode the toolbox, properties and problem/address
 // panels. Settings, the accessory test panel and the protocol log open in a
 // side drawer.
-import {useCallback, useDeferredValue, useState} from 'react';
+import {useCallback, useDeferredValue, useEffect, useState} from 'react';
 import {deleteElements, rotateElements} from '../../model/editing';
 import {GridPoint} from '../../model/geometry';
 import {createView} from '../../model/project';
@@ -22,6 +22,7 @@ import {useEditorKeys} from './editor/useEditorKeys';
 import {AreasPanel} from './operate/AreasPanel';
 import {FeedbackMonitor} from './operate/FeedbackMonitor';
 import {OperateCanvas} from './operate/OperateCanvas';
+import {sendCommand} from './store/engineStore';
 import {
   activeView,
   edit,
@@ -54,6 +55,9 @@ const canvasSize = () => {
   };
 };
 
+// How long a hint stays before it has faded out.
+const HINT_SHOWN_MS = 6000;
+
 export const Workspace = () => {
   const project = useProjectStore((state) => state.project);
   const document = useProjectStore((state) => state.document);
@@ -79,6 +83,11 @@ export const Workspace = () => {
   }, []);
   const rotatePlacement = useCallback(() => setPlaceRotation((r) => r + 1), []);
   useEditorKeys({drawing, setDrawing, rotatePlacement, fit});
+  // The engine refreshes the positions of what is on screen.
+  const shownViewId = view?.id ?? null;
+  useEffect(() => {
+    sendCommand({type: 'showView', viewId: shownViewId});
+  }, [shownViewId]);
 
   // Validation runs at low priority: the diagram updates at once after an
   // edit, the problem list a moment later (STK-8, large layouts).
@@ -250,7 +259,13 @@ export const Workspace = () => {
               <OperateCanvas project={project} view={view} />
             ))}
           {hint && (
-            <div className="hint" role="status">
+            <div
+              key={hint}
+              className="hint fading"
+              role="status"
+              style={{animationDuration: `${HINT_SHOWN_MS}ms`}}
+              onAnimationEnd={() => setHint(null)}
+            >
               <span>{hint}</span>
               <button
                 type="button"

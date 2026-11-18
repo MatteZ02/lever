@@ -30,7 +30,7 @@ export const strings = {
       routesNotImported: (count: number) =>
         `${count} route button${count === 1 ? '' : 's'} not imported: Lever calculates routes itself (Level 2).`,
       signalsAssumed: (count: number) =>
-        `${count} signal${count === 1 ? '' : 's'} imported as two-aspect main signals, with the Z21 app’s first state as Stop. Test them.`,
+        `${count} signal${count === 1 ? '' : 's'} imported as two-aspect main signals, with the Z21 app’s first state as Proceed. Test them.`,
     },
     noBackups:
       'Backups exist only for a layout saved as a file and open for editing.',
@@ -43,6 +43,14 @@ export const strings = {
     migrated: (version: number) =>
       `This layout was made with an older version of Lever (format ${version}). It has been updated; the original is kept in the backups.`,
     saveBeforeQuit: 'Save the new layout before closing?',
+    saveBeforeReplace: 'Save the new layout before opening another one?',
+    unsavedDetail:
+      'It has not been saved to a file yet. If you do not save it, it is lost.',
+    saveFailedClose: 'The latest changes to the layout could not be saved.',
+    saveFailedCloseDetail:
+      'If you continue without saving, these changes are lost.',
+    tryAgain: 'Try again',
+    discardChanges: 'Discard changes',
     save: 'Save…',
     dontSave: 'Don’t save',
     cancel: 'Cancel',
@@ -121,6 +129,9 @@ export const strings = {
     powerOn: 'Track power on',
     powerOff: 'Track power off',
     resume: 'Resume',
+    // Second line of the track status while stopped: it is the resume button.
+    clickToResume: 'Click to resume',
+    clickToPowerOn: 'Click to switch power on',
   },
 
   settings: {
@@ -217,6 +228,10 @@ export const strings = {
     deleteView: 'Delete this station',
     confirmDeleteView: (name: string) =>
       `Delete the station “${name}” and everything drawn in it?`,
+    replaceTitle: 'Replace element',
+    confirmReplace: (what: string) =>
+      `Replace ${what}? Its name, addresses and settings are removed. Undo (Ctrl+Z) brings them back.`,
+    replace: 'Replace',
     newViewName: 'New station',
     hints: {
       notOnTrack: 'Place this on a track.',
@@ -335,6 +350,9 @@ export const strings = {
     confirmationReport: 'Only when the central unit reports it',
     confirmationAssume: 'Also after a timeout without report',
     confirmTimeout: 'Timeout (ms)',
+    positionRefresh: 'Ask for turnout positions every (s)',
+    positionRefreshHelp:
+      '0 = off. For central units that do not report turnouts switched by other programs (DR5000: WinDigipet over USB). Lever then asks for the positions of the station on screen this often, and at once when you act.',
     feedbackSources: 'Feedback buses used',
     blockReleaseDelay: 'Default block release delay (ms)',
     autoSignals: 'Set signals along routes automatically',
