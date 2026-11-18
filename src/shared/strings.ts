@@ -283,6 +283,10 @@ export const strings = {
     unsaved: 'Saving…',
     saved: 'Saved',
     notSavedYet: 'Not saved yet',
+    changeNotSaved:
+      'That change could not be made: it would have damaged the layout. Nothing was changed. (Details in the developer console.)',
+    changeReadOnly:
+      'That change was not saved: this layout is open read-only (it is being edited elsewhere).',
     migrated: (version: number) => `Updated from format ${version}`,
   },
 

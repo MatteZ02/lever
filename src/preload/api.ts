@@ -33,6 +33,7 @@ export type LeverApi = {
     get(): Promise<ProjectState>;
     // Sends the edited project; the main process validates and autosaves it.
     // `clientId` identifies the window, so it can recognise its own edits.
+    // A refused update returns the reason: 'readOnly' or 'invalid'.
     update(
       project: Project,
       clientId: string,

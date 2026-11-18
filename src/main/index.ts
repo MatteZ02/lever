@@ -269,7 +269,11 @@ const registerIpc = (): void => {
           ),
         };
       } catch (error) {
-        return {error: String(error)};
+        // The window shows a short message; the details are for developers.
+        console.error('Project update refused:', error);
+        return {
+          error: projects.document.get().readOnly ? 'readOnly' : 'invalid',
+        };
       }
     },
   );

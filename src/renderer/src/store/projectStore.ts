@@ -3,8 +3,9 @@
 // here is sent there (validated, autosaved) and kept in the undo history.
 import {create} from 'zustand';
 import {DiagramElement} from '../../../model/elements';
-import {Project} from '../../../model/project';
+import {Project, projectSchema} from '../../../model/project';
 import {ProjectState} from '../../../shared/projectApi';
+import {strings} from '../../../shared/strings';
 import {parseWindowTarget} from '../../../shared/windowTarget';
 
 export const UNDO_LIMIT = 100;
@@ -111,12 +112,28 @@ export const setActiveArrangement = (arrangementId: string) =>
     selection: [],
   });
 
+// A change the main process refused is not kept: the window goes back to
+// the last accepted project, so it never shows (or builds on) a layout that
+// is not saved.
 const send = (project: Project) => {
   void window.lever.project.update(project, CLIENT_ID).then((result) => {
-    if ('error' in result) {
-      console.error('Project update refused:', result.error);
-      set({hint: result.error});
+    if (!('error' in result)) {
+      return;
     }
+    const accepted = get().document?.project;
+    set((state) => ({
+      hint:
+        result.error === 'readOnly'
+          ? strings.editor.changeReadOnly
+          : strings.editor.changeNotSaved,
+      ...(accepted && state.project === project
+        ? {
+            project: accepted,
+            revision: state.revision + 1,
+            past: state.past.filter((p) => p !== project),
+          }
+        : {}),
+    }));
   });
 };
 
@@ -128,6 +145,14 @@ export const edit = (change: (project: Project) => Project): void => {
   }
   const next = change(project);
   if (next === project) {
+    return;
+  }
+  // Caught here, before it is shown: an edit that would make the layout
+  // invalid (a bug in an editing tool) is dropped with a short message.
+  const checked = projectSchema.safeParse(next);
+  if (!checked.success) {
+    console.error('Edit refused, invalid layout:', checked.error.issues);
+    set({hint: strings.editor.changeNotSaved});
     return;
   }
   set((state) => ({

@@ -573,6 +573,9 @@ select {
   align-items: center;
   gap: 12px;
   max-width: 80%;
+  /* Long messages scroll instead of covering the diagram. */
+  max-height: 30%;
+  overflow: auto;
   padding: 8px 12px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
