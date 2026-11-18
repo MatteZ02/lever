@@ -47,7 +47,9 @@ export const stationViewSchema = z.object({
 });
 export type StationView = z.infer<typeof stationViewSchema>;
 
-// Full layout view (Phase 4): where each station panel goes and its scale.
+// Full layout view (FULL-2, FULL-5): where each station panel goes and its
+// scale (src/model/arrangement.ts). Panel x/y: where the view's grid origin
+// lies in full-view units.
 export const arrangementSchema = z.object({
   id: idSchema,
   name: z.string().min(1).max(100),
@@ -63,6 +65,7 @@ export const arrangementSchema = z.object({
     .default([]),
   showConnectorLines: z.boolean().default(true),
 });
+export type Arrangement = z.infer<typeof arrangementSchema>;
 
 // Route endpoints and fixed via points are element ids (RTE-1, RTE-3).
 export const savedRouteSchema = z.object({

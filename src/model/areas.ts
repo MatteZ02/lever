@@ -3,7 +3,7 @@
 import {DiagramElement} from './elements';
 import {Direction, GridPoint} from './geometry';
 import {AutomationArea, AutomationLevel, Project, StationView} from './project';
-import {buildViewTopology, TopologyEdge} from './topology';
+import {buildViewTopology, edgeElementId, TopologyEdge} from './topology';
 
 // The area an element belongs to: its own, else its view's default area
 // (MIX-1). Undefined if neither exists.
@@ -39,9 +39,7 @@ export const areaBoundaries = (
   const topology = buildViewTopology(view);
   const byId = new Map(view.elements.map((element) => [element.id, element]));
   const areaIdOf = (edge: TopologyEdge) => {
-    const element = byId.get(
-      edge.kind === 'track' ? edge.trackId : edge.turnoutId,
-    );
+    const element = byId.get(edgeElementId(edge));
     return element?.areaId ?? view.areaId;
   };
   const levelOfArea = (id: string) =>

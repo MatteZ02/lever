@@ -15,8 +15,9 @@ import {
   GridPoint,
   pointKey,
 } from './geometry';
+import {allConnectors, partnerOf} from './connectors';
 import {turnoutGeometry, turnoutPorts} from './ports';
-import {StationView} from './project';
+import {Project, StationView} from './project';
 
 export type NodeId = string;
 
@@ -61,7 +62,19 @@ export type TurnoutEdge = {
   length: number;
 };
 
-export type TopologyEdge = TrackEdge | TurnoutEdge;
+// Joins two paired station connectors (FULL-3): the line between them is
+// not drawn, but routes run through it. Only in the project topology.
+export type LinkEdge = {
+  kind: 'link';
+  id: string;
+  viewId: string;
+  from: NodeId;
+  to: NodeId;
+  connectorIds: [string, string];
+  length: number;
+};
+
+export type TopologyEdge = TrackEdge | TurnoutEdge | LinkEdge;
 
 export type Topology = {
   nodes: Map<NodeId, TopologyNode>;
@@ -131,6 +144,13 @@ export const buildViewTopology = (view: StationView): Topology => {
     }
   }
 
+  return indexTopology(nodes, edges);
+};
+
+const indexTopology = (
+  nodes: Map<NodeId, TopologyNode>,
+  edges: TopologyEdge[],
+): Topology => {
   const edgesAt = new Map<NodeId, string[]>();
   const edgeById = new Map<string, TopologyEdge>();
   for (const edge of edges) {
@@ -142,6 +162,40 @@ export const buildViewTopology = (view: StationView): Topology => {
     }
   }
   return {nodes, edges, edgesAt, edgeById};
+};
+
+// The whole layout as one graph (FULL-3): every view's topology, joined
+// through paired station connectors. Node ids include the view, so views
+// never share nodes by accident. A pairing that is not mutual is ignored
+// (validation reports it).
+export const buildProjectTopology = (project: Project): Topology => {
+  const nodes = new Map<NodeId, TopologyNode>();
+  const edges: TopologyEdge[] = [];
+  for (const view of project.views) {
+    const topology = buildViewTopology(view);
+    topology.nodes.forEach((node, id) => nodes.set(id, node));
+    edges.push(...topology.edges);
+  }
+  const linked = new Set<string>();
+  for (const {viewId, connector} of allConnectors(project)) {
+    const partner = partnerOf(project, connector);
+    if (!partner || linked.has(connector.id)) {
+      continue;
+    }
+    linked.add(connector.id);
+    linked.add(partner.connector.id);
+    edges.push({
+      kind: 'link',
+      id: `link:${connector.id}:${partner.connector.id}`,
+      viewId,
+      from: nodeId(viewId, connector.at),
+      to: nodeId(partner.viewId, partner.connector.at),
+      connectorIds: [connector.id, partner.connector.id],
+      // Unknown length; counts like one track step.
+      length: 1,
+    });
+  }
+  return indexTopology(nodes, edges);
 };
 
 const trackEdges = (
@@ -217,6 +271,14 @@ const turnoutEdges = (
 };
 
 // --- queries -------------------------------------------------------------
+
+// The diagram element an edge belongs to.
+export const edgeElementId = (edge: TopologyEdge): string =>
+  edge.kind === 'track'
+    ? edge.trackId
+    : edge.kind === 'turnout'
+      ? edge.turnoutId
+      : edge.connectorIds[0];
 
 export const edgesAtNode = (topology: Topology, node: NodeId): TopologyEdge[] =>
   (topology.edgesAt.get(node) ?? []).map((id) => topology.edgeById.get(id)!);

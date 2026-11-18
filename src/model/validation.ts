@@ -10,6 +10,7 @@
 import {feedbackInputKey} from '../shared/feedback';
 import {controlFAdrs, requiredAddressCount} from './accessoryCommands';
 import {CentralUnitProfile} from './centralUnitProfile';
+import {partnerOf} from './connectors';
 import {ControlledElement, DiagramElement, isControlled} from './elements';
 import {expandPolyline, isValidPolyline, pointKey, samePoint} from './geometry';
 import {turnoutGeometry} from './ports';
@@ -18,6 +19,7 @@ import {findSignalType} from './signalTypes';
 import {
   buildViewTopology,
   connectionCount,
+  edgeElementId,
   trackDirectionsAt,
 } from './topology';
 
@@ -41,6 +43,7 @@ export type ProblemCode =
   | 'manualTurnout'
   | 'trackWithoutFeedback'
   | 'unpairedConnector'
+  | 'brokenConnectorPair'
   | 'tracksCrossWithoutConnection';
 
 export type Problem = {
@@ -199,7 +202,7 @@ const validateView = (context: Context, view: StationView) => {
       ...new Set(
         touching.map((id) => {
           const edge = topology.edgeById.get(id)!;
-          return edge.kind === 'track' ? edge.trackId : edge.turnoutId;
+          return edgeElementId(edge);
         }),
       ),
     ];
@@ -288,6 +291,9 @@ const validateView = (context: Context, view: StationView) => {
       case 'connector':
         if (!element.pairedWith) {
           add(context, 'info', 'unpairedConnector', [element.id], view.id);
+        } else if (!partnerOf(context.project, element)) {
+          // Points at a connector that is gone or paired elsewhere.
+          add(context, 'warning', 'brokenConnectorPair', [element.id], view.id);
         }
         break;
       default:

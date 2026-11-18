@@ -387,6 +387,8 @@ export const strings = {
     trackWithoutFeedback: (p: Record<string, string | number>) =>
       `${p['count']} track piece${p['count'] === 1 ? '' : 's'} without feedback.`,
     unpairedConnector: () => 'Station exit not linked to another station.',
+    brokenConnectorPair: () =>
+      'Station exit linked to an exit that is gone or linked elsewhere. Choose its partner again.',
     tracksCrossWithoutConnection: () =>
       'Tracks cross without being connected (an overpass).',
   },
