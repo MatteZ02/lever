@@ -13,6 +13,8 @@ type RendererPort = Electron.IpcRendererEvent['ports'][number];
 
 let enginePort: RendererPort | null = null;
 const engineListeners = new Set<(event: unknown) => void>();
+// Engine events that arrived before the page subscribed (see below).
+const earlyEngineEvents: unknown[] = [];
 
 // The main process sends a port on request, and a new one if the engine was
 // restarted.
@@ -24,6 +26,13 @@ ipcRenderer.on('engine-port', (event) => {
   enginePort?.close();
   enginePort = port;
   port.onmessage = (message: {data: unknown}) => {
+    // The engine sends its snapshot as soon as the port is attached, often
+    // before the page has subscribed. Keep it (and anything else) until then:
+    // a lost snapshot left the window showing "Not connected" for good.
+    if (engineListeners.size === 0) {
+      earlyEngineEvents.push(message.data);
+      return;
+    }
     for (const listener of engineListeners) {
       listener(message.data);
     }
@@ -39,6 +48,9 @@ const api: LeverApi = {
     },
     subscribe(listener) {
       engineListeners.add(listener);
+      for (const event of earlyEngineEvents.splice(0)) {
+        listener(event);
+      }
       return () => {
         engineListeners.delete(listener);
       };
