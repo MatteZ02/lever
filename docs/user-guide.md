@@ -1,7 +1,8 @@
 # Lever user guide
 
-> Work in progress. This version covers the layout editor (Phase 2) and operating at Level 1
-> (Phase 3). Several windows, routes (Level 2) and the full layout view come in later phases.
+> Work in progress. This version covers the layout editor (Phase 2), operating at Level 1
+> (Phase 3), and the full layout view, station links and several windows (Phase 4). Routes
+> (Level 2) come in the next phase.
 
 ## Layout files
 
@@ -91,6 +92,27 @@ are not available yet.
 layout, it switches every connected turnout to the last position the central unit confirmed, one
 after another through the normal queue. Lever only knows the positions it saw on this PC; manual
 turnouts are not touched.
+
+## Full layout, linked stations and windows
+
+**Full layout** (the first tab when there are several stations) shows every station on one
+canvas. It works like a station: click turnouts, signals and tracks as usual; each station shows
+its automation level in its title. Double-click a station's title to open it.
+
+To arrange it, switch to **Edit layout** while on **Full layout**: drag a station by its frame or
+title, click it and change its **Size**. **Lines between linked exits** draws a dashed line
+between stations whose exits are linked. **New arrangement** keeps several arrangements (for
+example one per monitor); **Stations below each other** starts over.
+
+**Linking stations:** select a station exit in the editor and choose where it **leads to**: the
+exit at the other end of the line, in another station or in the same one (for example the two
+ends of a line through a hidden spiral). Lever joins the stations there, so routes can continue
+through it, and in operating mode clicking a linked exit opens the other end. Unlinked exits are
+normal where the line between stations is not drawn.
+
+**New window** opens what is shown (a station or the full layout) in another window, e.g. on a
+second monitor. All windows show the same live state; STOP (Esc) works in every window. When
+Lever starts again, it reopens its windows where they were. Closing the last window quits Lever.
 
 ## Drawing
 

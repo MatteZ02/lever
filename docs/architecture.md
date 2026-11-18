@@ -33,6 +33,12 @@
 - **Engine API** (`src/shared/engineApi.ts`, ARC-1): versioned, JSON-safe commands and events,
   validated with Zod at every receiving end. The same messages can later go over a WebSocket
   (Throttle integration, area ownership).
+- **Several windows** (Phase 4, VIEW-2/ARC-3): `src/main/windows.ts`. A window shows a target
+  (`view:<id>` or `full:<arrangementId>`, `src/shared/windowTarget.ts`), given in its URL hash
+  and reported back when it changes. Each window has its own engine port and its own working copy
+  of the project (edits go through the main process, as before). The engine refreshes positions
+  for the union of stations shown in all windows (`showViews`). Windows open at quit are saved in
+  `settings.windows` and reopened where they were; closing the last window quits.
 - **Several instances**: no single-instance lock, an ephemeral UDP port per instance (tested), and
   settings written atomically and only on change (MULTI-5). Project lock files come in Phase 2.
 
@@ -236,7 +242,10 @@ type Transition = {
   and crossings by table), so a route can only pass leg-to-leg in valid directions (RTE-2).
 - Signals and virtual points split an edge and carry their facing direction.
 - Paired station connectors join two views with an edge. Unpaired connectors are route end
-  points (FULL-3).
+  points (FULL-3). Built (Phase 4): `buildViewTopology` per view (validation, areas) and
+  `buildProjectTopology` for the whole layout, which adds a `link` edge between the nodes of each
+  mutual pair (`src/model/connectors.ts`; a one-sided pair is ignored and reported as
+  `brokenConnectorPair`). Node ids include the view id, so views never share nodes by accident.
 - Routing searches over **directed** edges, so signal directions and reversing rules are simple.
   Cost: `TURNOUT_WEIGHT · turnouts + SIGNAL_WEIGHT · signals + DIVERGING_WEIGHT · diverging moves`
   (named constants, tunable). Exact ties are returned as alternatives for the operator.
@@ -251,6 +260,17 @@ type AutomationArea = {id: string; name: string; level: 1 | 2 | 3 | 4};
   area uses the project default level. `levelOf(elementId)` resolves this once, in `model/`.
 - Prepared for ownership (MULTI-7): areas have stable ids, and the engine processes every command
   through `levelOf` and the area, so an `ownerInstance` check can be added in one place later.
+
+### 4.6.1 Full layout view (Phase 4)
+
+`arrangements[]` (FULL-5): each panel is `{viewId, x, y, scale}` and draws the view's **own grid
+coordinates** through `translate(x, y) scale(scale)` (`src/model/arrangement.ts`), so editing a
+station never moves its panel; the frame is the drawing's bounds plus a margin. Until the operator
+changes something, a default arrangement (stations below each other, id `arrangement-default`)
+is shown and not saved; `arrangementsOf` keeps saved arrangements in step with added and deleted
+stations. The renderer draws all panels in one `DiagramView` (one SVG, one viewport) with
+`ViewLayer` per panel; element ids are unique per project, so hit testing is unchanged. Click
+actions are shared with the station view (`useOperateActions`).
 
 ### 4.7 Project file
 
