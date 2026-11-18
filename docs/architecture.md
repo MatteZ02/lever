@@ -38,7 +38,10 @@
   and reported back when it changes. Each window has its own engine port and its own working copy
   of the project (edits go through the main process, as before). The engine refreshes positions
   for the union of stations shown in all windows (`showViews`). Windows open at quit are saved in
-  `settings.windows` and reopened where they were; closing the last window quits.
+  `settings.windows` and reopened where they were. The first window has the full interface;
+  "New window" opens a **plain** window (hash prefix `plain;`, `PlainWorkspace.tsx`): only the
+  diagram and the station picker, always operating, no menu (user, 2026-11-18). Closing a plain
+  window closes it; closing the main window quits.
 - **Several instances**: no single-instance lock, an ephemeral UDP port per instance (tested), and
   settings written atomically and only on change (MULTI-5). Project lock files come in Phase 2.
 

@@ -6,7 +6,7 @@ import {DiagramElement} from '../../../model/elements';
 import {Project, projectSchema} from '../../../model/project';
 import {ProjectState} from '../../../shared/projectApi';
 import {strings} from '../../../shared/strings';
-import {parseWindowTarget} from '../../../shared/windowTarget';
+import {parseWindowHash} from '../../../shared/windowTarget';
 
 export const UNDO_LIMIT = 100;
 
@@ -235,8 +235,13 @@ export const copySelection = (): void => {
 };
 
 // What a window opened with "Open in new window" shows first (VIEW-2).
-const initialTarget = () =>
-  parseWindowTarget(decodeURIComponent(window.location.hash.slice(1)));
+const windowHash = () =>
+  parseWindowHash(decodeURIComponent(window.location.hash.slice(1)));
+const initialTarget = () => windowHash().target;
+
+// A plain station window: only the diagram and the station picker, always
+// operating (opened with "New window").
+export const isPlainWindow = (): boolean => windowHash().plain;
 
 // Keeps the store in sync with the main process. Call once.
 export const bindProjectStore = (): (() => void) => {

@@ -50,6 +50,8 @@ export const settingsSchema = z.object({
           height: z.number().int().min(100),
         }),
         maximized: z.boolean().default(false),
+        // A plain station window (see windowTarget.ts).
+        plain: z.boolean().default(false),
       }),
     )
     .max(16)

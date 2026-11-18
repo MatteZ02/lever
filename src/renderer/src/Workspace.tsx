@@ -2,25 +2,17 @@
 // diagram, and in edit mode the toolbox, properties and problem/address
 // panels. Settings, the accessory test panel and the protocol log open in a
 // side drawer.
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import {arrangementsOf, movePanel} from '../../model/arrangement';
+import {useCallback, useDeferredValue, useState} from 'react';
+import {movePanel} from '../../model/arrangement';
 import {deleteElements, rotateElements} from '../../model/editing';
 import {GridPoint} from '../../model/geometry';
 import {createView} from '../../model/project';
 import {strings} from '../../shared/strings';
-import {formatWindowTarget, WindowTarget} from '../../shared/windowTarget';
 import {DeveloperPanel} from './components/DeveloperPanel';
 import {Modal} from './components/Modal';
 import {ModeSwitch} from './components/ModeSwitch';
 import {ProtocolLog} from './components/ProtocolLog';
 import {SettingsPanel} from './components/SettingsPanel';
-import {fitViewport} from './diagram/DiagramView';
 import {AddressTable} from './editor/AddressTable';
 import {EditorCanvas} from './editor/EditorCanvas';
 import {ProblemsPanel, useProblems} from './editor/ProblemsPanel';
@@ -28,26 +20,22 @@ import {PropertiesPanel} from './editor/properties/PropertiesPanel';
 import {Toolbox} from './editor/Toolbox';
 import {useEditorKeys} from './editor/useEditorKeys';
 import {ArrangementPanel, changeArrangement} from './full/ArrangementPanel';
-import {FullLayoutCanvas, fitArrangement} from './full/FullLayoutCanvas';
+import {FullLayoutCanvas} from './full/FullLayoutCanvas';
 import {AreasPanel} from './operate/AreasPanel';
 import {FeedbackMonitor} from './operate/FeedbackMonitor';
 import {OperateCanvas} from './operate/OperateCanvas';
-import {sendCommand} from './store/engineStore';
 import {
-  activeView,
   edit,
-  FULL_VIEW,
-  fullViewportKey,
   redo,
   select,
   setActiveArrangement,
   setActiveView,
   setHint,
   setTestMode,
-  setViewport,
   undo,
   useProjectStore,
 } from './store/projectStore';
+import {useShownView} from './useShownView';
 
 type Drawer = 'areas' | 'feedback' | 'settings' | 'developer' | 'log' | null;
 type BottomPanel = 'problems' | 'addresses';
@@ -58,14 +46,6 @@ const DRAWER_LABELS: Record<Exclude<Drawer, null>, string> = {
   settings: strings.settings.title,
   developer: strings.developer.short,
   log: strings.protocolLog.title,
-};
-
-const canvasSize = () => {
-  const canvas = document.querySelector('.diagram');
-  return {
-    width: canvas?.clientWidth ?? 800,
-    height: canvas?.clientHeight ?? 600,
-  };
 };
 
 // How long a hint stays before it has faded out.
@@ -80,79 +60,16 @@ export const Workspace = () => {
   const hint = useProjectStore((state) => state.hint);
   const canUndo = useProjectStore((state) => state.past.length > 0);
   const canRedo = useProjectStore((state) => state.future.length > 0);
-  const activeViewId = useProjectStore((state) => state.activeViewId);
-  const activeArrangementId = useProjectStore(
-    (state) => state.activeArrangementId,
-  );
   const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [bottom, setBottom] = useState<BottomPanel>('problems');
   const [drawing, setDrawing] = useState<GridPoint[]>([]);
   const [placeRotation, setPlaceRotation] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const view = activeView();
-  const fullView = activeViewId === FULL_VIEW;
-  // Arrangements of the full view (FULL-5); a default one until saved.
-  const arrangements = useMemo(
-    () => (project ? arrangementsOf(project, strings.full.defaultName) : []),
-    [project],
-  );
-  const arrangement =
-    arrangements.find((a) => a.id === activeArrangementId) ?? arrangements[0];
-
-  const fit = useCallback(() => {
-    const current = activeView();
-    if (current) {
-      setViewport(current.id, fitViewport(current, canvasSize()));
-    } else if (project && arrangement) {
-      setViewport(
-        fullViewportKey(arrangement.id),
-        fitArrangement(project, arrangement, canvasSize()),
-      );
-    }
-  }, [project, arrangement]);
+  const {view, fullView, arrangement, arrangements, fit, targetText} =
+    useShownView();
   const rotatePlacement = useCallback(() => setPlaceRotation((r) => r + 1), []);
   useEditorKeys({drawing, setDrawing, rotatePlacement, fit});
-  // The engine refreshes the positions of what is on screen.
-  const shownViews = fullView
-    ? (arrangement?.panels.map((panel) => panel.viewId).join(',') ?? '')
-    : (view?.id ?? '');
-  useEffect(() => {
-    sendCommand({
-      type: 'showViews',
-      viewIds: shownViews ? shownViews.split(',') : [],
-    });
-  }, [shownViews]);
-  // What this window shows: reported to the main process (reopened there
-  // next time) and in the window title.
-  const target: WindowTarget | undefined =
-    fullView && arrangement
-      ? {kind: 'full', arrangementId: arrangement.id}
-      : view
-        ? {kind: 'view', viewId: view.id}
-        : undefined;
-  const targetText = target ? formatWindowTarget(target) : '';
-  const shownName = fullView ? arrangement?.name : view?.name;
-  useEffect(() => {
-    window.lever.window.setTarget(targetText);
-  }, [targetText]);
-  useEffect(() => {
-    window.document.title = shownName
-      ? `${shownName} – ${strings.appName}`
-      : strings.appName;
-  }, [shownName]);
-
-  // A full view shown for the first time fits itself to the window.
-  const fullKey = arrangement ? fullViewportKey(arrangement.id) : '';
-  const fullViewportSet = useProjectStore(
-    (state) => fullKey in state.viewports,
-  );
-  useEffect(() => {
-    if (fullView && !fullViewportSet) {
-      fit();
-    }
-  }, [fullView, fullViewportSet, fit]);
-
   // Validation runs at low priority: the diagram updates at once after an
   // edit, the problem list a moment later (STK-8, large layouts).
   const deferredProject = useDeferredValue(project);

@@ -25,3 +25,18 @@ export const parseWindowTarget = (text: string): WindowTarget | undefined => {
       ? {kind: 'full', arrangementId: id}
       : undefined;
 };
+
+// A window's URL hash: its target, and whether it is a plain station window
+// (only the diagram and the station picker; opened with "New window").
+const PLAIN_PREFIX = 'plain;';
+
+export const formatWindowHash = (target: string, plain: boolean): string =>
+  `${plain ? PLAIN_PREFIX : ''}${target}`;
+
+export const parseWindowHash = (
+  hash: string,
+): {target?: WindowTarget; plain: boolean} => {
+  const plain = hash.startsWith(PLAIN_PREFIX);
+  const text = plain ? hash.slice(PLAIN_PREFIX.length) : hash;
+  return {target: parseWindowTarget(text), plain};
+};

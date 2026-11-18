@@ -200,7 +200,7 @@ const registerIpc = (): void => {
   ipcMain.on('window:open', (event, target: unknown) => {
     const parsed = windowTargetTextSchema.safeParse(target);
     if (isAppFrame(event) && parsed.success) {
-      windows.open(parsed.data);
+      windows.open(parsed.data, {plain: true});
     }
   });
   // What the sending window shows now; saved with it at quit.
@@ -320,7 +320,7 @@ const start = async (): Promise<void> => {
   windows = new WindowManager({
     hidden: uiScript !== undefined,
     isQuitting: () => stopping,
-    onCloseLast: () => app.quit(),
+    onCloseMain: () => app.quit(),
     onReady: (window, first) => {
       if (uiScript && first) {
         void runUiScript(window, uiScript);

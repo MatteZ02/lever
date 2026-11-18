@@ -1,12 +1,15 @@
 // Windows (VIEW-2, ARC-3): any station view or full-view arrangement can be
 // opened in its own window, e.g. one per monitor. All windows show the same
 // engine state (each gets its own engine port) and the same project. The
-// windows open at quit are reopened at start-up where they were.
+// first window has the full interface; "New window" opens a plain station
+// window: only the diagram and the station picker (user, 2026-11-18).
+// The windows open at quit are reopened at start-up where they were.
 import {join} from 'node:path';
 import {app, BrowserWindow, Rectangle, screen} from 'electron';
 import iconPath from '../../assets/icon.png?asset';
 import {Settings} from '../shared/settings';
 import {strings} from '../shared/strings';
+import {formatWindowHash} from '../shared/windowTarget';
 
 export type SavedWindow = Settings['windows'][number];
 
@@ -19,8 +22,9 @@ export type WindowManagerOptions = {
   hidden: boolean;
   // Called once a window has loaded (UI automation drives the first one).
   onReady?: (window: BrowserWindow, first: boolean) => void;
-  // Closing the last window asks before quitting (unsaved layout).
-  onCloseLast: () => void;
+  // Closing the main window quits Lever (asking about an unsaved layout);
+  // plain windows have no menu, settings or editor of their own.
+  onCloseMain: () => void;
   isQuitting: () => boolean;
 };
 
@@ -40,11 +44,16 @@ const visibleOnSomeDisplay = (bounds: Rectangle): boolean =>
 export class WindowManager {
   // What each window shows (window target text), by webContents id.
   private readonly targets = new Map<number, string>();
+  // Plain station windows, by webContents id.
+  private readonly plain = new Set<number>();
   private created = 0;
 
   constructor(private readonly options: WindowManagerOptions) {}
 
-  open(target = '', placement?: {bounds?: Rectangle; maximized?: boolean}) {
+  open(
+    target = '',
+    placement?: {bounds?: Rectangle; maximized?: boolean; plain?: boolean},
+  ) {
     const opener = BrowserWindow.getFocusedWindow();
     const bounds =
       placement?.bounds && visibleOnSomeDisplay(placement.bounds)
@@ -77,24 +86,30 @@ export class WindowManager {
     });
     const id = window.webContents.id;
     this.targets.set(id, target);
+    const plain = placement?.plain ?? false;
+    if (plain) {
+      this.plain.add(id);
+      // No menu (nor its shortcuts): the window is only the diagram. Esc is
+      // still STOP (handled in the page).
+      window.removeMenu();
+    }
     const first = this.created === 0;
     this.created++;
 
-    // Closing the last window quits Lever, through the quit path, so that
-    // "Cancel" in its unsaved-changes question keeps the window. Other
-    // windows simply close.
+    // A plain window simply closes. Closing the main window quits Lever,
+    // through the quit path, so that "Cancel" in its unsaved-changes
+    // question keeps it (and the plain windows) open.
     window.on('close', (event) => {
-      if (
-        this.options.isQuitting() ||
-        this.options.hidden ||
-        BrowserWindow.getAllWindows().length > 1
-      ) {
+      if (this.options.isQuitting() || this.options.hidden || plain) {
         return;
       }
       event.preventDefault();
-      this.options.onCloseLast();
+      this.options.onCloseMain();
     });
-    window.on('closed', () => this.targets.delete(id));
+    window.on('closed', () => {
+      this.targets.delete(id);
+      this.plain.delete(id);
+    });
     window.once('ready-to-show', () => {
       if (!this.options.hidden) {
         if (placement?.maximized) {
@@ -105,7 +120,7 @@ export class WindowManager {
       this.options.onReady?.(window, first);
     });
 
-    const hash = encodeURIComponent(target);
+    const hash = encodeURIComponent(formatWindowHash(target, plain));
     const devServer = process.env['ELECTRON_RENDERER_URL'];
     if (!app.isPackaged && devServer) {
       void window.loadURL(`${devServer}#${hash}`);
@@ -138,6 +153,7 @@ export class WindowManager {
             height: Math.max(100, Math.round(height)),
           },
           maximized: window.isMaximized(),
+          plain: this.plain.has(window.webContents.id),
         };
       });
   }
@@ -148,11 +164,17 @@ export class WindowManager {
       this.open();
       return;
     }
-    for (const entry of saved) {
+    // Exactly one main window: the first saved one that was, else the first.
+    const main = Math.max(
+      0,
+      saved.findIndex((entry) => !entry.plain),
+    );
+    saved.forEach((entry, index) => {
       this.open(entry.target, {
         bounds: entry.bounds,
         maximized: entry.maximized,
+        plain: index !== main,
       });
-    }
+    });
   }
 }

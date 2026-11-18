@@ -110,9 +110,11 @@ ends of a line through a hidden spiral). Lever joins the stations there, so rout
 through it, and in operating mode clicking a linked exit opens the other end. Unlinked exits are
 normal where the line between stations is not drawn.
 
-**New window** opens what is shown (a station or the full layout) in another window, e.g. on a
-second monitor. All windows show the same live state; STOP (Esc) works in every window. When
-Lever starts again, it reopens its windows where they were. Closing the last window quits Lever.
+**New window** opens what is shown (a station or the full layout) in a plain window, e.g. on a
+second monitor: only the diagram and the station tabs, for operating. Editing, settings and track
+power stay in the main window. All windows show the same live state, and **Esc is STOP in every
+window**. Closing a plain window just closes it; closing the main window quits Lever. When Lever
+starts again, it reopens its windows where they were.
 
 ## Drawing
 
