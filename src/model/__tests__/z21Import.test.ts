@@ -229,7 +229,7 @@ describe('Z21 app import', () => {
     );
   });
 
-  it('imports signals with the first state as stop', () => {
+  it('imports signals with the first state as proceed', () => {
     const result = importZ21(
       exportOf(
         station([...row(0, 0, 0), [1, 0, SIGNAL, 90, 803], ...row(0, 2, 2)], {
@@ -242,7 +242,7 @@ describe('Z21 app import', () => {
         kind: 'signal',
         facing: 'E',
         signalTypeId: 'builtin:main2',
-        control: {kind: 'dcc', addresses: [803], invert: true},
+        control: {kind: 'dcc', addresses: [803], invert: false},
       }),
     );
     expect(result.issues).toContainEqual({code: 'signalsAssumed', count: 1});

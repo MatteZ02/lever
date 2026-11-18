@@ -12,8 +12,8 @@
 //   left), 24 sharp 90° curve (joins angle to angle+90°), 11 two-aspect
 //   signal (facing angle), 14 track end (angle points out of the track).
 // - Each controlled tile has states 0 and 1. State 0 is straight (turnouts,
-//   slips) and is taken to be stop (signals); `address1_value` is the
-//   output (0 = output 1, 1 = output 2).
+//   slips) and proceed (signals: checked on the club's layout, 2026-11-18);
+//   `address1_value` is the output (0 = output 1, 1 = output 2).
 // - Route buttons list turnout states. Lever calculates routes itself
 //   (Level 2), so they are not imported; their caption notes are skipped.
 //
@@ -269,7 +269,9 @@ const importPage = (
       ?.find((state) => state.state === 0);
     return state0?.address1Value === 1;
   };
-  const dccControl = (control: Z21Control) => {
+  // State 0 is straight for turnouts but proceed for signals, whose first
+  // Lever aspect is stop: a signal's outputs are the other way round.
+  const dccControl = (control: Z21Control, isSignal = false) => {
     const address = control.address1;
     if (address > MAX_ADDRESS) {
       issues.push({code: 'invalidAddress', page: page.name, address});
@@ -277,7 +279,7 @@ const importPage = (
     return {
       kind: 'dcc' as const,
       addresses: address >= 1 && address <= MAX_ADDRESS ? [address] : [],
-      invert: invertOf(control),
+      invert: invertOf(control) !== isSignal,
     };
   };
 
@@ -320,7 +322,7 @@ const importPage = (
           facing: d,
           side: 'right',
           signalTypeId: DEFAULT_SIGNAL_TYPE_ID,
-          control: dccControl(control),
+          control: dccControl(control, true),
         };
         elements.push(signal);
         break;
