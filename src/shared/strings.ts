@@ -394,8 +394,16 @@ export const strings = {
   },
 
   notices: {
-    extAccessoryUnsupported:
+    extAccessoryUnsupported: () =>
       'The central unit’s firmware is too old for extended accessories (needs 1.40). Nothing was sent.',
+    refused: (name: string) =>
+      `${name}: not possible at this automation level.`,
+    incomplete: (name: string, reason: string) =>
+      `${name}: ${(strings.test.incomplete as Record<string, string>)[reason] ?? reason}. Nothing was sent.`,
+    failed: (name: string) =>
+      `${name}: the central unit did not confirm the change, also after a second try. Check the turnout or signal.`,
+    labelNeedsFeedback: (name: string) =>
+      `${name}: train numbers can only be shown on track with feedback.`,
     dismiss: 'Dismiss',
   },
 

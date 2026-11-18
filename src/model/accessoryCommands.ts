@@ -126,34 +126,89 @@ export const defaultTurnoutOutputMap = (
   }
 };
 
+// An output reference resolved to what goes on the wire: function address
+// and protocol output (0 = output 1, 1 = output 2), after inversion and the
+// address offset. Used both to send commands and to read reports back.
+export type ResolvedOutput = {fAdr: number; output: 0 | 1};
+
+export const resolveOutputs = (
+  refs: OutputRef[],
+  control: Extract<AccessoryControl, {kind: 'dcc'}>,
+  profile: CentralUnitProfile,
+): ResolvedOutput[] | IncompleteReason => {
+  if (refs.length === 0) {
+    return 'noOutputs';
+  }
+  const resolved: ResolvedOutput[] = [];
+  for (const ref of refs) {
+    const address = control.addresses[ref.address];
+    if (address === undefined) {
+      return 'missingAddress';
+    }
+    const fAdr = addressToFAdr(address, profile);
+    if (fAdr === undefined) {
+      return 'addressOutOfRange';
+    }
+    const output = control.invert ? swap(ref.output) : ref.output;
+    resolved.push({fAdr, output: output === 1 ? 0 : 1});
+  }
+  return resolved;
+};
+
 const toCommands = (
   refs: OutputRef[],
   control: Extract<AccessoryControl, {kind: 'dcc'}>,
   profile: CentralUnitProfile,
   pulseOverride?: number,
 ): CommandPlan => {
-  if (refs.length === 0) {
-    return {kind: 'incomplete', reason: 'noOutputs'};
+  const resolved = resolveOutputs(refs, control, profile);
+  if (typeof resolved === 'string') {
+    return {kind: 'incomplete', reason: resolved};
   }
-  const commands: AccessoryCommand[] = [];
-  for (const ref of refs) {
-    const address = control.addresses[ref.address];
-    if (address === undefined) {
-      return {kind: 'incomplete', reason: 'missingAddress'};
-    }
-    const fAdr = addressToFAdr(address, profile);
-    if (fAdr === undefined) {
-      return {kind: 'incomplete', reason: 'addressOutOfRange'};
-    }
-    const output = control.invert ? swap(ref.output) : ref.output;
-    commands.push({
+  return {
+    kind: 'commands',
+    commands: resolved.map(({fAdr, output}) => ({
       fAdr,
-      output: output === 1 ? 0 : 1,
+      output,
       pulseMs: pulseOverride ?? control.pulseMs ?? profile.pulseMs,
       queued: profile.turnoutCommandMode === 'queued',
-    });
+    })),
+  };
+};
+
+// The outputs of every state (turnout position or signal aspect) of a DCC
+// element, as they appear on the wire. Missing entries: incomplete config.
+export const stateOutputs = (
+  element: Turnout | Signal,
+  signalType: SignalType | undefined,
+  profile: CentralUnitProfile,
+): Map<string, ResolvedOutput[]> => {
+  const result = new Map<string, ResolvedOutput[]>();
+  const {control} = element;
+  if (control.kind !== 'dcc') {
+    return result;
   }
-  return {kind: 'commands', commands};
+  const map: Record<string, OutputRef[]> =
+    element.kind === 'turnout'
+      ? (control.outputMap ??
+        defaultTurnoutOutputMap(
+          element.type,
+          requiredAddressCount(element.type, control),
+          profile,
+        ))
+      : Object.fromEntries(
+          (signalType?.aspects ?? []).map((aspect) => [
+            aspect.id,
+            control.outputMap?.[aspect.id] ?? aspect.outputs,
+          ]),
+        );
+  for (const [state, refs] of Object.entries(map)) {
+    const resolved = resolveOutputs(refs, control, profile);
+    if (typeof resolved !== 'string') {
+      result.set(state, resolved);
+    }
+  }
+  return result;
 };
 
 export const turnoutCommands = (

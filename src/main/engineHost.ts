@@ -21,10 +21,8 @@ export class EngineHost {
   private quitting = false;
   private connectTarget: {host: string; port: number} | null = null;
   private protocolLog = false;
-  private layout: Omit<
-    Extract<EngineControl, {type: 'configureLayout'}>,
-    'type'
-  > | null = null;
+  // The open project, sent again after an engine restart.
+  private project: unknown = null;
 
   start(): void {
     const child = utilityProcess.fork(enginePath, [], {
@@ -48,13 +46,11 @@ export class EngineHost {
     this.send({type: 'setProtocolLog', enabled});
   }
 
-  // Applies the open project's central-unit settings; re-sent after an
-  // engine restart.
-  configureLayout(
-    layout: Omit<Extract<EngineControl, {type: 'configureLayout'}>, 'type'>,
-  ): void {
-    this.layout = layout;
-    this.send({type: 'configureLayout', ...layout});
+  // Gives the engine the open project (elements to operate, central-unit
+  // settings); re-sent after an engine restart.
+  loadLayout(project: unknown): void {
+    this.project = project;
+    this.send({type: 'loadLayout', project});
   }
 
   // Connects (or reconnects) the engine to the central unit.
@@ -104,8 +100,8 @@ export class EngineHost {
   private restart(): void {
     this.start();
     this.send({type: 'setProtocolLog', enabled: this.protocolLog});
-    if (this.layout) {
-      this.send({type: 'configureLayout', ...this.layout});
+    if (this.project) {
+      this.send({type: 'loadLayout', project: this.project});
     }
     if (this.connectTarget) {
       this.send({type: 'connect', ...this.connectTarget});

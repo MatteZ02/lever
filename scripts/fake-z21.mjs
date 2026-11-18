@@ -7,7 +7,8 @@
 //
 //   node scripts/fake-z21.mjs [--port=21107] [--firmware=1.33] [--hardware=0x204]
 //                             [--turnout-info-on=activate|deactivate|both]
-//                             [--unsupported=unknown-command|silent] [--verbose]
+//                             [--unsupported=unknown-command|silent]
+//                             [--never-switched=output1|notSwitched] [--verbose]
 //
 // Then type `help`. Use a port other than 21105 while Z21Sim is running.
 //
@@ -98,6 +99,9 @@ export const createFakeZ21 = async (options = {}) => {
   const hardwareType = options.hardwareType ?? 0x204;
   const turnoutInfoOn = options.turnoutInfoOn ?? 'activate';
   const unsupported = options.unsupported ?? 'unknown-command';
+  // ZZ for never-switched addresses: 1 (output 1) like the z21 start, or 0
+  // ("not switched yet") as the spec describes.
+  const neverSwitched = options.neverSwitched === 'notSwitched' ? 0 : 1;
   const log = options.log ?? (() => {});
   const fw = versionNumber(firmware);
 
@@ -139,7 +143,7 @@ export const createFakeZ21 = async (options = {}) => {
 
   const status = () => xbus([0x62, 0x22, centralState]);
   const turnoutInfo = (fAdr) =>
-    xbus([0x43, fAdr >> 8, fAdr & 0xff, turnouts.get(fAdr) ?? 0]);
+    xbus([0x43, fAdr >> 8, fAdr & 0xff, turnouts.get(fAdr) ?? neverSwitched]);
   const extInfo = (raw) => {
     const known = extAccessories.has(raw);
     return xbus([
@@ -473,6 +477,7 @@ const runCli = async () => {
     hardwareType: args.hardware ? Number(args.hardware) : undefined,
     turnoutInfoOn: args['turnout-info-on'],
     unsupported: args.unsupported,
+    neverSwitched: args['never-switched'],
     log: verbose ? (line) => console.log(line) : undefined,
   });
   console.log(

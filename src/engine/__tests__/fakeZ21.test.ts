@@ -181,3 +181,101 @@ describe('engine against the fake Z21', () => {
     expect(connection.getTrackStatus()).toBe('shortCircuit');
   });
 });
+
+describe('operating a layout (Level 1) against the fake Z21', () => {
+  const project = {
+    format: 'lever-project',
+    schemaVersion: 1,
+    id: 'p',
+    name: 'Test',
+    settings: {
+      centralUnit: {accessoryGapMs: 20, pulseMs: 30, feedbackSources: ['rbus']},
+      blockReleaseDelayMs: 50,
+    },
+    views: [
+      {
+        id: 'v',
+        name: 'Station',
+        areaId: 'a',
+        elements: [
+          {
+            kind: 'track',
+            id: 't1',
+            points: [
+              {x: 0, y: 0},
+              {x: 3, y: 0},
+            ],
+            blockId: 'B1',
+          },
+          {
+            kind: 'turnout',
+            id: 'W1',
+            type: 'right',
+            at: {x: 4, y: 0},
+            orientation: 'E',
+            control: {kind: 'dcc', addresses: [5], invert: false},
+          },
+          {
+            kind: 'turnout',
+            id: 'M1',
+            type: 'left',
+            at: {x: 10, y: 0},
+            orientation: 'E',
+          },
+        ],
+      },
+    ],
+    areas: [{id: 'a', name: 'Station', level: 1}],
+    blocks: [
+      {
+        id: 'B1',
+        name: 'Track 1',
+        inputs: [{source: 'rbus', module: 2, input: 3}],
+      },
+    ],
+  };
+
+  it('throws a turnout, records a manual one and shows occupancy', async () => {
+    const {fake, send, events, connection} = await start();
+    engine!.loadLayout(project);
+    const layout = () => engine!.snapshot().layout;
+    await waitFor(
+      () => layout().turnouts['W1']?.status === 'reported',
+      'start-up report',
+    );
+
+    send({type: 'setTurnout', elementId: 'W1', position: 'diverging'});
+    await waitFor(
+      () =>
+        layout().turnouts['W1']?.status === 'confirmed' &&
+        layout().turnouts['W1']?.position === 'diverging',
+      'confirmed diverging',
+    );
+
+    // Another client throws it back.
+    fake.setTurnout(4, 0);
+    await waitFor(
+      () => layout().turnouts['W1']?.position === 'straight',
+      'followed',
+    );
+
+    send({type: 'setTurnout', elementId: 'M1', position: 'diverging'});
+    expect(layout().turnouts['M1']).toEqual({
+      position: 'diverging',
+      status: 'manual',
+    });
+
+    fake.setRbusInput(2, 3, true);
+    await waitFor(() => layout().blocks['B1']?.occupied === true, 'occupied');
+    send({type: 'setTrainLabel', blockId: 'B1', label: 'IC 7'});
+    expect(layout().blocks['B1'].label).toBe('IC 7');
+    fake.setRbusInput(2, 3, false);
+    await waitFor(
+      () => layout().blocks['B1']?.occupied === false,
+      'released after delay',
+    );
+
+    expect(events.some((event) => event.type === 'layout')).toBe(true);
+    expect(connection.getState()).toBe('connected');
+  });
+});

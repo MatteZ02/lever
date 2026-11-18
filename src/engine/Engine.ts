@@ -15,6 +15,8 @@ import {
   feedbackStartupQueries,
 } from '../connection/FeedbackTracker';
 import {AccessoryStateStore} from '../interlocking/accessoryState';
+import {Interlocking, InterlockingNotice} from '../interlocking/Interlocking';
+import {projectSchema} from '../model/project';
 import {
   ENGINE_API_VERSION,
   EngineCommand,
@@ -39,6 +41,14 @@ export type EngineOptions = {
   now?: () => number;
   accessoryGapMs?: number;
   defaultPulseMs?: number;
+  // Timers for the interlocking (confirmation, block release); tests inject
+  // fake ones.
+  schedule?: (ms: number, run: () => void) => () => void;
+};
+
+const realSchedule = (ms: number, run: () => void) => {
+  const timer = setTimeout(run, ms);
+  return () => clearTimeout(timer);
 };
 
 export class Engine {
@@ -51,6 +61,10 @@ export class Engine {
   // (LOAD-3): those touched this session, later also the project's.
   private readonly knownAccessories = new Set<number>();
   private readonly defaultPulseMs: number;
+  private readonly interlocking: Interlocking;
+  // Turnout info queries sent and not answered yet: a report for one of
+  // these is a reply, anything else a broadcast of a change.
+  private readonly awaitingReply = new Set<number>();
   private feedbackSources: FeedbackSource[] = [];
   private protocolLog = false;
 
@@ -64,6 +78,12 @@ export class Engine {
       send: (datasets) => connection.sendDatasets(datasets),
       gapMs: options.accessoryGapMs,
       onStart: (job) => this.onJobStart(job),
+    });
+    this.interlocking = new Interlocking({
+      enqueue: (job) => this.enqueue(job),
+      schedule: options.schedule ?? realSchedule,
+      onChange: (changes) => this.broadcast({type: 'layout', changes}),
+      onNotice: (notice) => this.notice(notice),
     });
 
     connection.on('state', (state) => {
@@ -83,6 +103,11 @@ export class Engine {
       const now = this.now();
       switch (message.type) {
         case 'turnoutInfo':
+          this.interlocking.accessoryReport(
+            message.fAdr,
+            message.position,
+            this.awaitingReply.delete(message.fAdr),
+          );
           this.broadcast({
             type: 'accessory',
             state: this.accessories.reported(
@@ -93,6 +118,11 @@ export class Engine {
           });
           return;
         case 'extAccessoryInfo':
+          this.interlocking.extAccessoryReport(
+            message.rawAddress,
+            message.valid ? message.value : undefined,
+            false,
+          );
           this.broadcast({
             type: 'extAccessory',
             state: this.accessories.extReported(
@@ -107,6 +137,7 @@ export class Engine {
       const changes = this.feedback.handle(message, now);
       if (changes.length > 0) {
         this.broadcast({type: 'feedback', changes});
+        this.interlocking.feedbackChanged(changes);
       }
     });
   }
@@ -148,6 +179,28 @@ export class Engine {
     this.queue.setGap(gapMs);
   }
 
+  // The open project (from the main process): elements to operate, and the
+  // central-unit profile (gap, feedback sources).
+  loadLayout(data: unknown): void {
+    const parsed = projectSchema.safeParse(data);
+    if (!parsed.success) {
+      console.error('Engine: invalid project', parsed.error.message);
+      return;
+    }
+    const project = parsed.data;
+    this.interlocking.load(project);
+    this.setAccessoryGap(project.settings.centralUnit.accessoryGapMs);
+    this.setFeedbackSources(project.settings.centralUnit.feedbackSources);
+    // Ask for the position of accessories not reported yet (LOAD-3).
+    if (this.connection.getState() === 'connected') {
+      for (const fAdr of this.interlocking.addresses()) {
+        if (this.accessories.get(fAdr) === undefined) {
+          this.query(fAdr);
+        }
+      }
+    }
+  }
+
   // Logs off cleanly (§2.2).
   shutdown(): void {
     this.queue.dispose();
@@ -168,6 +221,7 @@ export class Engine {
       feedbackSources: this.feedbackSources,
       feedbackInputs: this.feedback.all(),
       accessoryQueueLength: this.queue.size(),
+      layout: this.interlocking.state(),
     };
   }
 
@@ -201,16 +255,9 @@ export class Engine {
         break;
       case 'queryAccessory':
         this.knownAccessories.add(command.fAdr);
-        this.enqueue(turnoutQuery(command.fAdr));
+        this.query(command.fAdr);
         break;
       case 'setExtAccessory':
-        if (!this.extAccessoriesSupported()) {
-          this.broadcast({
-            type: 'notice',
-            notice: {code: 'extAccessoryUnsupported', time: this.now()},
-          });
-          break;
-        }
         this.enqueue({
           kind: 'extAccessory',
           rawAddress: command.rawAddress,
@@ -219,6 +266,16 @@ export class Engine {
         break;
       case 'setFeedbackSources':
         this.setFeedbackSources(command.sources);
+        break;
+      case 'setTurnout':
+      case 'setSignal':
+      case 'pressAccessory': {
+        const {v: _v, ...elementCommand} = command;
+        this.interlocking.command(elementCommand);
+        break;
+      }
+      case 'setTrainLabel':
+        this.interlocking.setTrainLabel(command.blockId, command.label);
         break;
     }
   }
@@ -240,20 +297,25 @@ export class Engine {
       // (MULTI-3).
       this.accessories.clear();
       this.feedback.clear();
+      this.awaitingReply.clear();
+      this.interlocking.connectionLost();
       this.broadcastSnapshot();
       return;
     }
     // Startup state, rate-limited through the queue, never as a burst
-    // (LOAD-3).
-    [...this.knownAccessories]
+    // (LOAD-3): every accessory of the layout, and any touched by hand.
+    [...new Set([...this.interlocking.addresses(), ...this.knownAccessories])]
       .sort((a, b) => a - b)
-      .forEach((fAdr) => this.enqueue(turnoutQuery(fAdr)));
+      .forEach((fAdr) => this.query(fAdr));
     feedbackStartupQueries(this.feedbackSources).forEach((job) =>
       this.enqueue(job),
     );
   }
 
   private onJobStart(job: AccessoryJob): void {
+    if (job.kind !== 'query' && job.tag) {
+      this.interlocking.jobStarted(job.tag);
+    }
     if (job.kind === 'switch') {
       this.broadcast({
         type: 'accessory',
@@ -263,7 +325,33 @@ export class Engine {
     this.broadcast({type: 'accessoryQueue', length: this.queue.size()});
   }
 
+  private query(fAdr: number): void {
+    this.awaitingReply.add(fAdr);
+    this.enqueue(turnoutQuery(fAdr));
+  }
+
+  private notice(notice: InterlockingNotice): void {
+    this.broadcast({
+      type: 'notice',
+      notice: {
+        code: notice.code,
+        time: this.now(),
+        ...('elementId' in notice ? {elementId: notice.elementId} : {}),
+        ...('blockId' in notice ? {blockId: notice.blockId} : {}),
+        ...('reason' in notice ? {reason: notice.reason} : {}),
+      },
+    });
+  }
+
   private enqueue(job: AccessoryJob): void {
+    // Extended accessories need FW 1.40 (REU-5); refuse rather than send.
+    if (job.kind === 'extAccessory' && !this.extAccessoriesSupported()) {
+      this.broadcast({
+        type: 'notice',
+        notice: {code: 'extAccessoryUnsupported', time: this.now()},
+      });
+      return;
+    }
     this.queue.enqueue(job);
     this.broadcast({type: 'accessoryQueue', length: this.queue.size()});
   }

@@ -34,8 +34,8 @@ if (uiScript) {
 }
 let settings: Settings;
 let projects: ProjectController;
-// The last central-unit profile sent to the engine, to send only changes.
-let appliedProfile = '';
+// The last project sent to the engine, to send only changes.
+let appliedProject: Project | null = null;
 
 const PROJECT_ACTIONS: ProjectFileAction[] = [
   'new',
@@ -54,12 +54,11 @@ const broadcastProject = (state: ProjectState): void => {
   applyProjectToEngine(state.project);
 };
 
+// The engine operates the open project (STK-4: the live state lives there).
 const applyProjectToEngine = (project: Project): void => {
-  const {accessoryGapMs, feedbackSources} = project.settings.centralUnit;
-  const key = JSON.stringify({accessoryGapMs, feedbackSources});
-  if (key !== appliedProfile) {
-    appliedProfile = key;
-    engine.configureLayout({accessoryGapMs, feedbackSources});
+  if (project !== appliedProject) {
+    appliedProject = project;
+    engine.loadLayout(project);
   }
 };
 

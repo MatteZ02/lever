@@ -1,0 +1,85 @@
+// Live state of the layout, as the engine reports it to windows (ARC-1).
+// Keyed by element id (turnouts, signals, accessories) or block id.
+import {z} from 'zod';
+import {detectedLocoSchema} from './feedback';
+
+// How sure the displayed position or aspect is (ACC-2, ACC-3, MULTI-3):
+// - unknown: nothing reported yet;
+// - reported: from the start-up query only (a central unit may report a
+//   remembered or default position, e.g. the z21 start reports output 1 for
+//   turnouts never switched), not seen to switch;
+// - confirmed: seen switching in this session (any client), or confirmed by
+//   position feedback;
+// - commanded / retrying: sent by this instance, waiting for the report;
+// - failed: no matching report after a retry;
+// - mismatch: position feedback disagrees with the reported position;
+// - inconsistent: the reported outputs fit no position/aspect (MULTI-2);
+// - manual: not connected; position recorded by the operator (ACC-5).
+export const liveStatusSchema = z.enum([
+  'unknown',
+  'reported',
+  'confirmed',
+  'commanded',
+  'retrying',
+  'failed',
+  'mismatch',
+  'inconsistent',
+  'manual',
+]);
+export type LiveStatus = z.infer<typeof liveStatusSchema>;
+
+export const turnoutLiveSchema = z.object({
+  position: z.string().optional(),
+  status: liveStatusSchema,
+  // Position this instance commanded and still waits for.
+  commanded: z.string().optional(),
+  // Position shown by position-feedback inputs (ACC-3).
+  feedback: z.string().optional(),
+});
+export type TurnoutLive = z.infer<typeof turnoutLiveSchema>;
+
+export const signalLiveSchema = z.object({
+  aspect: z.string().optional(),
+  status: liveStatusSchema,
+  commanded: z.string().optional(),
+});
+export type SignalLive = z.infer<typeof signalLiveSchema>;
+
+export const accessoryLiveSchema = z.object({
+  on: z.boolean().optional(),
+  status: liveStatusSchema,
+});
+export type AccessoryLive = z.infer<typeof accessoryLiveSchema>;
+
+export const blockLiveSchema = z.object({
+  // Shown as occupied (immediately on occupation; after the release delay
+  // when freed, BLK-3).
+  occupied: z.boolean(),
+  // Inputs are free, release delay running.
+  releasing: z.boolean(),
+  // Train number or name set by the operator (BLK-4).
+  label: z.string().optional(),
+  // Locos reported by detectors (BLK-5).
+  locos: z.array(detectedLocoSchema),
+  hasFeedback: z.boolean(),
+});
+export type BlockLive = z.infer<typeof blockLiveSchema>;
+
+export const layoutLiveSchema = z.object({
+  turnouts: z.record(z.string(), turnoutLiveSchema),
+  signals: z.record(z.string(), signalLiveSchema),
+  accessories: z.record(z.string(), accessoryLiveSchema),
+  blocks: z.record(z.string(), blockLiveSchema),
+});
+export type LayoutLive = z.infer<typeof layoutLiveSchema>;
+
+export const emptyLayoutLive = (): LayoutLive => ({
+  turnouts: {},
+  signals: {},
+  accessories: {},
+  blocks: {},
+});
+
+// Changes only; the same shape, every part optional.
+export const layoutLiveChangesSchema = layoutLiveSchema.partial();
+export type LayoutLiveChanges = z.infer<typeof layoutLiveChangesSchema>;

@@ -88,6 +88,7 @@ describe('Engine', () => {
           feedbackSources: [],
           feedbackInputs: [],
           accessoryQueueLength: 0,
+          layout: {turnouts: {}, signals: {}, accessories: {}, blocks: {}},
         },
       },
     ]);

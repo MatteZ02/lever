@@ -13,6 +13,9 @@ export type FakeZ21Options = {
   turnoutInfoOn?: 'activate' | 'deactivate' | 'both';
   // Reply to unsupported X-Bus commands. Default 'unknown-command'.
   unsupported?: 'unknown-command' | 'silent';
+  // Report for never-switched turnouts: 'output1' (z21 start, default) or
+  // 'notSwitched' (ZZ=00, as the spec describes).
+  neverSwitched?: 'output1' | 'notSwitched';
   log?: (line: string) => void;
 };
 

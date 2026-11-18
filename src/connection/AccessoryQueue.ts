@@ -31,8 +31,10 @@ export type AccessoryJob =
       // Q flag (FW 1.24+). Set from the project's central-unit profile, the
       // same for every command, so Q=0 and Q=1 are never mixed (§5.2.2).
       queued?: boolean;
+      // The element this job belongs to (for confirmation timing).
+      tag?: string;
     }
-  | {kind: 'extAccessory'; rawAddress: number; value: number}
+  | {kind: 'extAccessory'; rawAddress: number; value: number; tag?: string}
   // A request whose answer arrives as a broadcast-style message (turnout
   // info, feedback status). `key` identifies duplicates.
   | {kind: 'query'; key: string; dataset: Uint8Array};

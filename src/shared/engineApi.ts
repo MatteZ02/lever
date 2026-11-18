@@ -7,6 +7,7 @@
 import {z} from 'zod';
 import {ENGINE_API_VERSION} from './apiVersion';
 import {feedbackInputStateSchema, feedbackSourceSchema} from './feedback';
+import {layoutLiveChangesSchema, layoutLiveSchema} from './liveState';
 
 export {ENGINE_API_VERSION};
 
@@ -49,6 +50,33 @@ export const engineCommandSchema = z.discriminatedUnion('type', [
     v: version,
     type: z.literal('setFeedbackSources'),
     sources: z.array(feedbackSourceSchema),
+  }),
+  // Operating the layout by element (Level 1+). The engine checks the
+  // element's automation level, sends through the queue and confirms.
+  z.object({
+    v: version,
+    type: z.literal('setTurnout'),
+    elementId: z.string(),
+    position: z.string(),
+  }),
+  z.object({
+    v: version,
+    type: z.literal('setSignal'),
+    elementId: z.string(),
+    aspectId: z.string(),
+  }),
+  z.object({
+    v: version,
+    type: z.literal('pressAccessory'),
+    elementId: z.string(),
+    on: z.boolean(),
+  }),
+  // Train number label on a block with feedback (BLK-4); null clears it.
+  z.object({
+    v: version,
+    type: z.literal('setTrainLabel'),
+    blockId: z.string(),
+    label: z.string().max(40).nullable(),
   }),
 ]);
 export type EngineCommand = z.infer<typeof engineCommandSchema>;
@@ -113,8 +141,20 @@ export type ExtAccessoryStateValue = z.infer<typeof extAccessoryStateSchema>;
 // Things the operator should know that are not errors in Lever, e.g. a
 // command the central unit cannot do. The renderer words them (strings.ts).
 export const engineNoticeSchema = z.object({
-  code: z.enum(['extAccessoryUnsupported']),
+  code: z.enum([
+    'extAccessoryUnsupported',
+    // An element command refused by its area's level.
+    'refused',
+    // Element not fully configured (e.g. no address).
+    'incomplete',
+    // No matching report after a retry.
+    'failed',
+    'labelNeedsFeedback',
+  ]),
   time: z.number(),
+  elementId: z.string().optional(),
+  blockId: z.string().optional(),
+  reason: z.string().optional(),
 });
 export type EngineNotice = z.infer<typeof engineNoticeSchema>;
 
@@ -133,6 +173,8 @@ export const engineSnapshotSchema = z.object({
   feedbackInputs: z.array(feedbackInputStateSchema),
   // Accessory commands waiting in the queue.
   accessoryQueueLength: z.number().int(),
+  // Live state of the loaded layout's elements and blocks.
+  layout: layoutLiveSchema,
 });
 export type EngineSnapshot = z.infer<typeof engineSnapshotSchema>;
 
@@ -187,6 +229,12 @@ export const engineEventSchema = z.discriminatedUnion('type', [
     length: z.number().int(),
   }),
   z.object({v: version, type: z.literal('notice'), notice: engineNoticeSchema}),
+  // Changed elements and blocks only.
+  z.object({
+    v: version,
+    type: z.literal('layout'),
+    changes: layoutLiveChangesSchema,
+  }),
 ]);
 export type EngineEvent = z.infer<typeof engineEventSchema>;
 export type EngineEventInput = DistributiveOmit<EngineEvent, 'v'>;
@@ -203,12 +251,9 @@ export const engineControlSchema = z.discriminatedUnion('type', [
   }),
   // Applied before connecting, so the log includes the connect sequence.
   z.object({type: z.literal('setProtocolLog'), enabled: z.boolean()}),
-  // From the open project's central-unit profile (LOAD-1, LOAD-2).
-  z.object({
-    type: z.literal('configureLayout'),
-    accessoryGapMs: z.number().int().min(20).max(5000),
-    feedbackSources: z.array(feedbackSourceSchema),
-  }),
+  // The open project (validated by the engine). Its central-unit profile
+  // sets the accessory gap and feedback sources (LOAD-1, LOAD-2).
+  z.object({type: z.literal('loadLayout'), project: z.unknown()}),
   // Log off cleanly and exit.
   z.object({type: z.literal('shutdown')}),
 ]);

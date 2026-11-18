@@ -180,14 +180,7 @@ const inselburg = (() => {
     'normal',
   );
   // Outer loop (Päärata Kel): south → around → track 3 → east exit.
-  s.track(
-    [8, 20],
-    [3, 20],
-    [2, 19],
-    [2, 9],
-    [3, 8],
-    [11, 8],
-  );
+  s.track([8, 20], [3, 20], [2, 19], [2, 9], [3, 8], [11, 8]);
   s.turnout('left', [12, 8], 'E');
   s.track([13, 8], [40, 8]);
   s.exit([40, 8], 'E', 'Päärata Kel');
@@ -208,14 +201,7 @@ const inselburg = (() => {
   s.track([28, -3], [29, -4], [34, -4]);
   s.stop([34, -4], 'W');
   // Inner loop (Päärata Pun): south → around → track 2 → east exit.
-  s.track(
-    [10, 18],
-    [5, 18],
-    [4, 17],
-    [4, 11],
-    [5, 10],
-    [9, 10],
-  );
+  s.track([10, 18], [5, 18], [4, 17], [4, 11], [5, 10], [9, 10]);
   // Dettingen: double crossover between the two main lines at the south end
   // (user, 2026-11-18), drawn as two crossovers in a row.
   s.turnout('left', [9, 20], 'E', 'Dettingen 1');

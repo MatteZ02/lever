@@ -45,9 +45,8 @@ process.parentPort.on('message', (event) => {
     case 'setProtocolLog':
       engine.setProtocolLog(control.enabled);
       break;
-    case 'configureLayout':
-      engine.setAccessoryGap(control.accessoryGapMs);
-      engine.setFeedbackSources(control.feedbackSources);
+    case 'loadLayout':
+      engine.loadLayout(control.project);
       break;
     case 'shutdown':
       engine.shutdown();
