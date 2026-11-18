@@ -13,6 +13,25 @@ export const strings = {
     exportTitle: 'Save a copy of the layout',
     importTitle: 'Import a layout as a new copy',
     restoreTitle: 'Restore a backup',
+    z21FileType: 'Z21 app layout',
+    importZ21Title: 'Import a control station from the Z21 app',
+    z21Failed: 'The Z21 file could not be imported.',
+    z21Imported: (stations: number) =>
+      `Imported ${stations} station${stations === 1 ? '' : 's'} from the Z21 app as a new layout. Save it to keep it. Check it in Edit layout → Problems before operating.`,
+    z21Issues: {
+      duplicatePage: (page: string, of: string) =>
+        `Page “${page}” was skipped: all its turnouts are also on “${of}”.`,
+      unknownControl: (type: number, count: number) =>
+        `${count} element${count === 1 ? '' : 's'} of an unknown kind (${type}) skipped.`,
+      oddAngle: (page: string, count: number) =>
+        `${count} element${count === 1 ? '' : 's'} on “${page}” at an angle Lever cannot draw, skipped.`,
+      invalidAddress: (page: string, address: number) =>
+        `Address ${address} on “${page}” is not a valid accessory address; that element has no address now.`,
+      routesNotImported: (count: number) =>
+        `${count} route button${count === 1 ? '' : 's'} not imported: Lever calculates routes itself (Level 2).`,
+      signalsAssumed: (count: number) =>
+        `${count} signal${count === 1 ? '' : 's'} imported as two-aspect main signals, with the Z21 app’s first state as Stop. Test them.`,
+    },
     noBackups:
       'Backups exist only for a layout saved as a file and open for editing.',
     saveFailed: 'The layout could not be saved.',
@@ -46,6 +65,7 @@ export const strings = {
     saveAs: 'Save as…',
     exportCopy: 'Save a copy…',
     importCopy: 'Import as new copy…',
+    importZ21: 'Import from Z21 app…',
     restoreBackup: 'Restore a backup…',
     quit: 'Quit',
     view: 'View',

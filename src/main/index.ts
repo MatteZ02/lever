@@ -48,6 +48,7 @@ const PROJECT_ACTIONS: ProjectFileAction[] = [
   'saveAs',
   'exportCopy',
   'import',
+  'importZ21',
   'restoreBackup',
 ];
 
@@ -186,6 +187,10 @@ const buildMenu = (): void => {
         {
           label: strings.menu.importCopy,
           click: () => runProjectAction('import'),
+        },
+        {
+          label: strings.menu.importZ21,
+          click: () => runProjectAction('importZ21'),
         },
         {
           label: strings.menu.restoreBackup,

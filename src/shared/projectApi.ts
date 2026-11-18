@@ -32,6 +32,7 @@ export type ProjectFileAction =
   | 'saveAs'
   | 'exportCopy'
   | 'import'
+  | 'importZ21'
   | 'restoreBackup';
 
 export type BackupEntry = {

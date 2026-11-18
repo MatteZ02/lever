@@ -6,14 +6,18 @@ import {join} from 'node:path';
 import {app, BrowserWindow, dialog} from 'electron';
 import {LoadError} from '../../model/migrations';
 import {createProject, PROJECT_FILE_EXTENSION} from '../../model/project';
+import {importZ21, Z21ImportIssue} from '../../model/z21Import';
 import {ProjectFileAction, ProjectState} from '../../shared/projectApi';
 import {strings} from '../../shared/strings';
+import {readZ21File} from '../z21File';
 import {backupDir} from './backups';
 import {OpenResult, ProjectDocument} from './ProjectDocument';
 
 const FILTERS = [
   {name: strings.project.fileType, extensions: [PROJECT_FILE_EXTENSION]},
 ];
+
+const Z21_FILTERS = [{name: strings.project.z21FileType, extensions: ['z21']}];
 
 export type ProjectControllerOptions = {
   onState: (state: ProjectState) => void;
@@ -102,6 +106,18 @@ export class ProjectController {
         }
         return;
       }
+      case 'importZ21': {
+        const path = await this.chooseFile(
+          window,
+          strings.project.importZ21Title,
+          undefined,
+          Z21_FILTERS,
+        );
+        if (path) {
+          await this.importZ21(path);
+        }
+        return;
+      }
       case 'restoreBackup': {
         const current = this.document.get().path;
         if (!current || this.document.get().readOnly) {
@@ -157,6 +173,27 @@ export class ProjectController {
     return true;
   }
 
+  // A Z21 app control station becomes a new, unsaved layout (the .z21 file
+  // is only read).
+  private async importZ21(path: string): Promise<void> {
+    try {
+      const {project, issues} = importZ21(await readZ21File(path));
+      await this.document.newProject(project);
+      this.options.rememberPath(null);
+      void dialog.showMessageBox({
+        type: 'info',
+        message: strings.project.z21Imported(project.views.length),
+        detail: issues.map(describeZ21Issue).join('\n'),
+      });
+    } catch (error) {
+      void dialog.showMessageBox({
+        type: 'error',
+        message: strings.project.z21Failed,
+        detail: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   private async reportOpen(result: OpenResult, path: string): Promise<void> {
     if (result.ok) {
       const state = this.document.get();
@@ -189,11 +226,12 @@ export class ProjectController {
     window: BrowserWindow | undefined,
     title: string,
     defaultPath?: string,
+    filters: Electron.FileFilter[] = FILTERS,
   ): Promise<string | undefined> {
     const options = {
       title,
       defaultPath,
-      filters: FILTERS,
+      filters,
       properties: ['openFile' as const],
     };
     const result = window
@@ -218,6 +256,24 @@ export class ProjectController {
     return result.canceled ? undefined : result.filePath;
   }
 }
+
+const describeZ21Issue = (issue: Z21ImportIssue): string => {
+  const text = strings.project.z21Issues;
+  switch (issue.code) {
+    case 'duplicatePage':
+      return text.duplicatePage(issue.page, issue.of);
+    case 'unknownControl':
+      return text.unknownControl(issue.type, issue.count);
+    case 'oddAngle':
+      return text.oddAngle(issue.page, issue.count);
+    case 'invalidAddress':
+      return text.invalidAddress(issue.page, issue.address);
+    case 'routesNotImported':
+      return text.routesNotImported(issue.count);
+    case 'signalsAssumed':
+      return text.signalsAssumed(issue.count);
+  }
+};
 
 const describeError = (
   error: LoadError | {code: 'unreadable'; message: string},
