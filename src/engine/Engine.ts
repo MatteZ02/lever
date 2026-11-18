@@ -96,7 +96,7 @@ export class Engine {
   private readonly schedule: (ms: number, run: () => void) => () => void;
   // The station view each window shows (key: its port); their turnouts are
   // the ones the position refresh asks for.
-  private readonly shownViews = new Map<unknown, string>();
+  private readonly shownViews = new Map<unknown, string[]>();
   private positionRefreshMs = 0;
   private lastPositionRefreshAt = 0;
   private cancelPositionRefresh: (() => void) | null = null;
@@ -344,15 +344,15 @@ export class Engine {
       case 'setTrainLabel':
         this.interlocking.setTrainLabel(command.blockId, command.label);
         break;
-      case 'showView': {
-        const before = this.shownViews.get(source);
-        if (command.viewId === null) {
+      case 'showViews': {
+        const before = this.shownViews.get(source) ?? [];
+        if (command.viewIds.length === 0) {
           this.shownViews.delete(source);
         } else {
-          this.shownViews.set(source, command.viewId);
+          this.shownViews.set(source, command.viewIds);
         }
         // Another station on screen: bring its positions up to date now.
-        if (command.viewId !== null && command.viewId !== before) {
+        if (command.viewIds.some((id) => !before.includes(id))) {
           this.refreshPositions();
         }
         break;
@@ -492,7 +492,7 @@ export class Engine {
       return;
     }
     this.lastPositionRefreshAt = this.now();
-    const views = new Set(this.shownViews.values());
+    const views = new Set([...this.shownViews.values()].flat());
     for (const fAdr of this.interlocking.addressesOfViews(views)) {
       this.awaitingReply.add(fAdr);
       this.enqueue(turnoutQuery(fAdr, true));

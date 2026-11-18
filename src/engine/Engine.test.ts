@@ -273,7 +273,7 @@ describe('position refresh (positionRefreshMs)', () => {
   const started = async (positionRefreshMs: number) => {
     const context = await setup();
     context.engine.loadLayout(layout(positionRefreshMs));
-    context.window.send({type: 'showView', viewId: 'v'});
+    context.window.send({type: 'showViews', viewIds: ['v']});
     // Start-up query and the first refresh for the shown view.
     await vi.advanceTimersByTimeAsync(1000);
     context.transport().takeSent();
@@ -310,7 +310,7 @@ describe('position refresh (positionRefreshMs)', () => {
 
   it('given no window shows the station, its turnouts are not asked for', async () => {
     const {transport, window} = await started(10000);
-    window.send({type: 'showView', viewId: null});
+    window.send({type: 'showViews', viewIds: []});
     await vi.advanceTimersByTimeAsync(30000);
     expect(transport().takeSent()).not.toContain(GET_INFO_5);
   });
