@@ -72,6 +72,10 @@ const api: LeverApi = {
   app: {
     info: () => ipcRenderer.invoke('app:info') as Promise<{version: string}>,
   },
+  window: {
+    open: (target) => ipcRenderer.send('window:open', target),
+    setTarget: (target) => ipcRenderer.send('window:target', target),
+  },
   project: {
     get: () => ipcRenderer.invoke('project:get') as Promise<ProjectState>,
     update: (project, clientId) =>

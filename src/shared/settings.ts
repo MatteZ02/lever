@@ -3,6 +3,7 @@
 // read at start-up and written only when the user changes a setting
 // (MULTI-5).
 import {z} from 'zod';
+import {windowTargetTextSchema} from './windowTarget';
 
 export const SETTINGS_VERSION = 1;
 
@@ -36,6 +37,23 @@ export const settingsSchema = z.object({
   protocolLog: z.boolean().default(false),
   // Reopened at start-up (PRJ-4). Set by the main process only.
   lastProjectPath: z.string().nullable().default(null),
+  // The windows open when Lever last closed (VIEW-2), reopened at start-up
+  // where they were, e.g. one per monitor. Set by the main process only.
+  windows: z
+    .array(
+      z.object({
+        target: windowTargetTextSchema,
+        bounds: z.object({
+          x: z.number().int(),
+          y: z.number().int(),
+          width: z.number().int().min(100),
+          height: z.number().int().min(100),
+        }),
+        maximized: z.boolean().default(false),
+      }),
+    )
+    .max(16)
+    .default([]),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;

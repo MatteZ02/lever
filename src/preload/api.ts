@@ -22,6 +22,13 @@ export type LeverApi = {
   app: {
     info(): Promise<{version: string}>;
   };
+  // Windows (VIEW-2). Targets are formatted by shared/windowTarget.ts; a new
+  // window gets its target in its URL hash.
+  window: {
+    open(target: string): void;
+    // What this window shows now (reopened there next time).
+    setTarget(target: string): void;
+  };
   project: {
     get(): Promise<ProjectState>;
     // Sends the edited project; the main process validates and autosaves it.

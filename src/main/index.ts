@@ -16,12 +16,14 @@ import {Project} from '../model/project';
 import {ProjectFileAction, ProjectState} from '../shared/projectApi';
 import {Settings, settingsUpdateSchema} from '../shared/settings';
 import {strings} from '../shared/strings';
+import {windowTargetTextSchema} from '../shared/windowTarget';
 import {EngineHost} from './engineHost';
 import {ProjectController} from './project/projectController';
 import {applySecurityPolicy} from './security';
 import {applySettingsUpdate, loadSettings, saveSettings} from './settingsFile';
 import {TurnoutPositionStore} from './turnoutPositions';
 import {runUiScript, uiScriptPath} from './uiAutomation';
+import {WindowManager} from './windows';
 
 // Several instances may run at once, also on one PC (MULTI-5), so there is
 // deliberately no app.requestSingleInstanceLock().
@@ -108,50 +110,8 @@ const isAppFrame = (event: IpcMainEvent | IpcMainInvokeEvent): boolean => {
   );
 };
 
-const createWindow = (): BrowserWindow => {
-  const window = new BrowserWindow({
-    width: 1280,
-    height: 800,
-    minWidth: 640,
-    minHeight: 480,
-    show: false,
-    title: strings.appName,
-    icon: iconPath,
-    autoHideMenuBar: false,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      contextIsolation: true,
-      sandbox: true,
-      nodeIntegration: false,
-      webSecurity: true,
-      spellcheck: false,
-      // Hidden automation windows must still render (uiAutomation.ts).
-      backgroundThrottling: uiScript === undefined,
-    },
-  });
-  // Closing the window quits Lever (one window for now). Go through the quit
-  // path first, so "Cancel" in its unsaved-changes question keeps the window.
-  window.on('close', (event) => {
-    if (stopping || uiScript) {
-      return;
-    }
-    event.preventDefault();
-    app.quit();
-  });
-  if (uiScript) {
-    window.once('ready-to-show', () => void runUiScript(window, uiScript));
-  } else {
-    window.once('ready-to-show', () => window.show());
-  }
-
-  const devServer = process.env['ELECTRON_RENDERER_URL'];
-  if (!app.isPackaged && devServer) {
-    void window.loadURL(devServer);
-  } else {
-    void window.loadFile(join(__dirname, '../renderer/index.html'));
-  }
-  return window;
-};
+// Windows (VIEW-2): created in start(); several may be open.
+let windows: WindowManager;
 
 const showAbout = (): void => {
   void dialog.showMessageBox({
@@ -236,6 +196,21 @@ const buildMenu = (): void => {
 };
 
 const registerIpc = (): void => {
+  // Opens a station view or the full view in a new window (VIEW-2).
+  ipcMain.on('window:open', (event, target: unknown) => {
+    const parsed = windowTargetTextSchema.safeParse(target);
+    if (isAppFrame(event) && parsed.success) {
+      windows.open(parsed.data);
+    }
+  });
+  // What the sending window shows now; saved with it at quit.
+  ipcMain.on('window:target', (event, target: unknown) => {
+    const parsed = windowTargetTextSchema.safeParse(target);
+    if (isAppFrame(event) && parsed.success) {
+      windows.setTarget(event.sender.id, parsed.data);
+    }
+  });
+
   ipcMain.on('engine:request-port', (event) => {
     if (isAppFrame(event)) {
       engine.attach(event.sender);
@@ -338,7 +313,17 @@ const start = async (): Promise<void> => {
   applyProjectToEngine(projects.document.get().project);
   engine.connect(settings.centralUnit.host, settings.centralUnit.port);
   await projects.reopen(settings.lastProjectPath);
-  createWindow();
+  windows = new WindowManager({
+    hidden: uiScript !== undefined,
+    isQuitting: () => stopping,
+    onCloseLast: () => app.quit(),
+    onReady: (window, first) => {
+      if (uiScript && first) {
+        void runUiScript(window, uiScript);
+      }
+    },
+  });
+  windows.restore(settings.windows);
 };
 
 let stopping = false;
@@ -356,8 +341,13 @@ app.on('before-quit', (event) => {
       return;
     }
     stopping = true;
-    void turnoutPositions
-      .flush()
+    // Reopen the same windows next time (not for UI automation).
+    if (!uiScript) {
+      settings = {...settings, windows: windows.snapshot()};
+    }
+    void (uiScript ? Promise.resolve() : saveSettings(settings))
+      .catch((error: unknown) => console.error('Settings not saved:', error))
+      .then(() => turnoutPositions.flush())
       .then(() => engine.stop())
       .finally(() => app.quit());
   });

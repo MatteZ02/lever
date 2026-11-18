@@ -8,7 +8,8 @@
 // Steps: {"wait": ms} | {"click": [x, y], "button"?: "left"|"right",
 // "double"?: true} | {"drag": [[x1, y1], [x2, y2]]} | {"key": "t", "ctrl"?:
 // true, "shift"?: true} | {"type": "text"} | {"capture": "name.png"} |
-// {"js": "code returning a value to print"}.
+// {"js": "code returning a value to print"} | {"window": n} (drive the n-th
+// open window from then on).
 //
 // Never active in a packaged build.
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
@@ -56,7 +57,10 @@ type Step =
   | {touch: [number, number][] | string}
   // Prints the renderer's main-thread work (DevTools Performance metrics:
   // task, script, layout, style time) since the previous metrics step.
-  | {metrics: string};
+  | {metrics: string}
+  // Later steps go to the n-th open window (0 = the first, in the order they
+  // were opened); prints the open windows' titles.
+  | {window: number};
 
 export const uiScriptPath = (): string | undefined =>
   app.isPackaged ? undefined : process.env['LEVER_UI_SCRIPT'];
@@ -81,15 +85,31 @@ const runSteps = async (window: BrowserWindow, scriptPath: string) => {
   const out = process.env['LEVER_UI_OUT'] ?? '.';
   await mkdir(out, {recursive: true});
   const steps = JSON.parse(await readFile(scriptPath, 'utf8')) as Step[];
-  const contents = window.webContents;
-  contents.on('console-message', (event) => {
-    console.log(`[renderer ${event.level}] ${event.message}`);
-  });
+  let contents = window.webContents;
+  const logConsole = (target: Electron.WebContents) =>
+    target.on('console-message', (event) => {
+      console.log(`[renderer ${event.level}] ${event.message}`);
+    });
+  logConsole(contents);
   await sleep(1500);
   let touchCount = 0;
   for (const step of steps) {
     if ('wait' in step) {
       await sleep(step.wait);
+    } else if ('window' in step) {
+      const open = BrowserWindow.getAllWindows().sort(
+        (a, b) => a.webContents.id - b.webContents.id,
+      );
+      console.log(
+        `[ui] windows: ${JSON.stringify(open.map((w) => w.getTitle()))}`,
+      );
+      const next = open[step.window];
+      if (next) {
+        contents = next.webContents;
+        logConsole(contents);
+      } else {
+        console.log(`[ui] no window ${step.window}`);
+      }
     } else if ('clickText' in step) {
       const found: unknown = await contents.executeJavaScript(
         `(() => { const b = [...document.querySelectorAll('button')].find((e) => e.textContent.trim() === ${JSON.stringify(step.clickText)}); if (b) { b.click(); return true; } return false; })()`,
