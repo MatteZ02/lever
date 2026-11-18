@@ -449,3 +449,18 @@ to every client with flag `0x1` (including the sender) **on activate**; `Q=1` is
 for never-switched addresses; extended accessories are supported (FW 1.43); **no reply to any
 feedback request** (R-Bus, LocoNet, CAN). Two complete Lever engines against Z21Sim each see the
 other's switching (`src/engine/__tests__/liveCentralUnit.test.ts`).
+
+## 14. Observed behaviour of a real z21 start, FW 1.33, for accessories and feedback (Lever, 2026-11-18)
+
+Probe output kept in the commit that added this section; details and consequences in
+`docs/hardware-notes.md`.
+
+- `LAN_X_TURNOUT_INFO` is broadcast **on activate** to every client with flag `0x1` (sender
+  included), not on deactivate.
+- **Never-switched addresses report `ZZ=01`**, not `ZZ=00` ("not switched yet", §5.3). The reported
+  position is therefore not proof of the real position.
+- With `Q=0`, a second client's activate for the **same** function address, sent while the first
+  client's activate is still on, is **silently ignored**. Different addresses are not affected.
+- `LAN_X_GET_EXT_ACCESSORY_INFO` → `LAN_X_UNKNOWN_COMMAND`; `LAN_X_SET_EXT_ACCESSORY` is ignored
+  silently (FW 1.33 < 1.40).
+- `LAN_RMBUS_GETDATA` is answered; `LAN_LOCONET_DETECTOR` and `LAN_CAN_DETECTOR` get no reply.

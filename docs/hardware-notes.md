@@ -27,14 +27,26 @@ The user's z21 start has **no accessories connected** (2026-11-17), so its check
 it answers for addresses with nothing behind them, which is harmless. Checks that need real
 turnouts are done later on the layout (on another PC).
 
-On the z21 start, protocol only (tools below):
+On the z21 start, protocol only — **checked 2026-11-18** (probe, two-engine live test, overlap
+test; nothing connected to the outputs):
 
-- [ ] Accessory broadcasts reach a second client (MULTI-1): run the live test.
-- [ ] Is `LAN_X_TURNOUT_INFO` sent on activate (as Z21Sim does), on deactivate, or both?
-- [ ] `LAN_X_TURNOUT_INFO` after power-up reports `ZZ=00` ("not switched yet") until switched.
-- [ ] Replies to extended-accessory and feedback requests on FW 1.33 (silence, or
-      `LAN_X_UNKNOWN_COMMAND`?).
-- [ ] Extended accessories are refused by Lever on FW 1.33 (a notice, nothing sent).
+- [x] Accessory broadcasts reach every client with flag `0x1`, including the sender, within 1 ms
+      (MULTI-1). The two-engine live test passes.
+- [x] `LAN_X_TURNOUT_INFO` is sent on **activate** only, not on deactivate (same as Z21Sim).
+- [x] **No `ZZ=00`**: never-switched addresses report `ZZ=01` (output 1). Lever cannot tell a
+      default or remembered position from a real one (MULTI-3). Only position feedback (ACC-3) or
+      switching the turnout gives certainty. To decide with the user how to show this.
+- [x] Extended accessories: `LAN_X_GET_EXT_ACCESSORY_INFO` → `LAN_X_UNKNOWN_COMMAND`;
+      `LAN_X_SET_EXT_ACCESSORY` silently ignored. Lever refuses both on FW 1.33 (notice).
+- [x] Feedback: `LAN_RMBUS_GETDATA` is answered (all inputs free). LocoNet and CAN detector
+      requests get no reply (the z21 start has neither bus).
+- [x] `Q=1` is accepted; several datasets per datagram are each answered.
+- [x] **Same turnout from two clients at once:** with `Q=0`, an activate for a turnout while
+      another client still holds the other output of the same turnout active is **silently
+      ignored** (no report, position unchanged). Different turnouts overlap fine. Within one Lever
+      instance the queue prevents this; between clients it can happen (two Lever instances, Lever
+      and the Roco app). The position then stays unconfirmed. Planned for Phase 3: if no report
+      arrives within the confirmation timeout, send the command once more, then warn.
 
 On the layout, with real turnouts (later):
 

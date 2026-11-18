@@ -73,6 +73,10 @@ describe.skipIf(!HOST)(`two Lever instances against ${HOST}:${PORT}`, () => {
           'instance B to see output 2 switched by A',
         );
 
+        // Wait until A's pulse is over: a z21 start (FW 1.33) silently ignores
+        // an activate for the same turnout while another client still holds
+        // its other output active (docs/hardware-notes.md).
+        await new Promise((resolve) => setTimeout(resolve, 500));
         b.send({type: 'switchAccessory', fAdr: FADR, output: 0});
         await waitFor(
           () => a.reported().at(-1) === 'output1',
