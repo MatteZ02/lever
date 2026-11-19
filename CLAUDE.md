@@ -25,7 +25,7 @@ app), which must keep working without Lever.
 | 2     | Project files, single-view editor, validation, test mode              | done; verified with UI automation against the fake Z21 (test buttons send the right bytes); awaiting user review and layout test                                           |
 | 3     | Operating mode Level 1, feedback monitor, areas                       | done; verified with UI automation against the fake Z21 (throw, aspect menu, manual turnout, occupancy, train label); awaiting user review                                  |
 | 4     | Several views, multiple windows, full layout view, station connectors | done; verified with UI automation (drag/scale panels, pairing, following an exit, a second window throwing a turnout via the fake Z21); window restore needs a manual test |
-| 5     | Level 2 routing, mixed-level tests                                    | not started                                                                                                                                                                |
+| 5     | Level 2 routing, mixed-level tests                                    | done; scenario tests incl. mixed Level 1/2; end-to-end with the fake Z21 (set, signals, broken by an external switch); awaiting user review on the layout                  |
 | 6     | Packaging, documentation (fi/en)                                      | not started                                                                                                                                                                |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
@@ -103,11 +103,13 @@ src/model/              PURE: project.ts (schema v1, .lever), migrations.ts, ele
                         DR5000: offset, straight output, pulse, gap, Q mode, confirmation),
                         accessoryCommands.ts (element + position → FAdr/output/pulse),
                         topology.ts (derived graph; project graph joined at paired exits),
-                        connectors.ts, arrangement.ts (full view), validation.ts, addressTable.ts,
+                        connectors.ts, arrangement.ts (full view), routing.ts (route finding,
+                        ROUTE_WEIGHTS), routeSignals.ts (RTE-5 rules), validation.ts, addressTable.ts,
                         editing.ts (pure edit ops), placement.ts.
 src/interlocking/       PURE: Interlocking.ts (Level 1 live state: positions/aspects from outputs,
                         confirmation timeout + one retry, blocks with release delay, train
-                        labels, ACC-4 restore), levels.ts (per-level command checks),
+                        labels, ACC-4 restore), routes.ts (Level 2 routes: set, broken,
+                        release, undo), levels.ts (per-level command checks),
                         accessoryState.ts (commanded vs reported); later routing.
 src/shared/             PURE: engine API (Zod, versioned), settings schema, feedback types,
                         strings.ts.

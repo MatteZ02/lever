@@ -312,7 +312,7 @@ may be defaults) to main over parentPort (`engineReportSchema`); main keeps them
 and its setting is on, main sends `restoreTurnouts`; the engine commands them once after
 connecting, through the interlocking and the queue, after the start-up queries.
 
-## 5. Interlocking engine _(proposed)_
+## 5. Interlocking engine (Levels 1 and 2 built)
 
 ```ts
 interface LevelModule {
@@ -334,6 +334,28 @@ interface LevelModule {
   (MULTI-3).
 - Everything here is pure and deterministic, with an injected clock, and tested as scenarios:
   "given this layout and state, when X, then Y" (ARC-L2, MIX-8).
+
+As built (Phases 3 and 5):
+
+- `src/interlocking/levels.ts`: level modules checking element commands; Levels 3 and 4 are
+  documented placeholders and refused.
+- `src/model/routing.ts`: route finding over **directed edges** of the project topology
+  (stations joined at linked exits). A state is "this edge, in this direction"; the next edge is
+  any other edge at its end except another passage of the same turnout, so routes go leg to leg
+  and never reverse on the spot. Start signals are left in their facing direction; end signals
+  are approached in it. Cost: `ROUTE_WEIGHTS` (turnout, diverging, signal, and a small length
+  weight that separates clearly different lengths and rules out circles). Dijkstra keeps every
+  equally cheap predecessor, so all tied routes are returned (the operator chooses). Via points
+  chain stretches. A plan carries turnout positions, signals passed (facing or not, diverging
+  ahead), areas with levels, blocks and polylines to draw.
+- `src/model/routeSignals.ts`: all signal aspect rules for a route (RTE-5) in one place.
+- `src/interlocking/routes.ts` (`RouteManager`, owned by the `Interlocking`): routes of this
+  instance only (MULTI-6). The engine finds the route again from the points sent by a window and
+  the chosen alternative's key. States: setting → (awaitingManual) → set; failed; broken. Every
+  turnout change reaches it at once; a set route whose turnout moves sets its signals to stop
+  before anything else (RTE-6c). Release, cancel, undo with history (RTE-6b). A route must start
+  in a Level 2 area; Level 1 parts are allowed (the window warns first, MIX-4); higher levels
+  are refused until built. Level 3 will add checks and locks per segment around this module.
 
 ## 6. Our layout
 

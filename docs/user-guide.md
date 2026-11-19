@@ -1,8 +1,8 @@
 # Lever user guide
 
 > Work in progress. This version covers the layout editor (Phase 2), operating at Level 1
-> (Phase 3), and the full layout view, station links and several windows (Phase 4). Routes
-> (Level 2) come in the next phase.
+> (Phase 3), the full layout view, station links and several windows (Phase 4), and routes at
+> Level 2 (Phase 5).
 
 ## Layout files
 
@@ -92,6 +92,44 @@ are not available yet.
 layout, it switches every connected turnout to the last position the central unit confirmed, one
 after another through the normal queue. Lever only knows the positions it saw on this PC; manual
 turnouts are not touched.
+
+## Routes (Level 2)
+
+Routes are for areas at **Level 2** (switch an area's level under **Levels**). The **Routes** panel
+appears at the top right of the diagram, in every window.
+
+1. **New route**, then click where the route starts and where it ends: a signal, a turnout, a
+   route point or a station exit, in any station or in the full layout. A signal's menu also has
+   **Route from here**. A route leaves a signal in the direction it faces and ends in front of a
+   signal facing the train.
+2. Lever shows the route dashed on the diagram. It picks the route with the fewest turnouts,
+   diverging movements and signals; if several are equally good, choose **Route 1**, **Route 2**,
+   …. Turnouts thrown by hand are listed. If part of the route lies in a **Level 1** area, Lever
+   says so: it is set normally there, but nothing there is meant to be routed or protected.
+3. **Set route**: the turnouts move one after another; the route shows moving dashes until every
+   turnout has reported its position. If it has manual turnouts, throw them by hand and press
+   **Thrown by hand**. Then the route is **set** (green dashes), and its signals are set: the
+   start signal and signals facing the route to proceed (reduced speed before a diverging turnout,
+   where the signal has it), signals facing the other way and the end signal to stop; distant
+   signals repeat their main signal. (Layout properties: _Set signals along routes
+   automatically_.)
+4. **Release** returns the route's signals to stop and leaves the turnouts as they are. **Undo
+   last route** also puts its turnouts back where they were, except any moved since (Lever says
+   which) and manual ones (Lever lists them to put back by hand). A key for undo can be chosen in
+   **Settings** (never Ctrl+Z).
+
+If a turnout of a set route moves, for whatever reason (another control station, a Throttle, the
+Roco app, a handset, or a click here), the route's signals go to **stop at once** and the route
+is shown **broken** (amber). A turnout that does not move makes the route **fail**; **Cancel**
+drops it. Level 2 does not lock turnouts or check occupancy (that is Level 3): occupied track
+stays red under the green route.
+
+**Save…** keeps a route by name, with its route points; saved routes are listed in the panel, and
+clicking the same start and end uses the saved one.
+
+**Several control stations:** each Lever knows only its own routes. Another station's routes
+look like turnouts set by someone else, and a turnout thrown by another station can break your
+route. Operate each area from one control station at a time.
 
 ## Full layout, linked stations and windows
 
