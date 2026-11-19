@@ -5,9 +5,12 @@
 export type SafetyShortcuts = {
   stop: string;
   trackPowerOff: string | null;
+  // Undo the last route (RTE-6b); not a safety action, but handled here so
+  // it follows the same rules (no modifiers, not while typing).
+  undoRoute?: string | null;
 };
 
-export type ShortcutAction = 'stop' | 'trackPowerOff';
+export type ShortcutAction = 'stop' | 'trackPowerOff' | 'undoRoute';
 
 const TEXT_INPUT_TYPES = new Set([
   'text',
@@ -64,6 +67,13 @@ export const shortcutAction = (
     !event.repeat
   ) {
     return 'trackPowerOff';
+  }
+  if (
+    shortcuts.undoRoute &&
+    event.key === shortcuts.undoRoute &&
+    !event.repeat
+  ) {
+    return 'undoRoute';
   }
   return undefined;
 };

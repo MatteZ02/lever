@@ -10,6 +10,7 @@
 // | Route being set                  | trackRouteSetting     | the same dashes, moving (animated)         |
 // | Route locked (Level 3, later)    | trackRouteLocked      | dashes plus a thin solid centre line       |
 // | Route broken (RTE-6c)            | trackRouteBroken      | short dash-dot, with a "!" marker          |
+// | Route preview (not set yet)      | accent                | short dashes                               |
 // | Turnout set leg (position known) | turnoutSet            | the set leg (not the tip side), full length|
 // | Turnout inactive leg (LOOK-5)    | trackInactiveLeg      | interrupted near the switch point, dimmed  |
 // | Slip position                    | turnoutSet            | X = straight, two curves = diverging       |
@@ -37,6 +38,8 @@ export const diagramDash = {
   routeSet: '0.45 0.25',
   routeSetting: '0.45 0.25',
   routeBroken: '0.3 0.15 0.05 0.15',
+  // The operator's preview before setting (accent colour, short dashes).
+  routePreview: '0.2 0.15',
   turnoutUnconfirmed: '0.08 0.12',
   // Position only reported at start-up, not seen switching (z21 start reports
   // output 1 for never-switched turnouts).

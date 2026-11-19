@@ -141,6 +141,8 @@ export const strings = {
     themeLight: 'Light',
     themeDark: 'Dark',
     protocolLog: 'Protocol log (for troubleshooting)',
+    undoRouteKey: 'Key for “Undo last route”',
+    noKey: 'None (use the button)',
   },
 
   protocolLog: {
@@ -171,6 +173,56 @@ export const strings = {
     open: 'New window',
     openHelp:
       'Open what is shown here in a new window, e.g. for a second monitor. Lever reopens its windows where they were.',
+  },
+
+  routes: {
+    title: 'Routes',
+    fold: 'Hide',
+    newRoute: 'New route',
+    undoLast: 'Undo last route',
+    clickStart:
+      'Click where the route starts: a signal, turnout, route point or station exit.',
+    clickEnd: (start: string) => `From ${start}. Click where the route ends.`,
+    notFound: {
+      noPath:
+        'No route between these points (signals are passed in their direction only).',
+      notRoutePoint:
+        'Routes start and end at signals, turnouts, route points or exits.',
+      samePoint: 'Start and end are the same.',
+    } as Record<string, string>,
+    via: (points: string) => `via ${points}`,
+    options: 'Equally good routes',
+    option: (n: number) => `Route ${n}`,
+    tie: 'These routes are equally good. Choose one; it is shown on the diagram.',
+    summary: (turnouts: number, areas: string[]) =>
+      `${turnouts} turnout${turnouts === 1 ? '' : 's'}; through ${areas.join(', ')}.`,
+    startLevel1:
+      'Routes start in a Level 2 area. Change the level under Levels to use routes here.',
+    levelNotAvailable:
+      'This route crosses an area at a level that is not available yet.',
+    level1Warning: (areas: string) =>
+      `Part of this route lies in a Level 1 area (${areas}), where no routing logic or protection is intended. It is set normally there.`,
+    manualList: (turnouts: string) =>
+      `Throw by hand, then confirm: ${turnouts}.`,
+    set: 'Set route',
+    save: 'Save…',
+    saveName: 'Name',
+    saveConfirm: 'Save route',
+    saved: 'Saved routes',
+    show: 'Show',
+    deleteSaved: 'Delete',
+    states: {
+      setting: 'Setting… (turnouts moving)',
+      awaitingManual: 'Waiting: throw the manual turnouts by hand',
+      set: 'Set',
+      failed: (turnout: string) => `Not set: ${turnout} did not move`,
+      broken: (turnout: string) => `Broken: ${turnout} moved; signals at stop`,
+    },
+    manualToSet: (turnouts: string) => `By hand: ${turnouts}.`,
+    confirmManual: 'Thrown by hand',
+    release: 'Release',
+    cancelRoute: 'Cancel',
+    fromHere: 'Route from here',
   },
 
   full: {

@@ -24,6 +24,7 @@ import {FullLayoutCanvas} from './full/FullLayoutCanvas';
 import {AreasPanel} from './operate/AreasPanel';
 import {FeedbackMonitor} from './operate/FeedbackMonitor';
 import {OperateCanvas} from './operate/OperateCanvas';
+import {RoutePanel} from './operate/RoutePanel';
 import {
   edit,
   redo,
@@ -278,6 +279,7 @@ export const Workspace = () => {
             ) : (
               <OperateCanvas project={project} view={view} />
             ))}
+          {!editing && <RoutePanel project={project} />}
           {hint && (
             <div
               key={hint}

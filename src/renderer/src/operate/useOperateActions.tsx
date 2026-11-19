@@ -2,7 +2,10 @@
 // a station view and the full layout view: throw a turnout (or record a
 // manual turnout's position), choose a signal's aspect, switch an accessory,
 // set the train number of an occupied block, or follow a paired station exit.
+// While a route is being chosen (Level 2), a click picks its start or end
+// instead and nothing is switched.
 import {useState} from 'react';
+import {levelOf} from '../../../model/areas';
 import {
   DiagramElement,
   Signal,
@@ -10,10 +13,13 @@ import {
 } from '../../../model/elements';
 import {nextTurnoutPosition} from '../../../model/ports';
 import {Project} from '../../../model/project';
+import {isRoutePoint} from '../../../model/routing';
 import {findSignalType} from '../../../model/signalTypes';
+import {viewOfElement} from '../../../model/validation';
 import {strings} from '../../../shared/strings';
 import {DiagramPointer} from '../diagram/DiagramView';
 import {sendCommand, useEngineStore} from '../store/engineStore';
+import {pickPoint, startPicking, useRouteStore} from '../store/routeStore';
 
 type Popup =
   | {kind: 'aspects'; signal: Signal; x: number; y: number}
@@ -74,6 +80,12 @@ export const useOperateActions = (
     pointer: DiagramPointer,
   ) => {
     setPopup(null);
+    if (useRouteStore.getState().pick) {
+      if (element && isRoutePoint(element)) {
+        pickPoint(project, element.id);
+      }
+      return;
+    }
     if (element) {
       act(element, pointer);
     }
@@ -107,6 +119,12 @@ export const useOperateActions = (
 
 // SIG-3: choose one of the signal's aspects. Large buttons; closes with
 // Cancel or after choosing (Esc stays STOP).
+// Routes start in Level 2 areas (Level 1 is manual operation only).
+const routesFrom = (project: Project, element: DiagramElement) => {
+  const view = viewOfElement(project, element.id);
+  return view !== undefined && levelOf(project, view, element) === 2;
+};
+
 const AspectMenu = ({
   project,
   signal,
@@ -147,6 +165,19 @@ const AspectMenu = ({
           {aspect.name}
         </button>
       ))}
+      {routesFrom(project, signal) && (
+        <button
+          type="button"
+          role="menuitem"
+          className="button"
+          onClick={() => {
+            startPicking(signal.id);
+            onClose();
+          }}
+        >
+          {strings.routes.fromHere}
+        </button>
+      )}
       <button type="button" className="button button--small" onClick={onClose}>
         {strings.modes.cancel}
       </button>

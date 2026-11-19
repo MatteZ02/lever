@@ -31,6 +31,9 @@ export const settingsSchema = z.object({
       stop: z.string().min(1).default('Escape'),
       // No default (CARRY-2).
       trackPowerOff: z.string().min(1).nullable().default(null),
+      // Undo the last route (RTE-6b). Never Ctrl+Z alone in operating
+      // mode; no default.
+      undoRoute: z.string().min(1).nullable().default(null),
     })
     .prefault({}),
   theme: z.enum(['system', 'light', 'dark']).default('system'),
@@ -74,6 +77,7 @@ export const settingsUpdateSchema = z.object({
     .object({
       stop: z.string().min(1),
       trackPowerOff: z.string().min(1).nullable(),
+      undoRoute: z.string().min(1).nullable().optional(),
     })
     .optional(),
   theme: z.enum(['system', 'light', 'dark']).optional(),

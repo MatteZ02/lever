@@ -42,6 +42,9 @@ window.addEventListener(
     } else if (action === 'trackPowerOff') {
       event.preventDefault();
       sendCommand({type: 'setTrackPower', on: false});
+    } else if (action === 'undoRoute') {
+      event.preventDefault();
+      sendCommand({type: 'undoRoute'});
     }
   },
   {capture: true},

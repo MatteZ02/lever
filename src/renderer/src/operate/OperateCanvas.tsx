@@ -7,6 +7,7 @@ import {StationConnector} from '../../../model/elements';
 import {Project, StationView} from '../../../model/project';
 import {AreaBoundaries} from '../diagram/AreaBoundaries';
 import {DiagramView} from '../diagram/DiagramView';
+import {RouteOverlay} from '../diagram/RouteOverlay';
 import {
   DEFAULT_VIEWPORT,
   setActiveView,
@@ -67,6 +68,7 @@ export const OperateCanvas = ({
         }}
       >
         <AreaBoundaries project={project} view={view} />
+        <RouteOverlay project={project} viewId={view.id} />
       </DiagramView>
       {popups}
     </>

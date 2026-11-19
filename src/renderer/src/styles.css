@@ -964,3 +964,74 @@ span.level-badge {
   padding-bottom: 6px;
   border-bottom: 1px solid var(--color-border);
 }
+
+/* --- Routes (Level 2) ---------------------------------------------------- */
+
+/* A route being set: its dashes move along the track (LOOK-3). One cycle is
+   ROUTE_SETTING_ANIMATION_MS; the offset is one dash period (0.45 + 0.25). */
+.route-setting {
+  animation: route-setting 800ms linear infinite;
+}
+
+@keyframes route-setting {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -0.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-setting {
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
+.route-panel {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  width: min(340px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.route-panel--folded {
+  width: auto;
+  padding: 4px;
+}
+
+.route-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.route-panel .route-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.route-panel .route-row strong {
+  flex: 1 1 100%;
+}
+
+.route-warning {
+  margin: 0;
+  padding: 6px 8px;
+  border-left: 4px solid var(--color-trackRouteBroken);
+  background: var(--color-surfaceRaised);
+}

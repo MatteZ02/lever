@@ -18,6 +18,7 @@ import {strings} from '../../../shared/strings';
 import {color} from '../../theme';
 import {AreaBoundaries} from '../diagram/AreaBoundaries';
 import {DiagramPointer, DiagramView, ViewLayer} from '../diagram/DiagramView';
+import {RouteOverlay} from '../diagram/RouteOverlay';
 import {buildDisplays} from '../operate/displays';
 import {useOperateActions} from '../operate/useOperateActions';
 import {
@@ -267,6 +268,7 @@ const StationPanel = ({
         />
         <ViewLayer project={project} view={view} displays={displays} />
         <AreaBoundaries project={project} view={view} />
+        {!editing && <RouteOverlay project={project} viewId={view.id} />}
       </g>
       {/* Title with the station's level (FULL-7). Double-click opens it. */}
       <g

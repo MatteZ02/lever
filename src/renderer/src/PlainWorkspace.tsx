@@ -4,6 +4,7 @@
 import {strings} from '../../shared/strings';
 import {FullLayoutCanvas} from './full/FullLayoutCanvas';
 import {OperateCanvas} from './operate/OperateCanvas';
+import {RoutePanel} from './operate/RoutePanel';
 import {setActiveArrangement, setActiveView} from './store/projectStore';
 import {useShownView} from './useShownView';
 
@@ -62,6 +63,7 @@ export const PlainWorkspace = () => {
           ) : (
             view && <OperateCanvas project={project} view={view} />
           )}
+          <RoutePanel project={project} />
         </div>
       </div>
     </div>

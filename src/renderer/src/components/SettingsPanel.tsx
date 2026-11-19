@@ -62,6 +62,18 @@ const CentralUnitForm = (props: CentralUnitFormProps) => {
   );
 };
 
+// Keys offered for "undo last route": none of them is Esc (STOP) or
+// typed text, and Ctrl+Z is never used (RTE-6b).
+const UNDO_ROUTE_KEYS = [
+  ...Array.from({length: 12}, (_, i) => `F${i + 1}`),
+  'Backspace',
+  'Insert',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+];
+
 export const SettingsPanel = () => {
   const settings = useSettingsStore((state) => state.settings);
   const protocolLog = useEngineStore((state) => state.protocolLog);
@@ -101,6 +113,28 @@ export const SettingsPanel = () => {
           }
         />
         {strings.settings.protocolLog}
+      </label>
+
+      <label className="field">
+        <span>{strings.settings.undoRouteKey}</span>
+        <select
+          value={settings.shortcuts.undoRoute ?? ''}
+          onChange={(event) =>
+            void updateSettings({
+              shortcuts: {
+                ...settings.shortcuts,
+                undoRoute: event.target.value || null,
+              },
+            })
+          }
+        >
+          <option value="">{strings.settings.noKey}</option>
+          {UNDO_ROUTE_KEYS.map((key) => (
+            <option key={key} value={key}>
+              {key}
+            </option>
+          ))}
+        </select>
       </label>
     </section>
   );

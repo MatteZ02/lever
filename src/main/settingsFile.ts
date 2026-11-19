@@ -50,5 +50,7 @@ export const applySettingsUpdate = (
     ...settings,
     ...update,
     centralUnit: update.centralUnit ?? settings.centralUnit,
-    shortcuts: update.shortcuts ?? settings.shortcuts,
+    shortcuts: update.shortcuts
+      ? {...settings.shortcuts, ...update.shortcuts}
+      : settings.shortcuts,
   });
