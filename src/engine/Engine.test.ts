@@ -7,6 +7,7 @@ import {
 import {FakeTransport} from '../connection/testUtils/fakeTransport';
 import {projectWith, turnout} from '../model/__tests__/testLayouts';
 import {ENGINE_API_VERSION, EngineEvent} from '../shared/engineApi';
+import {emptyLayoutLive} from '../shared/liveState';
 import {Engine, EnginePort} from './Engine';
 
 const STATUS_NORMAL = '08 00 40 00 62 22 00 40';
@@ -90,7 +91,7 @@ describe('Engine', () => {
           feedbackSources: [],
           feedbackInputs: [],
           accessoryQueueLength: 0,
-          layout: {turnouts: {}, signals: {}, accessories: {}, blocks: {}},
+          layout: emptyLayoutLive(),
         },
       },
     ]);
