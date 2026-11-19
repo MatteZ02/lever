@@ -182,7 +182,8 @@ export const strings = {
     undoLast: 'Undo last route',
     clickStart:
       'Click where the route starts: a signal, turnout, route point or station exit.',
-    clickEnd: (start: string) => `From ${start}. Click where the route ends.`,
+    clickEnd: (start: string) =>
+      `From ${start}. Click where the route ends, or a route point to pass on the way.`,
     notFound: {
       noPath:
         'No route between these points (signals are passed in their direction only).',
@@ -223,6 +224,9 @@ export const strings = {
     release: 'Release',
     cancelRoute: 'Cancel',
     fromHere: 'Route from here',
+    endHere: 'Route ends here',
+    viaHere: 'Via here',
+    followExit: 'Go to the other end',
   },
 
   full: {
@@ -572,8 +576,10 @@ export const strings = {
   notices: {
     extAccessoryUnsupported: () =>
       'The central unit’s firmware is too old for extended accessories (needs 1.40). Nothing was sent.',
-    refused: (name: string) =>
-      `${name}: not possible at this automation level.`,
+    refused: (name: string, reason?: string) =>
+      reason === 'signalNeedsRoute'
+        ? `${name}: at Level 2 signals are set by routes. Click it for "Route from here".`
+        : `${name}: not possible at this automation level.`,
     incomplete: (name: string, reason: string) =>
       `${name}: ${(strings.test.incomplete as Record<string, string>)[reason] ?? reason}. Nothing was sent.`,
     failed: (name: string) =>

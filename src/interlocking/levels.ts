@@ -24,13 +24,18 @@ export type ElementCommand =
   | {type: 'setSignal'; elementId: string; aspectId: string}
   | {type: 'pressAccessory'; elementId: string; on: boolean};
 
+// Who asks: the operator directly, or a route of this instance (setting,
+// releasing, breaking or undoing it).
+export type CommandOrigin = 'operator' | 'route';
+
 export type LevelContext = {
   level: AutomationLevel;
+  origin: CommandOrigin;
 };
 
 export type Decision = {ok: true} | {ok: false; reason: RefusalReason};
 
-export type RefusalReason = 'levelNotAvailable';
+export type RefusalReason = 'levelNotAvailable' | 'signalNeedsRoute';
 
 export interface LevelModule {
   readonly level: AutomationLevel;
@@ -43,12 +48,16 @@ export const level1Module: LevelModule = {
   check: () => ({ok: true}),
 };
 
-// Level 2: manual routing without protection (8.8). Single elements stay
-// freely switchable; route logic arrives in Phase 5 (RTE-6c: a turnout
-// change breaks a set route, it is not refused).
+// Level 2: manual routing without protection (8.8). Signals are set by
+// routes only, never by hand (user, 2026-11-19); turnouts stay freely
+// switchable (a turnout change breaks a set route, RTE-6c, it is not
+// refused).
 export const level2Module: LevelModule = {
   level: 2,
-  check: () => ({ok: true}),
+  check: (command, context) =>
+    command.type === 'setSignal' && context.origin === 'operator'
+      ? {ok: false, reason: 'signalNeedsRoute'}
+      : {ok: true},
 };
 
 export const BUILT_LEVELS: LevelModule[] = [level1Module, level2Module];
@@ -58,6 +67,7 @@ export const BUILT_LEVELS: LevelModule[] = [level1Module, level2Module];
 export const checkCommand = (
   command: ElementCommand,
   level: AutomationLevel,
+  origin: CommandOrigin = 'operator',
   modules: LevelModule[] = BUILT_LEVELS,
 ): Decision => {
   const highest = Math.max(...modules.map((module) => module.level));
@@ -65,7 +75,7 @@ export const checkCommand = (
     return {ok: false, reason: 'levelNotAvailable'};
   }
   for (const module of modules.filter((m) => m.level <= level)) {
-    const decision = module.check(command, {level});
+    const decision = module.check(command, {level, origin});
     if (!decision.ok) {
       return decision;
     }

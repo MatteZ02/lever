@@ -28,7 +28,7 @@ const noticeText = (notice: EngineNotice): string => {
     case 'extAccessoryUnsupported':
       return strings.notices.extAccessoryUnsupported();
     case 'refused':
-      return strings.notices.refused(name);
+      return strings.notices.refused(name, notice.reason);
     case 'incomplete':
       return strings.notices.incomplete(name, notice.reason ?? '');
     case 'failed':

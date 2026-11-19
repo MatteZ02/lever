@@ -98,10 +98,12 @@ turnouts are not touched.
 Routes are for areas at **Level 2** (switch an area's level under **Levels**). The **Routes** panel
 appears at the top right of the diagram, in every window.
 
-1. **New route**, then click where the route starts and where it ends: a signal, a turnout, a
-   route point or a station exit, in any station or in the full layout. A signal's menu also has
-   **Route from here**. A route leaves a signal in the direction it faces and ends in front of a
-   signal facing the train.
+1. Click a **signal**, **station exit** or **route point** and choose **Route from here**. Then
+   click where the route ends and choose **Route ends here**; to make it go a certain way, click
+   a route point (or signal) on the way first and choose **Via here**. (**New route** in the
+   panel works too, and also takes a turnout as start or end.) A route leaves a signal in the
+   direction it faces and ends in front of a signal facing the train. While you are making a
+   route, clicking turnouts does nothing.
 2. Lever shows the route dashed on the diagram. It picks the route with the fewest turnouts,
    diverging movements and signals; if several are equally good, choose **Route 1**, **Route 2**,
    …. Turnouts thrown by hand are listed. If part of the route lies in a **Level 1** area, Lever
@@ -126,6 +128,10 @@ stays red under the green route.
 
 **Save…** keeps a route by name, with its route points; saved routes are listed in the panel, and
 clicking the same start and end uses the saved one.
+
+**Signals at Level 2 are set by routes only:** clicking such a signal offers **Route from here**,
+not its aspects (at Level 1 you set aspects by hand, as before). Turnouts can still be thrown by
+hand at Level 2.
 
 **Several control stations:** each Lever knows only its own routes. Another station's routes
 look like turnouts set by someone else, and a turnout thrown by another station can break your

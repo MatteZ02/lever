@@ -2,7 +2,7 @@
 // dashes over the track (over red where it is occupied, so both show), a
 // route being set with moving dashes, a broken or failed route with
 // dash-dot amber, and the operator's preview with accent dashes. The picked
-// start and end are ringed.
+// start, via points and end are ringed.
 import {Project} from '../../../model/project';
 import {findElement} from '../../../model/validation';
 import {RouteLive} from '../../../shared/liveState';
@@ -76,7 +76,7 @@ export const RouteOverlay = ({
     search?.ok && pick
       ? (search.routes[pick.choice] ?? search.routes[0])
       : undefined;
-  const marked = [pick?.from, pick?.to].flatMap((id) => {
+  const marked = [pick?.from, ...(pick?.via ?? []), pick?.to].flatMap((id) => {
     const element = id ? findElement(project, id) : undefined;
     const inView = project.views
       .find((view) => view.id === viewId)

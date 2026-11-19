@@ -43,7 +43,12 @@ import {
   SignalLive,
   TurnoutLive,
 } from '../shared/liveState';
-import {checkCommand, ElementCommand, RefusalReason} from './levels';
+import {
+  checkCommand,
+  CommandOrigin,
+  ElementCommand,
+  RefusalReason,
+} from './levels';
 import {RouteManager, RouteNotice} from './routes';
 
 export type InterlockingNotice =
@@ -136,7 +141,7 @@ export class Interlocking {
       setTurnout: (elementId, position) =>
         this.command({type: 'setTurnout', elementId, position}),
       setSignal: (elementId, aspectId) =>
-        this.command({type: 'setSignal', elementId, aspectId}),
+        this.command({type: 'setSignal', elementId, aspectId}, 'route'),
       // A manual turnout's command records the position (ACC-5).
       recordManual: (elementId, position) =>
         this.command({type: 'setTurnout', elementId, position}),
@@ -461,7 +466,9 @@ export class Interlocking {
     }
   }
 
-  command(command: ElementCommand): void {
+  // `origin`: the operator, or a route of this instance (at Level 2 only
+  // routes set signals).
+  command(command: ElementCommand, origin: CommandOrigin = 'operator'): void {
     const info = this.infos.get(command.elementId);
     if (!info || !this.project) {
       return;
@@ -469,6 +476,7 @@ export class Interlocking {
     const decision = checkCommand(
       command,
       levelOf(this.project, info.view, info.element),
+      origin,
     );
     if (!decision.ok) {
       this.deps.onNotice({

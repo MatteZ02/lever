@@ -2,8 +2,12 @@
 // a station view and the full layout view: throw a turnout (or record a
 // manual turnout's position), choose a signal's aspect, switch an accessory,
 // set the train number of an occupied block, or follow a paired station exit.
-// While a route is being chosen (Level 2), a click picks its start or end
-// instead and nothing is switched.
+//
+// Routes (Level 2): clicking a signal, station exit or route point in a
+// Level 2 area opens a menu with "Route from here". While a route is being
+// made, clicking another of them offers "Route ends here" and "Via here";
+// other clicks switch nothing then. At Level 2 signals are set by routes
+// only, so a signal there has no aspect menu (user, 2026-11-19).
 import {useState} from 'react';
 import {levelOf} from '../../../model/areas';
 import {
@@ -17,12 +21,31 @@ import {isRoutePoint} from '../../../model/routing';
 import {findSignalType} from '../../../model/signalTypes';
 import {viewOfElement} from '../../../model/validation';
 import {strings} from '../../../shared/strings';
+import {describeElement} from '../describe';
 import {DiagramPointer} from '../diagram/DiagramView';
 import {sendCommand, useEngineStore} from '../store/engineStore';
-import {pickPoint, startPicking, useRouteStore} from '../store/routeStore';
+import {
+  addVia,
+  pickPoint,
+  setRouteEnd,
+  startPicking,
+  useRouteStore,
+} from '../store/routeStore';
+
+type RouteChoice = 'from' | 'to' | 'via' | 'follow';
+
+// Elements a route can be started, ended or led through by clicking.
+const CLICK_ROUTE_KINDS = new Set(['signal', 'connector', 'virtualPoint']);
 
 type Popup =
   | {kind: 'aspects'; signal: Signal; x: number; y: number}
+  | {
+      kind: 'route';
+      element: DiagramElement;
+      choices: RouteChoice[];
+      x: number;
+      y: number;
+    }
   | {kind: 'label'; blockId: string; x: number; y: number};
 
 export const useOperateActions = (
@@ -51,7 +74,11 @@ export const useOperateActions = (
         return;
       }
       case 'signal':
-        setPopup({kind: 'aspects', signal: element, x, y});
+        if (routesFrom(project, element)) {
+          setPopup({kind: 'route', element, choices: ['from'], x, y});
+        } else {
+          setPopup({kind: 'aspects', signal: element, x, y});
+        }
         return;
       case 'accessory': {
         const on =
@@ -66,8 +93,24 @@ export const useOperateActions = (
           setPopup({kind: 'label', blockId: element.blockId, x, y});
         }
         return;
-      case 'connector':
-        onConnector?.(element);
+      case 'connector': {
+        const choices: RouteChoice[] = routesFrom(project, element)
+          ? ['from']
+          : [];
+        if (element.pairedWith && onConnector) {
+          choices.push('follow');
+        }
+        if (choices.length === 1 && choices[0] === 'follow') {
+          onConnector?.(element);
+        } else if (choices.length > 0) {
+          setPopup({kind: 'route', element, choices, x, y});
+        }
+        return;
+      }
+      case 'virtualPoint':
+        if (routesFrom(project, element)) {
+          setPopup({kind: 'route', element, choices: ['from'], x, y});
+        }
         return;
       default:
         return;
@@ -80,10 +123,29 @@ export const useOperateActions = (
     pointer: DiagramPointer,
   ) => {
     setPopup(null);
-    if (useRouteStore.getState().pick) {
-      if (element && isRoutePoint(element)) {
-        pickPoint(project, element.id);
+    const pick = useRouteStore.getState().pick;
+    if (pick) {
+      // Choosing a route: only route points react.
+      if (!element || !isRoutePoint(element)) {
+        return;
       }
+      if (!pick.from || !CLICK_ROUTE_KINDS.has(element.kind)) {
+        pickPoint(project, element.id);
+        return;
+      }
+      if (element.id === pick.from) {
+        return;
+      }
+      const rect = (
+        pointer.event.currentTarget as Element
+      ).getBoundingClientRect();
+      setPopup({
+        kind: 'route',
+        element,
+        choices: ['to', 'via'],
+        x: pointer.event.clientX - rect.left,
+        y: pointer.event.clientY - rect.top,
+      });
       return;
     }
     if (element) {
@@ -91,8 +153,38 @@ export const useOperateActions = (
     }
   };
 
+  const chooseRoute = (element: DiagramElement, choice: RouteChoice) => {
+    setPopup(null);
+    switch (choice) {
+      case 'from':
+        startPicking(element.id);
+        return;
+      case 'to':
+        setRouteEnd(project, element.id);
+        return;
+      case 'via':
+        addVia(element.id);
+        return;
+      case 'follow':
+        if (element.kind === 'connector') {
+          onConnector?.(element);
+        }
+        return;
+    }
+  };
+
   const popups = (
     <>
+      {popup?.kind === 'route' && (
+        <RouteMenu
+          element={popup.element}
+          choices={popup.choices}
+          x={popup.x}
+          y={popup.y}
+          onChoose={(choice) => chooseRoute(popup.element, choice)}
+          onClose={() => setPopup(null)}
+        />
+      )}
       {popup?.kind === 'aspects' && (
         <AspectMenu
           project={project}
@@ -165,19 +257,6 @@ const AspectMenu = ({
           {aspect.name}
         </button>
       ))}
-      {routesFrom(project, signal) && (
-        <button
-          type="button"
-          role="menuitem"
-          className="button"
-          onClick={() => {
-            startPicking(signal.id);
-            onClose();
-          }}
-        >
-          {strings.routes.fromHere}
-        </button>
-      )}
       <button type="button" className="button button--small" onClick={onClose}>
         {strings.modes.cancel}
       </button>
@@ -239,3 +318,50 @@ const TrainLabelEditor = ({
     </form>
   );
 };
+
+const ROUTE_CHOICE_LABELS: Record<RouteChoice, string> = {
+  from: strings.routes.fromHere,
+  to: strings.routes.endHere,
+  via: strings.routes.viaHere,
+  follow: strings.routes.followExit,
+};
+
+// The route menu of a signal, exit or route point (Level 2).
+const RouteMenu = ({
+  element,
+  choices,
+  x,
+  y,
+  onChoose,
+  onClose,
+}: {
+  element: DiagramElement;
+  choices: RouteChoice[];
+  x: number;
+  y: number;
+  onChoose: (choice: RouteChoice) => void;
+  onClose: () => void;
+}) => (
+  <div
+    className="popup"
+    style={{left: x, top: y}}
+    role="menu"
+    aria-label={describeElement(element)}
+  >
+    <strong>{describeElement(element)}</strong>
+    {choices.map((choice) => (
+      <button
+        key={choice}
+        type="button"
+        role="menuitem"
+        className="button"
+        onClick={() => onChoose(choice)}
+      >
+        {ROUTE_CHOICE_LABELS[choice]}
+      </button>
+    ))}
+    <button type="button" className="button button--small" onClick={onClose}>
+      {strings.modes.cancel}
+    </button>
+  </div>
+);

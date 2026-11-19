@@ -71,6 +71,48 @@ export const pickPoint = (project: Project, elementId: string) => {
   });
 };
 
+// The end of the route being made (from the click menu): replaces an
+// earlier end; a saved route with this start and end lends its via points
+// when none were chosen.
+export const setRouteEnd = (project: Project, elementId: string) => {
+  const pick = get().pick;
+  if (!pick?.from || elementId === pick.from) {
+    return;
+  }
+  const saved =
+    pick.via.length === 0
+      ? project.routes.find(
+          (route) => route.from === pick.from && route.to === elementId,
+        )
+      : undefined;
+  set({
+    pick: {
+      ...pick,
+      to: elementId,
+      via: saved?.via ?? pick.via,
+      savedRouteId: saved?.id,
+      choice: 0,
+    },
+    panelOpen: true,
+  });
+};
+
+// A point the route must pass, after those chosen before (RTE-3).
+export const addVia = (elementId: string) => {
+  const pick = get().pick;
+  if (!pick?.from || pick.via.includes(elementId) || elementId === pick.from) {
+    return;
+  }
+  set({
+    pick: {
+      ...pick,
+      via: [...pick.via, elementId],
+      savedRouteId: undefined,
+      choice: 0,
+    },
+  });
+};
+
 // A saved route chosen from the list: shown as a preview to set.
 export const pickSavedRoute = (route: Project['routes'][number]): void =>
   set({

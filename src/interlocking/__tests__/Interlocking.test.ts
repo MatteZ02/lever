@@ -454,6 +454,52 @@ describe('mixed levels (ARC-L1)', () => {
   });
 });
 
+describe('signals at Level 2 (set by routes only)', () => {
+  const withSignal = (level: 1 | 2) => {
+    const project = projectWith(track('t', [0, 0], [5, 0]), {
+      kind: 'signal',
+      id: 'S',
+      name: '',
+      at: point(2, 0),
+      facing: 'E',
+      side: 'right',
+      signalTypeId: 'builtin:main2',
+      control: {kind: 'dcc', addresses: [20], invert: false},
+    });
+    project.areas.forEach((area) => (area.level = level));
+    return project;
+  };
+
+  it('given a Level 2 area, the operator cannot set a signal by hand', () => {
+    const {interlocking, jobs, notices} = setup(withSignal(2));
+    interlocking.command({
+      type: 'setSignal',
+      elementId: 'S',
+      aspectId: 'proceed',
+    });
+    expect(jobs).toEqual([]);
+    expect(notices).toEqual([
+      {code: 'refused', elementId: 'S', reason: 'signalNeedsRoute'},
+    ]);
+  });
+
+  it('a route may set it, and at Level 1 the operator may', () => {
+    const {interlocking, jobs} = setup(withSignal(2));
+    interlocking.command(
+      {type: 'setSignal', elementId: 'S', aspectId: 'proceed'},
+      'route',
+    );
+    expect(jobs).toHaveLength(1);
+    const level1 = setup(withSignal(1));
+    level1.interlocking.command({
+      type: 'setSignal',
+      elementId: 'S',
+      aspectId: 'proceed',
+    });
+    expect(level1.jobs).toHaveLength(1);
+  });
+});
+
 describe('position refresh (DR5000: changes by other programs)', () => {
   it('given a known position, when a refresh reply differs, then the change is followed and confirmed', () => {
     const {interlocking} = setup(projectWith(dccTurnout(5)));
