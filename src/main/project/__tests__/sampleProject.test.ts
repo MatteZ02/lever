@@ -1,4 +1,4 @@
-// The sample project (samples/club-layout.lever, imported from the club's
+// The sample project (samples/alppirata.lever, imported from the club's
 // Z21 app control station with File → Import from Z21 app) must stay valid
 // and clean. Known exceptions, both as drawn in the Z21 app and to be
 // checked by the user: the turnout whose address there is 9999 (no address
@@ -16,7 +16,7 @@ const SAMPLE = join(
   '..',
   '..',
   'samples',
-  'club-layout.lever',
+  'alppirata.lever',
 );
 
 describe('sample project', () => {

@@ -125,7 +125,7 @@ src/renderer/src/       React app; Zustand stores (engineStore mirrors engine ev
                         FeedbackMonitor, AreasPanel); full/ (FullLayoutCanvas,
                         ArrangementPanel);
                         Workspace.tsx (layout); safety/shortcuts.ts.
-samples/club-layout.lever  olten, inselburg-dettingen, Sissach, imported from the club's Z21 app
+samples/alppirata.lever  olten, inselburg-dettingen, Sissach, imported from the club's Z21 app
                         export (real addresses); edited in Lever now; a test keeps it clean.
 scripts/make-stress-project.mjs  Large layout for performance checks (docs/performance.md).
 ```

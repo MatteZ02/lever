@@ -104,7 +104,7 @@ Remove-Item Env:LEVER_Z21_HOST
 
 ## Sample and test layouts
 
-- `samples/club-layout.lever`: the club's stations, imported from the Z21 app export with
+- `samples/alppirata.lever`: the club's stations, imported from the Z21 app export with
   File → Import from Z21 app (2026-11-18), then saved. The file is the source now; edit it in
   Lever. `src/main/project/__tests__/sampleProject.test.ts` keeps it free of open ends and stray
   junctions (two known exceptions are listed there).

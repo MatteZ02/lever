@@ -30,7 +30,7 @@ Lever reopens the last layout when it starts. If the layout is already open for 
 copy of Lever (on this PC or another one on the network share), it opens **read-only** and says
 where it is open.
 
-A sample is included: `samples/club-layout.lever`, the club's olten, inselburg-dettingen and
+A sample is included: `samples/alppirata.lever`, the club's olten, inselburg-dettingen and
 Sissach, imported from the Z21 app with their addresses.
 
 ## Operating and editing
