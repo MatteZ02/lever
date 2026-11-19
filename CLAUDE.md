@@ -11,6 +11,8 @@ app), which must keep working without Lever.
 - Protocol: `docs/reference/z21-lan-protokoll-en_1.13.pdf` is the source of truth;
   `docs/reference/z21-protocol-notes.md` is the navigation aid (copied from Throttle, extended here).
 - Hardware findings and the "verify on DR5000" list: `docs/hardware-notes.md`.
+- For members: `README.md`, `docs/install-en.md`, `docs/install-fi.md` (Finnish written natively),
+  `docs/user-guide.md`. Keep the install guides in step with UI labels (Lever's UI is English).
 - Throttle's repository is cloned at `D:\GitHub\aaltoenergia\ar-z21` (not `../throttle`). Read its
   `CLAUDE.md` for hardware findings. Reference commit for copied code: `789c70e`.
 - If the spec is ambiguous, or hardware behaves differently from it, tell the user; do not silently
@@ -26,7 +28,7 @@ app), which must keep working without Lever.
 | 3     | Operating mode Level 1, feedback monitor, areas                       | done; verified with UI automation against the fake Z21 (throw, aspect menu, manual turnout, occupancy, train label); awaiting user review                                  |
 | 4     | Several views, multiple windows, full layout view, station connectors | done; verified with UI automation (drag/scale panels, pairing, following an exit, a second window throwing a turnout via the fake Z21); window restore needs a manual test |
 | 5     | Level 2 routing, mixed-level tests                                    | done; scenario tests incl. mixed Level 1/2; end-to-end with the fake Z21 (set, signals, broken by an external switch); awaiting user review on the layout                  |
-| 6     | Packaging, documentation (fi/en)                                      | not started                                                                                                                                                                |
+| 6     | Packaging, documentation (fi/en)                                      | done: release build checked (installer + portable zip, unsigned); README, install guides fi/en (Finnish to be reviewed by the user), user guide; not published             |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
 screenshots (`Z21_control_station_*.PNG`: olten, inselburg-dettingen, Sissach), the JuliaData

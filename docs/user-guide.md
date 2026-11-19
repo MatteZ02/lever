@@ -1,8 +1,8 @@
 # Lever user guide
 
-> Work in progress. This version covers the layout editor (Phase 2), operating at Level 1
-> (Phase 3), the full layout view, station links and several windows (Phase 4), and routes at
-> Level 2 (Phase 5).
+> How to operate the layout with Lever (Levels 1 and 2), edit layouts, and use several windows.
+> Installing Lever and connecting it: [install-en.md](install-en.md) (Finnish:
+> [install-fi.md](install-fi.md)).
 
 ## Layout files
 
@@ -92,6 +92,26 @@ are not available yet.
 layout, it switches every connected turnout to the last position the central unit confirmed, one
 after another through the normal queue. Lever only knows the positions it saw on this PC; manual
 turnouts are not touched.
+
+## Automation levels and areas
+
+Every part of the layout runs at an **automation level**:
+
+- **Level 1, manual:** turnouts and signals one by one, by clicking them. Occupancy and train
+  numbers are shown; nothing is automatic or protected.
+- **Level 2, manual routing:** routes from a start to an end (next section). Signals are set by
+  routes only; turnouts can still be thrown one by one. Nothing is locked and occupancy is not
+  checked.
+- Levels 3 (train protection) and 4 (automatic routing and driving) are planned, not available.
+
+The parts are **automation areas**. Every station is one; in the editor you can add areas for part
+of a station or the line between stations, and choose an element's area in its properties. Each
+station's level is shown in the bar (and in the full layout, on each station's title); boundaries
+between areas are marked on the diagram.
+
+To change a level, open **Levels** and choose it; no edit password is needed. Lowering a level
+never moves a turnout or changes a signal. A route may run from a Level 2 area into a Level 1
+area: Lever warns first and sets it normally there.
 
 ## Routes (Level 2)
 

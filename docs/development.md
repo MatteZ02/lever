@@ -152,8 +152,23 @@ This produces, for Windows x64:
 - `Lever-<version>-portable-x64.zip`: unzip anywhere and run `Lever.exe`.
 
 `npm run dist:dir` builds only the unpacked app (`release-builds/<version>/win-unpacked/`), which
-is quicker for testing. Set the version in `package.json` (0.x while in development), then attach
-both files to a GitHub release with the tag `v<version>`. There is no auto-updater (DST-2).
+is quicker for testing. There is no auto-updater (DST-2). To publish a release:
+
+1. Set the version in `package.json` (0.x while in development) and commit it.
+2. `npm run typecheck && npm run lint && npm test`, then `npm run dist`.
+3. Start the built app once (`release-builds/<version>/win-unpacked/Lever.exe`, with
+   `ELECTRON_RUN_AS_NODE` unset) and check that it connects and that STOP works.
+4. Tag and publish with both files (the installer's `.blockmap` is not needed):
+
+   ```powershell
+   git tag v<version>; git push origin v<version>
+   gh release create v<version> --title "Lever <version>" --notes "…" `
+     release-builds/<version>/Lever-<version>-setup-x64.exe `
+     release-builds/<version>/Lever-<version>-portable-x64.zip
+   ```
+
+The install guides ([English](install-en.md), [Finnish](install-fi.md)) point members to the
+Releases page.
 
 ### Code signing
 
