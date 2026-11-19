@@ -27,7 +27,9 @@ import {
 import {turnoutPositions} from '../model/ports';
 import {Block, Project, StationView} from '../model/project';
 import {OutputReport, reconstructState} from '../model/reconstruct';
+import {findRoutes} from '../model/routing';
 import {findSignalType, SignalType} from '../model/signalTypes';
+import {buildProjectTopology, Topology} from '../model/topology';
 import {
   DetectedLoco,
   feedbackInputKey,
@@ -42,12 +44,20 @@ import {
   TurnoutLive,
 } from '../shared/liveState';
 import {checkCommand, ElementCommand, RefusalReason} from './levels';
+import {RouteManager, RouteNotice} from './routes';
 
 export type InterlockingNotice =
   | {code: 'refused'; elementId: string; reason: RefusalReason}
   | {code: 'incomplete'; elementId: string; reason: string}
   | {code: 'failed'; elementId: string}
-  | {code: 'labelNeedsFeedback'; blockId: string};
+  | {code: 'labelNeedsFeedback'; blockId: string}
+  // A route that cannot be set: no such route (any more), it starts in a
+  // Level 1 area, or crosses an area at a level not built yet.
+  | {
+      code: 'routeRefused';
+      reason: 'noRoute' | 'changed' | 'needsLevel2' | 'levelNotAvailable';
+    }
+  | RouteNotice;
 
 export type InterlockingDeps = {
   enqueue: (job: AccessoryJob) => void;
@@ -109,10 +119,34 @@ export class Interlocking {
     signals: {},
     accessories: {},
     blocks: {},
+    routes: {},
   };
   private changes: LayoutLiveChanges = {};
+  // The whole layout as one graph, for routes (rebuilt on load).
+  private topology: Topology | null = null;
+  // True while a project is loaded: live state is being rebuilt, so routes
+  // are evaluated once at the end, not per element.
+  private loading = false;
+  private readonly routes: RouteManager;
 
-  constructor(private readonly deps: InterlockingDeps) {}
+  constructor(private readonly deps: InterlockingDeps) {
+    this.routes = new RouteManager({
+      project: () => this.project,
+      turnout: (id) => this.live.turnouts[id],
+      setTurnout: (elementId, position) =>
+        this.command({type: 'setTurnout', elementId, position}),
+      setSignal: (elementId, aspectId) =>
+        this.command({type: 'setSignal', elementId, aspectId}),
+      // A manual turnout's command records the position (ACC-5).
+      recordManual: (elementId, position) =>
+        this.command({type: 'setTurnout', elementId, position}),
+      notice: (notice) => this.deps.onNotice(notice),
+      changed: () => {
+        this.live.routes = this.routes.live();
+        this.changes.routes = this.live.routes;
+      },
+    });
+  }
 
   state(): LayoutLive {
     return this.live;
@@ -206,7 +240,15 @@ export class Interlocking {
 
     // Drop state of removed elements, then rebuild the rest.
     const previous = this.live;
-    this.live = {turnouts: {}, signals: {}, accessories: {}, blocks: {}};
+    this.topology = buildProjectTopology(project);
+    this.loading = true;
+    this.live = {
+      turnouts: {},
+      signals: {},
+      accessories: {},
+      blocks: {},
+      routes: previous.routes,
+    };
     for (const [id, info] of this.infos) {
       const kind =
         info.element.kind === 'turnout'
@@ -231,8 +273,85 @@ export class Interlocking {
         this.pending.delete(id);
       }
     }
+    this.loading = false;
+    this.routes.layoutChanged();
+    this.live.routes = this.routes.live();
     this.changes = {};
     this.deps.onChange(this.live);
+  }
+
+  // --- routes (Level 2, section 8.8) ------------------------------------------
+
+  // RTE-4: finds the route again (the layout may have changed since the
+  // operator's preview) and sets the one with `key`, or the first one.
+  setRoute(from: string, to: string, via: string[], key?: string): void {
+    const project = this.project;
+    if (!project || !this.topology) {
+      return;
+    }
+    const search = findRoutes(project, from, to, via, this.topology);
+    if (!search.ok) {
+      this.deps.onNotice({code: 'routeRefused', reason: 'noRoute'});
+      return;
+    }
+    const plan =
+      key === undefined
+        ? search.routes[0]
+        : search.routes.find((route) => route.key === key);
+    if (!plan) {
+      this.deps.onNotice({code: 'routeRefused', reason: 'changed'});
+      return;
+    }
+    // Routes are a Level 2 feature: they start in a Level 2 area and may
+    // run into Level 1 areas (MIX-4; the operator was warned). Levels not
+    // built yet are refused.
+    const start = this.elementInfo(from);
+    const startLevel = start
+      ? levelOf(project, start.view, start.element)
+      : project.settings.defaultLevel;
+    if (startLevel > 2 || plan.areas.some((area) => area.level > 2)) {
+      this.deps.onNotice({code: 'routeRefused', reason: 'levelNotAvailable'});
+      return;
+    }
+    if (startLevel < 2) {
+      this.deps.onNotice({code: 'routeRefused', reason: 'needsLevel2'});
+      return;
+    }
+    this.routes.set(plan);
+    this.flush();
+  }
+
+  cancelRoute(routeId: string): void {
+    this.routes.cancel(routeId);
+    this.flush();
+  }
+
+  releaseRoute(routeId: string): void {
+    this.routes.release(routeId);
+    this.flush();
+  }
+
+  undoRoute(): void {
+    this.routes.undoLast();
+    this.flush();
+  }
+
+  confirmManualTurnouts(routeId: string): void {
+    this.routes.confirmManual(routeId);
+    this.flush();
+  }
+
+  // Any element with its view (route points need not be controlled).
+  private elementInfo(
+    elementId: string,
+  ): {view: StationView; element: DiagramElement} | undefined {
+    for (const view of this.project?.views ?? []) {
+      const element = view.elements.find((e) => e.id === elementId);
+      if (element) {
+        return {view, element};
+      }
+    }
+    return undefined;
   }
 
   // --- reports from the central unit ----------------------------------------
@@ -701,6 +820,10 @@ export class Interlocking {
       if (!sameJson(this.live.turnouts[element.id], next)) {
         this.live.turnouts[element.id] = next;
         (this.changes.turnouts ??= {})[element.id] = next;
+        // RTE-6c: a set route notices at once when its turnout moves.
+        if (!this.loading) {
+          this.routes.turnoutChanged(element.id);
+        }
       }
     } else if (element.kind === 'signal') {
       const next: SignalLive = {status};

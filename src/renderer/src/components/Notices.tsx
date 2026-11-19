@@ -6,6 +6,7 @@
 import {findElement} from '../../../model/validation';
 import {EngineNotice} from '../../../shared/engineApi';
 import {strings} from '../../../shared/strings';
+import {describeElementId} from '../describe';
 import {useEngineStore} from '../store/engineStore';
 import {useProjectStore} from '../store/projectStore';
 
@@ -34,8 +35,26 @@ const noticeText = (notice: EngineNotice): string => {
       return strings.notices.failed(name);
     case 'labelNeedsFeedback':
       return strings.notices.labelNeedsFeedback(name);
+    case 'routeRefused':
+      return strings.notices.routeRefused(notice.reason ?? '');
+    case 'routeSet':
+      return strings.notices.routeSet;
+    case 'routeFailed':
+      return strings.notices.routeFailed(describe(notice.elementId));
+    case 'routeBroken':
+      return strings.notices.routeBroken(describe(notice.elementId));
+    case 'routeUndone':
+      return strings.notices.routeUndone(
+        (notice.skipped ?? []).map(describe),
+        (notice.manualBack ?? []).map(describe),
+      );
   }
 };
+
+const describe = (elementId: string | undefined) =>
+  elementId
+    ? describeElementId(useProjectStore.getState().project, elementId)
+    : '';
 
 // How long a notice stays before it has faded out.
 const NOTICE_SHOWN_MS = 10000;

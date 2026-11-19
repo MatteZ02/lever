@@ -178,6 +178,8 @@ const mergeLayout = (
   blocks: changes.blocks
     ? {...layout.blocks, ...changes.blocks}
     : layout.blocks,
+  // Routes always come complete.
+  routes: changes.routes ?? layout.routes,
 });
 
 // Connects the store to the engine. Call once at start-up.

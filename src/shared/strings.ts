@@ -528,6 +528,33 @@ export const strings = {
       `${name}: the central unit did not confirm the change, also after a second try. Check the turnout or signal.`,
     labelNeedsFeedback: (name: string) =>
       `${name}: train numbers can only be shown on track with feedback.`,
+    routeRefused: (reason: string) =>
+      ({
+        noRoute: 'No route between these points.',
+        changed:
+          'The layout changed since the route was shown. Choose the route again.',
+        needsLevel2:
+          'Routes start in a Level 2 area. Change the area’s level under Levels.',
+        levelNotAvailable:
+          'This route crosses an area at a level that is not available yet.',
+      })[reason] ?? 'The route could not be set.',
+    routeSet: 'Route set.',
+    routeFailed: (turnout: string) =>
+      `Route not set: ${turnout} did not move. Check it, then cancel the route or try again.`,
+    routeBroken: (turnout: string) =>
+      `Route broken: ${turnout} moved. Its signals were set to stop.`,
+    routeUndone: (skipped: string[], manualBack: string[]) =>
+      [
+        'Last route undone.',
+        skipped.length > 0
+          ? `Left alone (moved since): ${skipped.join(', ')}.`
+          : '',
+        manualBack.length > 0
+          ? `Put back by hand: ${manualBack.join(', ')}.`
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
     dismiss: 'Dismiss',
   },
 

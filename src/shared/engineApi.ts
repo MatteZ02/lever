@@ -86,6 +86,26 @@ export const engineCommandSchema = z.discriminatedUnion('type', [
     blockId: z.string(),
     label: z.string().max(40).nullable(),
   }),
+  // Routes (Level 2, RTE-1 – RTE-8). The engine finds the route itself
+  // from the points; `key` picks one of several equally good routes (the
+  // one the operator chose in the preview).
+  z.object({
+    v: version,
+    type: z.literal('setRoute'),
+    from: z.string(),
+    to: z.string(),
+    via: z.array(z.string()).max(20).default([]),
+    key: z.string().max(10000).optional(),
+  }),
+  z.object({v: version, type: z.literal('cancelRoute'), routeId: z.string()}),
+  z.object({v: version, type: z.literal('releaseRoute'), routeId: z.string()}),
+  z.object({v: version, type: z.literal('undoRoute')}),
+  // The operator has thrown the route's manual turnouts by hand.
+  z.object({
+    v: version,
+    type: z.literal('confirmManualTurnouts'),
+    routeId: z.string(),
+  }),
 ]);
 export type EngineCommand = z.infer<typeof engineCommandSchema>;
 
@@ -158,11 +178,22 @@ export const engineNoticeSchema = z.object({
     // No matching report after a retry.
     'failed',
     'labelNeedsFeedback',
+    // Routes (Level 2).
+    'routeRefused',
+    'routeSet',
+    'routeFailed',
+    'routeBroken',
+    'routeUndone',
   ]),
   time: z.number(),
   elementId: z.string().optional(),
   blockId: z.string().optional(),
   reason: z.string().optional(),
+  routeId: z.string().optional(),
+  // routeUndone: turnouts left alone (moved since), and manual turnouts to
+  // put back by hand.
+  skipped: z.array(z.string()).optional(),
+  manualBack: z.array(z.string()).optional(),
 });
 export type EngineNotice = z.infer<typeof engineNoticeSchema>;
 

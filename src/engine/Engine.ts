@@ -344,6 +344,26 @@ export class Engine {
       case 'setTrainLabel':
         this.interlocking.setTrainLabel(command.blockId, command.label);
         break;
+      case 'setRoute':
+        this.interlocking.setRoute(
+          command.from,
+          command.to,
+          command.via,
+          command.key,
+        );
+        break;
+      case 'cancelRoute':
+        this.interlocking.cancelRoute(command.routeId);
+        break;
+      case 'releaseRoute':
+        this.interlocking.releaseRoute(command.routeId);
+        break;
+      case 'undoRoute':
+        this.interlocking.undoRoute();
+        break;
+      case 'confirmManualTurnouts':
+        this.interlocking.confirmManualTurnouts(command.routeId);
+        break;
       case 'showViews': {
         const before = this.shownViews.get(source) ?? [];
         if (command.viewIds.length === 0) {
@@ -513,6 +533,9 @@ export class Engine {
         ...('elementId' in notice ? {elementId: notice.elementId} : {}),
         ...('blockId' in notice ? {blockId: notice.blockId} : {}),
         ...('reason' in notice ? {reason: notice.reason} : {}),
+        ...('routeId' in notice ? {routeId: notice.routeId} : {}),
+        ...('skipped' in notice ? {skipped: notice.skipped} : {}),
+        ...('manualBack' in notice ? {manualBack: notice.manualBack} : {}),
       },
     });
   }

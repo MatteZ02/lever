@@ -1,6 +1,8 @@
 // Live state of the layout, as the engine reports it to windows (ARC-1).
 // Keyed by element id (turnouts, signals, accessories) or block id.
 import {z} from 'zod';
+import {gridPointSchema} from '../model/geometry';
+import {automationLevelSchema} from '../model/project';
 import {detectedLocoSchema} from './feedback';
 
 // How sure the displayed position or aspect is (ACC-2, ACC-3, MULTI-3):
@@ -65,11 +67,50 @@ export const blockLiveSchema = z.object({
 });
 export type BlockLive = z.infer<typeof blockLiveSchema>;
 
+// A route set by this instance (Level 2, RTE-4 – RTE-8). Other instances'
+// routes are not known (MULTI-6).
+export const routeLiveSchema = z.object({
+  id: z.string(),
+  // Set order (undo goes back from the newest).
+  order: z.number().int(),
+  from: z.string(),
+  to: z.string(),
+  via: z.array(z.string()),
+  // setting: turnouts moving; awaitingManual: manual turnouts to throw by
+  // hand and confirm; set: in place, signals set; failed: a turnout did not
+  // move; broken: a turnout moved after it was set (signals to stop).
+  state: z.enum(['setting', 'awaitingManual', 'set', 'failed', 'broken']),
+  segments: z.array(
+    z.object({viewId: z.string(), points: z.array(gridPointSchema)}),
+  ),
+  turnouts: z.array(
+    z.object({
+      turnoutId: z.string(),
+      position: z.string(),
+      manual: z.boolean(),
+    }),
+  ),
+  // Manual turnouts not yet recorded in the route's position.
+  manualToSet: z.array(z.string()),
+  areas: z.array(
+    z.object({
+      areaId: z.string(),
+      name: z.string(),
+      level: automationLevelSchema,
+    }),
+  ),
+  failedTurnoutId: z.string().optional(),
+  brokenTurnoutId: z.string().optional(),
+});
+export type RouteLive = z.infer<typeof routeLiveSchema>;
+
 export const layoutLiveSchema = z.object({
   turnouts: z.record(z.string(), turnoutLiveSchema),
   signals: z.record(z.string(), signalLiveSchema),
   accessories: z.record(z.string(), accessoryLiveSchema),
   blocks: z.record(z.string(), blockLiveSchema),
+  // Always sent complete (routes come and go).
+  routes: z.record(z.string(), routeLiveSchema),
 });
 export type LayoutLive = z.infer<typeof layoutLiveSchema>;
 
@@ -78,6 +119,7 @@ export const emptyLayoutLive = (): LayoutLive => ({
   signals: {},
   accessories: {},
   blocks: {},
+  routes: {},
 });
 
 // Changes only; the same shape, every part optional.

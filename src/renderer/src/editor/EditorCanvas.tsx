@@ -30,6 +30,7 @@ import {
 import {strings} from '../../../shared/strings';
 import {color, diagramStroke} from '../../theme';
 import {Modal} from '../components/Modal';
+import {describeElement} from '../describe';
 import {AreaBoundaries} from '../diagram/AreaBoundaries';
 import {
   DiagramPointer,
@@ -88,19 +89,6 @@ export const finishTrack = (viewId: string, points: GridPoint[]): void => {
 };
 
 // "Turnout 13", "Station exit Nebenbahn", or just the kind.
-const describeElement = (element: DiagramElement): string => {
-  const kind = strings.kinds[element.kind] ?? element.kind;
-  const control = 'control' in element ? element.control : undefined;
-  const detail =
-    element.name.trim() ||
-    (control?.kind === 'dcc'
-      ? control.addresses.join('/')
-      : control?.kind === 'extended'
-        ? String(control.address)
-        : '');
-  return detail ? `${kind} ${detail}` : kind.toLowerCase();
-};
-
 type PendingReplace = {element: DiagramElement; replaced: DiagramElement[]};
 
 const hintFor = (reason: 'notOnTrack' | 'notAtTrackEnd') =>
