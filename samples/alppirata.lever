@@ -1808,6 +1808,375 @@
           },
           "width": 28,
           "height": 1
+        },
+        {
+          "id": "point-33h4i5tk",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 40,
+            "y": 38
+          }
+        },
+        {
+          "id": "point-aqj4xmzk",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 40,
+            "y": 40
+          }
+        },
+        {
+          "id": "point-fenb1uwj",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 28,
+            "y": 40
+          }
+        },
+        {
+          "id": "point-s1xa9nom",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 28,
+            "y": 38
+          }
+        },
+        {
+          "id": "point-8gk9el8g",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 7,
+            "y": 26
+          }
+        },
+        {
+          "id": "point-6vzfs87j",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 7,
+            "y": 28
+          }
+        },
+        {
+          "id": "point-gjci1uhr",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 11,
+            "y": 32
+          }
+        },
+        {
+          "id": "point-aqctxoxb",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 54,
+            "y": 22
+          }
+        },
+        {
+          "id": "point-cva5v8jt",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 54,
+            "y": 24
+          }
+        },
+        {
+          "id": "point-qhjjibqz",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 54,
+            "y": 26
+          }
+        },
+        {
+          "id": "point-uqlg3k8x",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 54,
+            "y": 28
+          }
+        },
+        {
+          "id": "point-96u9o6dm",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 20,
+            "y": 22
+          }
+        },
+        {
+          "id": "point-c862fhk3",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 20,
+            "y": 24
+          }
+        },
+        {
+          "id": "point-rfjhrte7",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 20,
+            "y": 26
+          }
+        },
+        {
+          "id": "point-4slxp2ou",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 20,
+            "y": 28
+          }
+        },
+        {
+          "id": "point-22vqs8w5",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 23,
+            "y": 34
+          }
+        },
+        {
+          "id": "point-dxcolq96",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 23,
+            "y": 32
+          }
+        },
+        {
+          "id": "point-0qcn6y7q",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 51,
+            "y": 34
+          }
+        },
+        {
+          "id": "point-vyo75fx4",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 51,
+            "y": 32
+          }
+        },
+        {
+          "id": "point-7nxdu0w7",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 61,
+            "y": 32
+          }
+        },
+        {
+          "id": "point-k9c2s238",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 61,
+            "y": 24
+          }
+        },
+        {
+          "id": "point-rorbvyi2",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 61,
+            "y": 26
+          }
+        },
+        {
+          "id": "point-b1czw7vp",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 57,
+            "y": 10
+          }
+        },
+        {
+          "id": "point-epmnj3li",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 47,
+            "y": 10
+          }
+        },
+        {
+          "id": "point-r0fzf72e",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 47,
+            "y": 8
+          }
+        },
+        {
+          "id": "point-gfpoft1i",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 21,
+            "y": 10
+          }
+        },
+        {
+          "id": "point-rrlen5vq",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 21,
+            "y": 8
+          }
+        },
+        {
+          "id": "point-nci077lx",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 21,
+            "y": 14
+          }
+        },
+        {
+          "id": "point-u6ahhzvo",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 21,
+            "y": 16
+          }
+        },
+        {
+          "id": "point-roy2oz4k",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 5,
+            "y": 13
+          }
+        },
+        {
+          "id": "point-ts666agr",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 6,
+            "y": 16
+          }
+        },
+        {
+          "id": "point-b2tbk96c",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 13,
+            "y": 18
+          }
+        },
+        {
+          "id": "point-y05t3om1",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 16,
+            "y": 30
+          }
+        },
+        {
+          "id": "point-gftze9pt",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 18,
+            "y": 34
+          }
+        },
+        {
+          "id": "point-bbj9d1p0",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 54,
+            "y": 34
+          }
+        },
+        {
+          "id": "point-w7d9djsa",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 56,
+            "y": 30
+          }
+        },
+        {
+          "id": "point-g3o8qzi3",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 54,
+            "y": 18
+          }
+        },
+        {
+          "id": "point-5ljvz08u",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 50,
+            "y": 14
+          }
+        },
+        {
+          "id": "point-jo1r28h4",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 54,
+            "y": 6
+          }
+        },
+        {
+          "id": "point-dizryehs",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 55,
+            "y": 7
+          }
+        },
+        {
+          "id": "point-yw194a3a",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 56,
+            "y": 8
+          }
         }
       ]
     },
