@@ -110,7 +110,7 @@ src/interlocking/       PURE: Interlocking.ts (Level 1 live state: positions/asp
                         confirmation timeout + one retry, blocks with release delay, train
                         labels, ACC-4 restore), routes.ts (Level 2 routes: set, broken,
                         release, undo), levels.ts (per-level command checks),
-                        accessoryState.ts (commanded vs reported); later routing.
+                        accessoryState.ts (commanded vs reported).
 src/shared/             PURE: engine API (Zod, versioned), settings schema, feedback types,
                         strings.ts.
 scripts/z21-probe.mjs   Raw protocol probe with 3 clients; run on Z21Sim, z21 start, DR5000.
