@@ -42,6 +42,9 @@ ipcRenderer.on('engine-port', (event) => {
 ipcRenderer.send('engine:request-port');
 
 const api: LeverApi = {
+  // Asked once, before the page's scripts run: strings.ts picks its table
+  // from it when it loads.
+  language: ipcRenderer.sendSync('settings:language') === 'fi' ? 'fi' : 'en',
   engine: {
     send(command: EngineCommandInput) {
       enginePort?.postMessage({...command, v: ENGINE_API_VERSION});

@@ -13,11 +13,14 @@ import {readZ21File} from '../z21File';
 import {backupDir} from './backups';
 import {OpenResult, ProjectDocument, unsavedRisk} from './ProjectDocument';
 
-const FILTERS = [
+// Functions, so they follow a change of language.
+const projectFilters = () => [
   {name: strings.project.fileType, extensions: [PROJECT_FILE_EXTENSION]},
 ];
 
-const Z21_FILTERS = [{name: strings.project.z21FileType, extensions: ['z21']}];
+const z21Filters = () => [
+  {name: strings.project.z21FileType, extensions: ['z21']},
+];
 
 export type ProjectControllerOptions = {
   onState: (state: ProjectState) => void;
@@ -121,7 +124,7 @@ export class ProjectController {
           window,
           strings.project.importZ21Title,
           undefined,
-          Z21_FILTERS,
+          z21Filters(),
         );
         if (path) {
           await this.importZ21(path);
@@ -285,7 +288,7 @@ export class ProjectController {
     window: BrowserWindow | undefined,
     title: string,
     defaultPath?: string,
-    filters: Electron.FileFilter[] = FILTERS,
+    filters: Electron.FileFilter[] = projectFilters(),
   ): Promise<string | undefined> {
     const options = {
       title,
@@ -307,7 +310,7 @@ export class ProjectController {
     const options = {
       title,
       defaultPath: `${name}.${PROJECT_FILE_EXTENSION}`,
-      filters: FILTERS,
+      filters: projectFilters(),
     };
     const result = window
       ? await dialog.showSaveDialog(window, options)

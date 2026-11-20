@@ -114,7 +114,7 @@ src/interlocking/       PURE: Interlocking.ts (Level 1 live state: positions/asp
                         release, undo), levels.ts (per-level command checks),
                         accessoryState.ts (commanded vs reported).
 src/shared/             PURE: engine API (Zod, versioned), settings schema, feedback types,
-                        strings.ts.
+                        strings.ts + strings.fi.ts (UI text), language.ts.
 scripts/z21-probe.mjs   Raw protocol probe with 3 clients; run on Z21Sim, z21 start, DR5000.
 scripts/fake-z21.mjs    TEST-ONLY fake central unit with feedback emulation (Z21Sim has none);
                         `npm run fake-z21` (UDP 21107) or imported by tests. Independent of
@@ -170,7 +170,9 @@ with 45° legs (turnout legs are one grid step).
 - Zod validates persisted data and every message crossing a process boundary.
 - Colours only via theme tokens (`color.x` in TS, `var(--color-x)` in CSS). Lint fails otherwise.
   Fixed diagram meanings: occupied = solid red, set route = dashed green (LOOK-2).
-- All user-visible strings in `src/shared/strings.ts`. English only (CON-4).
+- All user-visible strings in `src/shared/strings.ts` (English) and `src/shared/strings.fi.ts`
+  (Finnish, same shape; the user reviews the Finnish). Add every new string to both. The language
+  is a setting; windows reload when it changes.
 - Pure logic gets Vitest tests; protocol tests use byte-exact values from the spec; safety logic
   uses "given / when / then" scenario tests.
 - Prettier: single quotes, semicolons, `bracketSpacing: false`, 2 spaces, LF. Import order without

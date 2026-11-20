@@ -15,7 +15,7 @@ import iconPath from '../../assets/icon.png?asset';
 import {Project} from '../model/project';
 import {ProjectFileAction, ProjectState} from '../shared/projectApi';
 import {Settings, settingsUpdateSchema} from '../shared/settings';
-import {strings} from '../shared/strings';
+import {setLanguage, strings} from '../shared/strings';
 import {windowTargetTextSchema} from '../shared/windowTarget';
 import {EngineHost} from './engineHost';
 import {ProjectController} from './project/projectController';
@@ -217,6 +217,11 @@ const registerIpc = (): void => {
     }
   });
 
+  // The preload asks this synchronously, before the page loads.
+  ipcMain.on('settings:language', (event) => {
+    event.returnValue = isAppFrame(event) ? settings.language : 'en';
+  });
+
   ipcMain.handle('settings:get', (event) =>
     isAppFrame(event) ? settings : undefined,
   );
@@ -238,6 +243,16 @@ const registerIpc = (): void => {
     }
     if (settings.protocolLog !== previous.protocolLog) {
       engine.setProtocolLog(settings.protocolLog);
+    }
+    if (settings.language !== previous.language) {
+      // Menus here, and every window reloaded in the new language (the
+      // project and the engine state live outside the windows).
+      setLanguage(settings.language);
+      buildMenu();
+      for (const window of BrowserWindow.getAllWindows()) {
+        window.webContents.reload();
+      }
+      return settings;
     }
     for (const window of BrowserWindow.getAllWindows()) {
       window.webContents.send('settings:changed', settings);
@@ -296,6 +311,7 @@ const start = async (): Promise<void> => {
   app.setAppUserModelId('fi.alppirautatiet.lever');
   applySecurityPolicy();
   settings = await loadSettings();
+  setLanguage(settings.language);
   turnoutPositions = new TurnoutPositionStore(
     join(app.getPath('userData'), 'turnout-positions.json'),
   );

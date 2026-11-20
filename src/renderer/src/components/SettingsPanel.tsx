@@ -1,4 +1,5 @@
 import {FormEvent, useState} from 'react';
+import {LANGUAGES} from '../../../shared/language';
 import {strings} from '../../../shared/strings';
 import {useEngineStore} from '../store/engineStore';
 import {updateSettings, useSettingsStore} from '../store/settingsStore';
@@ -101,6 +102,22 @@ export const SettingsPanel = () => {
                 : strings.settings.themeDark}
           </label>
         ))}
+      </fieldset>
+
+      <fieldset>
+        <legend>{strings.settings.language}</legend>
+        {LANGUAGES.map((language) => (
+          <label key={language} className="choice" lang={language}>
+            <input
+              type="radio"
+              name="language"
+              checked={settings.language === language}
+              onChange={() => void updateSettings({language})}
+            />
+            {strings.settings.languageNames[language]}
+          </label>
+        ))}
+        <small className="muted">{strings.settings.languageHelp}</small>
       </fieldset>
 
       <label className="choice">

@@ -1,8 +1,15 @@
-// All user-visible text (CON-4). English only. Used by the main process
-// (menus, dialogs) and the renderer. Keep wording plain, without jargon
-// (CARRY-4).
+// All user-visible text (CON-4): English here, Finnish in strings.fi.ts
+// (same shape, checked by the type). Used by the main process (menus,
+// dialogs) and the renderer. Keep wording plain, without jargon (CARRY-4).
+//
+// The language is fixed when a page loads (the preload passes the setting
+// as `window.lever.language`), so module-level copies of a string are fine
+// in the renderer. The main process switches with setLanguage() and builds
+// its menu again.
+import {Language} from './language';
+import {fi} from './strings.fi';
 
-export const strings = {
+const en = {
   appName: 'Lever',
 
   project: {
@@ -140,6 +147,9 @@ export const strings = {
     themeSystem: 'Same as Windows',
     themeLight: 'Light',
     themeDark: 'Dark',
+    language: 'Language',
+    languageNames: {en: 'English', fi: 'Suomi'} as Record<string, string>,
+    languageHelp: 'Lever’s windows reload in the new language.',
     protocolLog: 'Protocol log (for troubleshooting)',
     undoRouteKey: 'Key for “Undo last route”',
     noKey: 'None (use the button)',
@@ -717,4 +727,21 @@ export const strings = {
     },
     locos: (addresses: number[]) => `Locos: ${addresses.join(', ')}`,
   },
-} as const;
+};
+
+export type Strings = typeof en;
+
+const TABLES: Record<Language, Strings> = {en, fi};
+
+// The language of this page: renderers get it from the preload; elsewhere
+// (main process, engine, tests) it starts in English.
+const pageLanguage = (): Language =>
+  (globalThis as {lever?: {language?: unknown}}).lever?.language === 'fi'
+    ? 'fi'
+    : 'en';
+
+export let strings: Strings = TABLES[pageLanguage()];
+
+export const setLanguage = (language: Language): void => {
+  strings = TABLES[language];
+};

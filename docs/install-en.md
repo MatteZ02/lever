@@ -54,6 +54,9 @@ Lever talks to the central unit (DR5000, Z21 or z21 start) over the layout's own
 
 ## 4. The central unit's address
 
+Lever can also be used in Finnish: **Settings** → **Language** → **Suomi** reloads its windows in
+Finnish.
+
 1. Start Lever.
 2. Click **Settings** (top right).
 3. Under **Central unit**, enter the **IP address**. A central unit straight from the factory has

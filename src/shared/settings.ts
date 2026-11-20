@@ -3,6 +3,7 @@
 // read at start-up and written only when the user changes a setting
 // (MULTI-5).
 import {z} from 'zod';
+import {LANGUAGES} from './language';
 import {windowTargetTextSchema} from './windowTarget';
 
 export const SETTINGS_VERSION = 1;
@@ -37,6 +38,8 @@ export const settingsSchema = z.object({
     })
     .prefault({}),
   theme: z.enum(['system', 'light', 'dark']).default('system'),
+  // Language of the user interface (strings.ts, strings.fi.ts).
+  language: z.enum(LANGUAGES).default('en'),
   protocolLog: z.boolean().default(false),
   // Reopened at start-up (PRJ-4). Set by the main process only.
   lastProjectPath: z.string().nullable().default(null),
@@ -81,6 +84,7 @@ export const settingsUpdateSchema = z.object({
     })
     .optional(),
   theme: z.enum(['system', 'light', 'dark']).optional(),
+  language: z.enum(LANGUAGES).optional(),
   protocolLog: z.boolean().optional(),
 });
 export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;

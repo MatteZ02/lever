@@ -2,10 +2,13 @@
 // only; shared by the preload (node build) and the renderer (web build).
 import type {Project} from '../model/project';
 import type {EngineCommandInput, EngineEvent} from '../shared/engineApi';
+import type {Language} from '../shared/language';
 import type {ProjectFileAction, ProjectState} from '../shared/projectApi';
 import type {Settings, SettingsUpdate} from '../shared/settings';
 
 export type LeverApi = {
+  // The user interface language, fixed while the page is loaded.
+  language: Language;
   engine: {
     // Sends a command to the engine. Commands sent before the port is ready
     // (the first moments after the window opens) are dropped.

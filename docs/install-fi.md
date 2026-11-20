@@ -58,6 +58,10 @@ Lever keskustelee keskusyksikön (DR5000, Z21 tai z21 start) kanssa radan omassa
 
 ## 4. Keskusyksikön osoite
 
+Leverin saa suomenkieliseksi: **Settings** → **Language** → **Suomi**, jolloin ikkunat latautuvat
+uudelleen suomeksi. Tämä ohje käyttää englanninkielisiä nimiä (suomeksi **Asetukset**, **Kieli**
+jne.).
+
 1. Käynnistä Lever.
 2. Napsauta oikeasta yläkulmasta **Settings**.
 3. Kirjoita kohtaan **Central unit** keskusyksikön **IP address**. Tehtaalta tulleen keskusyksikön

@@ -8,6 +8,9 @@ import {bindProjectStore} from './store/projectStore';
 import {bindSettingsStore, useSettingsStore} from './store/settingsStore';
 import './styles.css';
 
+// The page's language (screen readers, hyphenation); strings.ts uses it too.
+document.documentElement.lang = window.lever.language;
+
 bindEngineStore();
 bindSettingsStore();
 bindProjectStore();
