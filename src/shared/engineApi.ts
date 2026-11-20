@@ -102,12 +102,6 @@ export const engineCommandSchema = z.discriminatedUnion('type', [
   z.object({v: version, type: z.literal('cancelRoute'), routeId: z.string()}),
   z.object({v: version, type: z.literal('releaseRoute'), routeId: z.string()}),
   z.object({v: version, type: z.literal('undoRoute')}),
-  // The operator has thrown the route's manual turnouts by hand.
-  z.object({
-    v: version,
-    type: z.literal('confirmManualTurnouts'),
-    routeId: z.string(),
-  }),
 ]);
 export type EngineCommand = z.infer<typeof engineCommandSchema>;
 
@@ -200,6 +194,10 @@ export const engineNoticeSchema = z.object({
   // put back by hand.
   skipped: z.array(z.string()).optional(),
   manualBack: z.array(z.string()).optional(),
+  // routeSet: manual turnouts to throw by hand, with their positions.
+  manualThrow: z
+    .array(z.object({turnoutId: z.string(), position: z.string()}))
+    .optional(),
 });
 export type EngineNotice = z.infer<typeof engineNoticeSchema>;
 

@@ -1,8 +1,9 @@
 // Routes (Level 2, section 8.8), in every operating window: choose a start
 // and an end on the diagram (or a saved route), see the route before
 // setting it (alternatives on a tie, manual turnouts, Level 1 parts), and
-// manage the routes this control station has set: confirm manual
-// turnouts, cancel, release, undo the last one.
+// manage the routes this control station has set: cancel, release, undo the
+// last one. Manual turnouts are listed, never confirmed: setting the route
+// records them, and the operator throws them by hand.
 import {useMemo, useState} from 'react';
 import {levelOf} from '../../../model/areas';
 import {newId, Project} from '../../../model/project';
@@ -394,37 +395,24 @@ const ActiveRoute = ({
       ? text.states.failed(name(route.failedTurnoutId))
       : route.state === 'broken' && route.brokenTurnoutId
         ? text.states.broken(name(route.brokenTurnoutId))
-        : text.states[route.state as 'setting' | 'awaitingManual' | 'set'];
+        : text.states[route.state as 'setting' | 'set'];
   return (
     <div className="route-row">
       <strong>
         {name(route.from)} → {name(route.to)}
       </strong>
       <span className="small">{state}</span>
-      {route.state === 'awaitingManual' && (
-        <>
-          <span className="small">
-            {text.manualToSet(
-              route.manualToSet
-                .map((id) => {
-                  const turnout = route.turnouts.find(
-                    (t) => t.turnoutId === id,
-                  );
-                  return `${name(id)}: ${strings.positions[turnout?.position ?? ''] ?? turnout?.position}`;
-                })
-                .join(', '),
-            )}
-          </span>
-          <button
-            type="button"
-            className="button button--small"
-            onClick={() =>
-              sendCommand({type: 'confirmManualTurnouts', routeId: route.id})
-            }
-          >
-            {text.confirmManual}
-          </button>
-        </>
+      {route.manualToSet.length > 0 && route.state !== 'broken' && (
+        <span className="small">
+          {text.manualToSet(
+            route.manualToSet
+              .map((id) => {
+                const turnout = route.turnouts.find((t) => t.turnoutId === id);
+                return `${name(id)}: ${strings.positions[turnout?.position ?? ''] ?? turnout?.position}`;
+              })
+              .join(', '),
+          )}
+        </span>
       )}
       {route.state === 'set' || route.state === 'broken' ? (
         <button

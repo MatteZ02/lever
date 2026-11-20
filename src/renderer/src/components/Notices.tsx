@@ -38,7 +38,12 @@ const noticeText = (notice: EngineNotice): string => {
     case 'routeRefused':
       return strings.notices.routeRefused(notice.reason ?? '');
     case 'routeSet':
-      return strings.notices.routeSet;
+      return strings.notices.routeSet(
+        (notice.manualThrow ?? []).map(
+          (t) =>
+            `${describe(t.turnoutId)}: ${strings.positions[t.position] ?? t.position}`,
+        ),
+      );
     case 'routeFailed':
       return strings.notices.routeFailed(describe(notice.elementId));
     case 'routeBroken':

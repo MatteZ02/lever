@@ -76,10 +76,9 @@ export const routeLiveSchema = z.object({
   from: z.string(),
   to: z.string(),
   via: z.array(z.string()),
-  // setting: turnouts moving; awaitingManual: manual turnouts to throw by
-  // hand and confirm; set: in place, signals set; failed: a turnout did not
-  // move; broken: a turnout moved after it was set (signals to stop).
-  state: z.enum(['setting', 'awaitingManual', 'set', 'failed', 'broken']),
+  // setting: turnouts moving; set: in place, signals set; failed: a turnout
+  // did not move; broken: a turnout moved after it was set (signals to stop).
+  state: z.enum(['setting', 'set', 'failed', 'broken']),
   segments: z.array(
     z.object({viewId: z.string(), points: z.array(gridPointSchema)}),
   ),
@@ -92,7 +91,7 @@ export const routeLiveSchema = z.object({
       manual: z.boolean(),
     }),
   ),
-  // Manual turnouts not yet recorded in the route's position.
+  // Manual turnouts the route recorded in a new position: to throw by hand.
   manualToSet: z.array(z.string()),
   areas: z.array(
     z.object({

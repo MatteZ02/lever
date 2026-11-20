@@ -2,9 +2,11 @@
 // PURE apart from its dependencies; driven by the Interlocking, which tells
 // it every change of a turnout.
 //
-// A route is "setting" while its turnouts move (through the queue), waits
-// for the operator to confirm manual turnouts thrown by hand, and is "set"
-// once every turnout is where the route needs it; only then are its signals
+// A route is "setting" while its turnouts move (through the queue), and is
+// "set" once every turnout is where the route needs it. Manual turnouts are
+// recorded in the route's position when it is set, without asking; the
+// operator is told which ones to throw by hand (the "route set" notice and
+// the route panel). only then are its signals
 // set (RTE-5). A turnout of a set route that moves for any reason makes it
 // "broken": its signals go to stop at once (RTE-6c). Level 2 has no other
 // protection: nothing is locked and occupancy is not checked (RTE-7).
@@ -22,7 +24,8 @@ import {RouteLive, TurnoutLive} from '../shared/liveState';
 export const UNDO_HISTORY = 10;
 
 export type RouteNotice =
-  | {code: 'routeSet'; routeId: string}
+  // `manualThrow`: manual turnouts to throw by hand for this route.
+  | {code: 'routeSet'; routeId: string; manualThrow: ManualThrow[]}
   | {code: 'routeFailed'; routeId: string; elementId: string}
   | {code: 'routeBroken'; routeId: string; elementId: string}
   // Cancelled because a new route conflicts with it (`elementId`: its
@@ -42,12 +45,14 @@ export type RouteNotice =
       manualBack: string[];
     };
 
+export type ManualThrow = {turnoutId: string; position: string};
+
 export type RouteDeps = {
   project: () => Project | null;
   turnout: (id: string) => TurnoutLive | undefined;
   setTurnout: (id: string, position: string) => void;
   setSignal: (id: string, aspectId: string) => void;
-  // A manual turnout thrown by hand, as confirmed by the operator.
+  // A manual turnout's position, recorded when a route needs it.
   recordManual: (id: string, position: string) => void;
   notice: (notice: RouteNotice) => void;
   changed: () => void;
@@ -62,6 +67,8 @@ type Route = {
   before: Record<string, string | undefined>;
   // Signals the route set (returned to stop on release or break).
   signals: SignalSetting[];
+  // Manual turnouts not already where the route needs them.
+  manualThrow: ManualThrow[];
   failedTurnoutId?: string;
   brokenTurnoutId?: string;
 };
@@ -91,7 +98,7 @@ export class RouteManager {
           position,
           manual,
         })),
-        manualToSet: this.manualMissing(route),
+        manualToSet: route.manualThrow.map((t) => t.turnoutId),
         areas: route.plan.areas,
         ...(route.failedTurnoutId
           ? {failedTurnoutId: route.failedTurnoutId}
@@ -105,6 +112,7 @@ export class RouteManager {
   }
 
   // RTE-4: throw what is not already in place, then wait for the reports.
+  // Manual turnouts are recorded at once (thrown by hand, not confirmed).
   set(plan: RoutePlan): string {
     const id = `route-${++this.counter}`;
     const route: Route = {
@@ -119,6 +127,12 @@ export class RouteManager {
         ]),
       ),
       signals: [],
+      manualThrow: plan.turnouts
+        .filter(
+          (t) =>
+            t.manual && this.deps.turnout(t.turnoutId)?.position !== t.position,
+        )
+        .map(({turnoutId, position}) => ({turnoutId, position})),
     };
     this.routes.set(id, route);
     for (const turnout of plan.turnouts) {
@@ -129,6 +143,11 @@ export class RouteManager {
       if (live?.status !== 'confirmed' || live.position !== turnout.position) {
         this.deps.setTurnout(turnout.turnoutId, turnout.position);
       }
+    }
+    // After the commands, so this route is not "set" before they go out;
+    // other routes using these turnouts see the change (and break).
+    for (const turnout of route.manualThrow) {
+      this.deps.recordManual(turnout.turnoutId, turnout.position);
     }
     this.evaluate(route);
     this.deps.changed();
@@ -149,23 +168,6 @@ export class RouteManager {
     if (changed) {
       this.deps.changed();
     }
-  }
-
-  // The operator has thrown the route's manual turnouts by hand (RTE-4).
-  confirmManual(routeId: string): void {
-    const route = this.routes.get(routeId);
-    if (!route) {
-      return;
-    }
-    this.evaluating = true;
-    for (const turnout of route.plan.turnouts) {
-      if (turnout.manual) {
-        this.deps.recordManual(turnout.turnoutId, turnout.position);
-      }
-    }
-    this.evaluating = false;
-    this.evaluate(route);
-    this.deps.changed();
   }
 
   // RTE-8: a route not yet set is dropped; its turnouts stay where they are.
@@ -265,15 +267,6 @@ export class RouteManager {
     }
   }
 
-  private manualMissing(route: Route): string[] {
-    return route.plan.turnouts
-      .filter(
-        (t) =>
-          t.manual && this.deps.turnout(t.turnoutId)?.position !== t.position,
-      )
-      .map((t) => t.turnoutId);
-  }
-
   // Moves the route on; returns true if its state changed.
   private evaluate(route: Route): boolean {
     const before = route.state;
@@ -295,7 +288,7 @@ export class RouteManager {
       }
       return route.state !== before;
     }
-    if (route.state !== 'setting' && route.state !== 'awaitingManual') {
+    if (route.state !== 'setting') {
       return false;
     }
     const failed = addressed.find((t) => {
@@ -323,13 +316,13 @@ export class RouteManager {
     if (!inPlace) {
       return route.state !== before;
     }
-    if (this.manualMissing(route).length > 0) {
-      route.state = 'awaitingManual';
-      return route.state !== before;
-    }
     route.state = 'set';
     this.setSignals(route);
-    this.deps.notice({code: 'routeSet', routeId: route.id});
+    this.deps.notice({
+      code: 'routeSet',
+      routeId: route.id,
+      manualThrow: route.manualThrow,
+    });
     return true;
   }
 

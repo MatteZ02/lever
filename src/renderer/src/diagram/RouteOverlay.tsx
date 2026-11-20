@@ -15,7 +15,6 @@ const styleFor = (state: RouteLive['state'] | 'preview') => {
     case 'set':
       return {stroke: color.trackRouteSet, dash: diagramDash.routeSet};
     case 'setting':
-    case 'awaitingManual':
       return {
         stroke: color.trackRouteSetting,
         dash: diagramDash.routeSetting,

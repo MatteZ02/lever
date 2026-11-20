@@ -129,8 +129,9 @@ appears at the top right of the diagram, in every window.
    …. Turnouts thrown by hand are listed. If part of the route lies in a **Level 1** area, Lever
    says so: it is set normally there, but nothing there is meant to be routed or protected.
 3. **Set route**: the turnouts move one after another; the route shows moving dashes until every
-   turnout has reported its position. If it has manual turnouts, throw them by hand and press
-   **Thrown by hand**. Then the route is **set** (green dashes), and its signals are set: the
+   turnout has reported its position. Manual turnouts are not asked about: Lever records them in
+   the route's position and lists them (in the notice and under the route) for you to throw by
+   hand. Then the route is **set** (green dashes), and its signals are set: the
    start signal and signals facing the route to proceed (reduced speed before a diverging turnout,
    where the signal has it), signals facing the other way and the end signal to stop; distant
    signals repeat their main signal. (Layout properties: _Set signals along routes

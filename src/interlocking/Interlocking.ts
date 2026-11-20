@@ -372,11 +372,6 @@ export class Interlocking {
     this.flush();
   }
 
-  confirmManualTurnouts(routeId: string): void {
-    this.routes.confirmManual(routeId);
-    this.flush();
-  }
-
   // Any element with its view (route points need not be controlled).
   private elementInfo(
     elementId: string,

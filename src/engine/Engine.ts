@@ -362,9 +362,6 @@ export class Engine {
       case 'undoRoute':
         this.interlocking.undoRoute();
         break;
-      case 'confirmManualTurnouts':
-        this.interlocking.confirmManualTurnouts(command.routeId);
-        break;
       case 'showViews': {
         const before = this.shownViews.get(source) ?? [];
         if (command.viewIds.length === 0) {
@@ -538,6 +535,7 @@ export class Engine {
         ...('toElementId' in notice ? {toElementId: notice.toElementId} : {}),
         ...('skipped' in notice ? {skipped: notice.skipped} : {}),
         ...('manualBack' in notice ? {manualBack: notice.manualBack} : {}),
+        ...('manualThrow' in notice ? {manualThrow: notice.manualThrow} : {}),
       },
     });
   }

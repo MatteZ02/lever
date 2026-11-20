@@ -167,23 +167,22 @@ describe('setting a route (RTE-4, RTE-5)', () => {
     reportJobs();
   });
 
-  it('given a manual turnout, waits for the operator to confirm it', () => {
-    const {interlocking, reportJobs, route} = setup(
+  it('given a manual turnout, records it without asking and notes it', () => {
+    const {interlocking, notices, reportJobs, route} = setup(
       layout(2, {manualT2: true}),
     );
     // Via track 2: T2 (manual) must be diverging.
     interlocking.setRoute('S4', 'C2', []);
-    reportJobs();
-    expect(route()).toMatchObject({
-      state: 'awaitingManual',
-      manualToSet: ['T2'],
-    });
-    interlocking.confirmManualTurnouts(route().id);
-    reportJobs();
-    expect(route().state).toBe('set');
     expect(interlocking.state().turnouts['T2']).toEqual({
       position: 'diverging',
       status: 'manual',
+    });
+    reportJobs();
+    expect(route()).toMatchObject({state: 'set', manualToSet: ['T2']});
+    expect(notices).toContainEqual({
+      code: 'routeSet',
+      routeId: route().id,
+      manualThrow: [{turnoutId: 'T2', position: 'diverging'}],
     });
   });
 

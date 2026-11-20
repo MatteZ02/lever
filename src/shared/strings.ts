@@ -204,7 +204,7 @@ export const strings = {
     level1Warning: (areas: string) =>
       `Part of this route lies in a Level 1 area (${areas}), where no routing logic or protection is intended. It is set normally there.`,
     manualList: (turnouts: string) =>
-      `Throw by hand, then confirm: ${turnouts}.`,
+      `Not connected, throw by hand: ${turnouts}.`,
     set: 'Set route',
     cancels: (routes: string) =>
       `Setting this route cancels ${routes} (they share track or turnouts).`,
@@ -221,13 +221,11 @@ export const strings = {
     deleteSaved: 'Delete',
     states: {
       setting: 'Setting… (turnouts moving)',
-      awaitingManual: 'Waiting: throw the manual turnouts by hand',
       set: 'Set',
       failed: (turnout: string) => `Not set: ${turnout} did not move`,
       broken: (turnout: string) => `Broken: ${turnout} moved; signals at stop`,
     },
-    manualToSet: (turnouts: string) => `By hand: ${turnouts}.`,
-    confirmManual: 'Thrown by hand',
+    manualToSet: (turnouts: string) => `Throw by hand: ${turnouts}.`,
     release: 'Release',
     cancelRoute: 'Cancel',
     fromHere: 'Route from here',
@@ -608,7 +606,10 @@ export const strings = {
         crossing:
           'This route crosses another route. Show it again and confirm the crossing.',
       })[reason] ?? 'The route could not be set.',
-    routeSet: 'Route set.',
+    routeSet: (manual: string[]) =>
+      manual.length > 0
+        ? `Route set. Throw by hand: ${manual.join(', ')}.`
+        : 'Route set.',
     routeFailed: (turnout: string) =>
       `Route not set: ${turnout} did not move. Check it, then cancel the route or try again.`,
     routeBroken: (turnout: string) =>
