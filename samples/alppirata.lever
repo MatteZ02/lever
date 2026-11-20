@@ -1604,7 +1604,11 @@
             "x": 63,
             "y": 38
           },
-          "direction": "E"
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-78aa6la2",
+            "connectorId": "connector-f2ifo6yj"
+          }
         },
         {
           "id": "connector-xedg3alo",
@@ -1614,7 +1618,11 @@
             "x": 63,
             "y": 40
           },
-          "direction": "E"
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-78aa6la2",
+            "connectorId": "connector-yn33ydjv"
+          }
         },
         {
           "id": "stop-u51dax25",
@@ -1736,8 +1744,8 @@
           },
           "direction": "N",
           "pairedWith": {
-            "viewId": "view-78aa6la2",
-            "connectorId": "connector-f2ifo6yj"
+            "viewId": "view-r1tq8f4s",
+            "connectorId": "connector-hmdrbqqd"
           }
         },
         {
@@ -1750,8 +1758,8 @@
           },
           "direction": "N",
           "pairedWith": {
-            "viewId": "view-78aa6la2",
-            "connectorId": "connector-yn33ydjv"
+            "viewId": "view-r1tq8f4s",
+            "connectorId": "connector-kxrkx2fn"
           }
         },
         {
@@ -2913,7 +2921,11 @@
             "x": 52,
             "y": 14
           },
-          "direction": "E"
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-vjzaj3un",
+            "connectorId": "connector-mvqs4h17"
+          }
         },
         {
           "id": "connector-kxrkx2fn",
@@ -2923,7 +2935,11 @@
             "x": 52,
             "y": 16
           },
-          "direction": "E"
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-vjzaj3un",
+            "connectorId": "connector-dk6972br"
+          }
         },
         {
           "id": "connector-26eozpdb",
@@ -2933,7 +2949,11 @@
             "x": 26,
             "y": 24
           },
-          "direction": "E"
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-78aa6la2",
+            "connectorId": "connector-5e2emubv"
+          }
         },
         {
           "id": "connector-9yqpyfr1",
@@ -2943,7 +2963,11 @@
             "x": 26,
             "y": 26
           },
-          "direction": "E"
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-78aa6la2",
+            "connectorId": "connector-zww25x5u"
+          }
         },
         {
           "id": "label-tcvzsy4v",
@@ -3575,23 +3599,27 @@
           "kind": "connector",
           "at": {
             "x": 6,
-            "y": 18
+            "y": 20
           },
           "direction": "W",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
-            "connectorId": "connector-dk6972br"
+            "connectorId": "connector-xedg3alo"
           }
         },
         {
           "id": "connector-5e2emubv",
-          "name": "Päärata pun ->",
+          "name": "Päärata pun",
           "kind": "connector",
           "at": {
             "x": 52,
-            "y": 18
+            "y": 20
           },
-          "direction": "E"
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-r1tq8f4s",
+            "connectorId": "connector-26eozpdb"
+          }
         },
         {
           "id": "connector-f2ifo6yj",
@@ -3599,23 +3627,27 @@
           "kind": "connector",
           "at": {
             "x": 6,
-            "y": 20
+            "y": 18
           },
           "direction": "W",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
-            "connectorId": "connector-mvqs4h17"
+            "connectorId": "connector-43htub70"
           }
         },
         {
           "id": "connector-zww25x5u",
-          "name": "Päärata kel <-",
+          "name": "Päärata kel",
           "kind": "connector",
           "at": {
             "x": 52,
-            "y": 20
+            "y": 18
           },
-          "direction": "E"
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-r1tq8f4s",
+            "connectorId": "connector-9yqpyfr1"
+          }
         },
         {
           "id": "label-ei4kzy1e",
@@ -3713,19 +3745,22 @@
           "viewId": "view-vjzaj3un",
           "x": -41,
           "y": 9,
-          "scale": 1
+          "scale": 1,
+          "rotation": 0
         },
         {
           "viewId": "view-r1tq8f4s",
-          "x": 40,
-          "y": -9,
-          "scale": 1
+          "x": -10,
+          "y": -109,
+          "scale": 1,
+          "rotation": 0
         },
         {
           "viewId": "view-78aa6la2",
-          "x": 35,
-          "y": -40,
-          "scale": 1
+          "x": 9,
+          "y": -12,
+          "scale": 1,
+          "rotation": 270
         }
       ],
       "showConnectorLines": true
