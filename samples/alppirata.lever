@@ -28,7 +28,7 @@
       "elements": [
         {
           "id": "track-o436injw",
-          "name": "",
+          "name": "OL_681",
           "kind": "track",
           "points": [
             {
@@ -43,7 +43,7 @@
         },
         {
           "id": "track-kx0m9r23",
-          "name": "",
+          "name": "OL_682",
           "kind": "track",
           "points": [
             {
@@ -58,7 +58,7 @@
         },
         {
           "id": "track-4cat3e9e",
-          "name": "",
+          "name": "OL_683",
           "kind": "track",
           "points": [
             {
@@ -77,7 +77,7 @@
         },
         {
           "id": "track-f8tymfyp",
-          "name": "",
+          "name": "OL_1",
           "kind": "track",
           "points": [
             {
@@ -100,7 +100,7 @@
         },
         {
           "id": "track-xtvgwi6g",
-          "name": "",
+          "name": "OL_691",
           "kind": "track",
           "points": [
             {
@@ -115,7 +115,7 @@
         },
         {
           "id": "track-s9pt3ccr",
-          "name": "",
+          "name": "OL_2",
           "kind": "track",
           "points": [
             {
@@ -149,7 +149,7 @@
         },
         {
           "id": "track-zl9f3298",
-          "name": "",
+          "name": "OL_451",
           "kind": "track",
           "points": [
             {
@@ -164,7 +164,7 @@
         },
         {
           "id": "track-3aav116t",
-          "name": "",
+          "name": "OL_3",
           "kind": "track",
           "points": [
             {
@@ -183,7 +183,7 @@
         },
         {
           "id": "track-lglxu1zs",
-          "name": "",
+          "name": "OL_382",
           "kind": "track",
           "points": [
             {
@@ -198,7 +198,7 @@
         },
         {
           "id": "track-qwc22wfp",
-          "name": "",
+          "name": "OL_480",
           "kind": "track",
           "points": [
             {
@@ -213,7 +213,7 @@
         },
         {
           "id": "track-ksrifi8c",
-          "name": "",
+          "name": "OL_451",
           "kind": "track",
           "points": [
             {
@@ -243,7 +243,7 @@
         },
         {
           "id": "track-6uy81m8m",
-          "name": "",
+          "name": "OL_4",
           "kind": "track",
           "points": [
             {
@@ -262,7 +262,7 @@
         },
         {
           "id": "track-fbwnvah1",
-          "name": "",
+          "name": "OL_481",
           "kind": "track",
           "points": [
             {
@@ -296,7 +296,7 @@
         },
         {
           "id": "track-cpfp58am",
-          "name": "",
+          "name": "OL_383",
           "kind": "track",
           "points": [
             {
@@ -341,7 +341,7 @@
         },
         {
           "id": "track-w6iwldm5",
-          "name": "",
+          "name": "OL_27",
           "kind": "track",
           "points": [
             {
@@ -356,7 +356,7 @@
         },
         {
           "id": "track-txqkqpfd",
-          "name": "",
+          "name": "OL_493",
           "kind": "track",
           "points": [
             {
@@ -407,7 +407,7 @@
         },
         {
           "id": "track-cbbpwhnt",
-          "name": "",
+          "name": "OL_28",
           "kind": "track",
           "points": [
             {
@@ -425,31 +425,8 @@
           ]
         },
         {
-          "id": "track-hf3381ki",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 59,
-              "y": 24
-            },
-            {
-              "x": 71,
-              "y": 24
-            },
-            {
-              "x": 75,
-              "y": 20
-            },
-            {
-              "x": 75,
-              "y": -22
-            }
-          ]
-        },
-        {
           "id": "track-f1rck7d4",
-          "name": "",
+          "name": "OL_494",
           "kind": "track",
           "points": [
             {
@@ -519,7 +496,7 @@
         },
         {
           "id": "track-9cjti7pc",
-          "name": "",
+          "name": "OL_29",
           "kind": "track",
           "points": [
             {
@@ -529,29 +506,6 @@
             {
               "x": 57,
               "y": 26
-            }
-          ]
-        },
-        {
-          "id": "track-rtol2dws",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 59,
-              "y": 26
-            },
-            {
-              "x": 71,
-              "y": 26
-            },
-            {
-              "x": 76,
-              "y": 21
-            },
-            {
-              "x": 76,
-              "y": -22
             }
           ]
         },
@@ -572,7 +526,7 @@
         },
         {
           "id": "track-5hvsefy7",
-          "name": "",
+          "name": "OL_30",
           "kind": "track",
           "points": [
             {
@@ -591,7 +545,7 @@
         },
         {
           "id": "track-slddlm2e",
-          "name": "",
+          "name": "OL_490",
           "kind": "track",
           "points": [
             {
@@ -621,7 +575,7 @@
         },
         {
           "id": "track-ee3g7lbm",
-          "name": "",
+          "name": "OL_388",
           "kind": "track",
           "points": [
             {
@@ -639,43 +593,8 @@
           ]
         },
         {
-          "id": "track-nr58lz4r",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 17,
-              "y": 32
-            },
-            {
-              "x": -14,
-              "y": 32
-            },
-            {
-              "x": -24,
-              "y": 22
-            },
-            {
-              "x": -24,
-              "y": 12
-            },
-            {
-              "x": -17,
-              "y": 5
-            },
-            {
-              "x": -3,
-              "y": 5
-            },
-            {
-              "x": 7,
-              "y": 15
-            }
-          ]
-        },
-        {
           "id": "track-86fzse32",
-          "name": "",
+          "name": "OL_31",
           "kind": "track",
           "points": [
             {
@@ -689,55 +608,8 @@
           ]
         },
         {
-          "id": "track-m5nqz210",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 55,
-              "y": 32
-            },
-            {
-              "x": 74,
-              "y": 32
-            },
-            {
-              "x": 78,
-              "y": 28
-            },
-            {
-              "x": 78,
-              "y": -15
-            },
-            {
-              "x": 75,
-              "y": -18
-            },
-            {
-              "x": 71,
-              "y": -18
-            },
-            {
-              "x": 68,
-              "y": -15
-            },
-            {
-              "x": 68,
-              "y": 4
-            },
-            {
-              "x": 62,
-              "y": 10
-            },
-            {
-              "x": 53,
-              "y": 10
-            }
-          ]
-        },
-        {
           "id": "track-1a8xjdwf",
-          "name": "",
+          "name": "OL_486",
           "kind": "track",
           "points": [
             {
@@ -752,7 +624,7 @@
         },
         {
           "id": "track-q9t45gse",
-          "name": "",
+          "name": "OL_32",
           "kind": "track",
           "points": [
             {
@@ -767,7 +639,7 @@
         },
         {
           "id": "track-5sy9juyt",
-          "name": "",
+          "name": "OL_390",
           "kind": "track",
           "points": [
             {
@@ -842,7 +714,7 @@
         },
         {
           "id": "turnout-1kqof4b4",
-          "name": "",
+          "name": "OL_013",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -860,7 +732,7 @@
         },
         {
           "id": "turnout-6yn0bixc",
-          "name": "",
+          "name": "OL_017",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -878,7 +750,7 @@
         },
         {
           "id": "turnout-r9brtvn7",
-          "name": "",
+          "name": "OL_019",
           "kind": "turnout",
           "type": "doubleSlip",
           "at": {
@@ -896,7 +768,7 @@
         },
         {
           "id": "turnout-9y9uuaq9",
-          "name": "",
+          "name": "OL_020",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -914,7 +786,7 @@
         },
         {
           "id": "turnout-di0mltei",
-          "name": "",
+          "name": "OL_001",
           "kind": "turnout",
           "type": "doubleSlip",
           "at": {
@@ -932,7 +804,7 @@
         },
         {
           "id": "turnout-1e6sed09",
-          "name": "",
+          "name": "OL_002",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -950,7 +822,7 @@
         },
         {
           "id": "signal-abrn1rf9",
-          "name": "",
+          "name": "OL_03",
           "kind": "signal",
           "at": {
             "x": 46,
@@ -969,7 +841,7 @@
         },
         {
           "id": "turnout-pq07rf8z",
-          "name": "",
+          "name": "OL_014",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -987,7 +859,7 @@
         },
         {
           "id": "turnout-2kb446di",
-          "name": "",
+          "name": "OL_023",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1005,7 +877,7 @@
         },
         {
           "id": "turnout-c3yygldg",
-          "name": "",
+          "name": "OL_018",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1023,7 +895,7 @@
         },
         {
           "id": "turnout-9lnsnuzx",
-          "name": "",
+          "name": "OL_003",
           "kind": "turnout",
           "type": "doubleSlip",
           "at": {
@@ -1041,7 +913,7 @@
         },
         {
           "id": "turnout-0jal7sn6",
-          "name": "",
+          "name": "OL_004",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1055,7 +927,7 @@
         },
         {
           "id": "signal-lj6ovv2y",
-          "name": "",
+          "name": "OL_04",
           "kind": "signal",
           "at": {
             "x": 48,
@@ -1074,7 +946,7 @@
         },
         {
           "id": "turnout-yrxfv5we",
-          "name": "",
+          "name": "OL_032",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1092,7 +964,7 @@
         },
         {
           "id": "turnout-wjnzrjuh",
-          "name": "",
+          "name": "OL_016",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1110,7 +982,7 @@
         },
         {
           "id": "turnout-jjcwu91a",
-          "name": "",
+          "name": "OL_015",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1128,7 +1000,7 @@
         },
         {
           "id": "turnout-fumdildc",
-          "name": "",
+          "name": "OL_021",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1146,7 +1018,7 @@
         },
         {
           "id": "turnout-5q0swvtb",
-          "name": "",
+          "name": "OL_022",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1164,7 +1036,7 @@
         },
         {
           "id": "turnout-3gvslg6c",
-          "name": "",
+          "name": "OL_034",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1182,7 +1054,7 @@
         },
         {
           "id": "turnout-f8vszo2i",
-          "name": "",
+          "name": "OL_035",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1200,7 +1072,7 @@
         },
         {
           "id": "turnout-egk4j2yu",
-          "name": "",
+          "name": "OL_005",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1218,7 +1090,7 @@
         },
         {
           "id": "turnout-giuzmh5g",
-          "name": "",
+          "name": "OL_011",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1236,7 +1108,7 @@
         },
         {
           "id": "turnout-3njzb0nb",
-          "name": "",
+          "name": "OL_036",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1254,7 +1126,7 @@
         },
         {
           "id": "turnout-5rzwou8o",
-          "name": "",
+          "name": "OL_033",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1272,7 +1144,7 @@
         },
         {
           "id": "turnout-3ncjfeaa",
-          "name": "",
+          "name": "OL_007",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1290,7 +1162,7 @@
         },
         {
           "id": "turnout-lusx8634",
-          "name": "",
+          "name": "OL_008",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1308,7 +1180,7 @@
         },
         {
           "id": "turnout-2hhq4mmc",
-          "name": "",
+          "name": "OL_010",
           "kind": "turnout",
           "type": "doubleSlip",
           "at": {
@@ -1326,7 +1198,7 @@
         },
         {
           "id": "turnout-l2wkc4ey",
-          "name": "",
+          "name": "OL_026",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1344,7 +1216,7 @@
         },
         {
           "id": "turnout-mp6xcbpu",
-          "name": "",
+          "name": "OL_028",
           "kind": "turnout",
           "type": "doubleSlip",
           "at": {
@@ -1362,7 +1234,7 @@
         },
         {
           "id": "turnout-y63nfg9i",
-          "name": "",
+          "name": "OL_006",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1380,7 +1252,7 @@
         },
         {
           "id": "turnout-70h1ivjl",
-          "name": "",
+          "name": "OL_012",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1398,7 +1270,7 @@
         },
         {
           "id": "turnout-3e3lg4sc",
-          "name": "",
+          "name": "OL_027",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1416,7 +1288,7 @@
         },
         {
           "id": "turnout-z8fmgyj4",
-          "name": "",
+          "name": "OL_040",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1434,7 +1306,7 @@
         },
         {
           "id": "turnout-jb05zpyc",
-          "name": "",
+          "name": "OL_037",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1452,7 +1324,7 @@
         },
         {
           "id": "turnout-59awz6xz",
-          "name": "",
+          "name": "OL_039",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -1470,7 +1342,7 @@
         },
         {
           "id": "turnout-c8aplaea",
-          "name": "",
+          "name": "OL_038",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -1598,30 +1470,32 @@
         },
         {
           "id": "connector-43htub70",
-          "name": "",
+          "name": "H 2",
           "kind": "connector",
           "at": {
             "x": 63,
             "y": 38
           },
+          "textColor": "yellow",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-78aa6la2",
-            "connectorId": "connector-f2ifo6yj"
+            "connectorId": "connector-r4f9pte6"
           }
         },
         {
           "id": "connector-xedg3alo",
-          "name": "",
+          "name": "H 1",
           "kind": "connector",
           "at": {
             "x": 63,
             "y": 40
           },
+          "textColor": "red",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-78aa6la2",
-            "connectorId": "connector-yn33ydjv"
+            "connectorId": "connector-j2cvvmf0"
           }
         },
         {
@@ -1735,34 +1609,6 @@
           "direction": "E"
         },
         {
-          "id": "connector-mvqs4h17",
-          "name": "Päärata Keltainen",
-          "kind": "connector",
-          "at": {
-            "x": 76,
-            "y": -22
-          },
-          "direction": "N",
-          "pairedWith": {
-            "viewId": "view-r1tq8f4s",
-            "connectorId": "connector-hmdrbqqd"
-          }
-        },
-        {
-          "id": "connector-dk6972br",
-          "name": "Päärata Punainen",
-          "kind": "connector",
-          "at": {
-            "x": 75,
-            "y": -22
-          },
-          "direction": "N",
-          "pairedWith": {
-            "viewId": "view-r1tq8f4s",
-            "connectorId": "connector-kxrkx2fn"
-          }
-        },
-        {
           "id": "platform-2g2jguv4",
           "name": "",
           "kind": "platform",
@@ -1819,7 +1665,7 @@
         },
         {
           "id": "point-33h4i5tk",
-          "name": "",
+          "name": "OL_501",
           "kind": "virtualPoint",
           "at": {
             "x": 40,
@@ -1828,7 +1674,7 @@
         },
         {
           "id": "point-aqj4xmzk",
-          "name": "",
+          "name": "OL_502",
           "kind": "virtualPoint",
           "at": {
             "x": 40,
@@ -1837,7 +1683,7 @@
         },
         {
           "id": "point-fenb1uwj",
-          "name": "",
+          "name": "OL_502",
           "kind": "virtualPoint",
           "at": {
             "x": 28,
@@ -1846,7 +1692,7 @@
         },
         {
           "id": "point-s1xa9nom",
-          "name": "",
+          "name": "OL_501",
           "kind": "virtualPoint",
           "at": {
             "x": 28,
@@ -1855,7 +1701,7 @@
         },
         {
           "id": "point-8gk9el8g",
-          "name": "",
+          "name": "OL_493",
           "kind": "virtualPoint",
           "at": {
             "x": 7,
@@ -1864,7 +1710,7 @@
         },
         {
           "id": "point-6vzfs87j",
-          "name": "",
+          "name": "OL_494",
           "kind": "virtualPoint",
           "at": {
             "x": 7,
@@ -1873,7 +1719,7 @@
         },
         {
           "id": "point-gjci1uhr",
-          "name": "",
+          "name": "OL_485",
           "kind": "virtualPoint",
           "at": {
             "x": 11,
@@ -1882,7 +1728,7 @@
         },
         {
           "id": "point-aqctxoxb",
-          "name": "",
+          "name": "OL_07",
           "kind": "virtualPoint",
           "at": {
             "x": 54,
@@ -1891,7 +1737,7 @@
         },
         {
           "id": "point-cva5v8jt",
-          "name": "",
+          "name": "OL_08",
           "kind": "virtualPoint",
           "at": {
             "x": 54,
@@ -1900,7 +1746,7 @@
         },
         {
           "id": "point-qhjjibqz",
-          "name": "",
+          "name": "OL_09",
           "kind": "virtualPoint",
           "at": {
             "x": 54,
@@ -1909,7 +1755,7 @@
         },
         {
           "id": "point-uqlg3k8x",
-          "name": "",
+          "name": "OL_10",
           "kind": "virtualPoint",
           "at": {
             "x": 54,
@@ -1918,7 +1764,7 @@
         },
         {
           "id": "point-96u9o6dm",
-          "name": "",
+          "name": "OL_07",
           "kind": "virtualPoint",
           "at": {
             "x": 20,
@@ -1927,7 +1773,7 @@
         },
         {
           "id": "point-c862fhk3",
-          "name": "",
+          "name": "OL_08",
           "kind": "virtualPoint",
           "at": {
             "x": 20,
@@ -1936,7 +1782,7 @@
         },
         {
           "id": "point-rfjhrte7",
-          "name": "",
+          "name": "OL_09",
           "kind": "virtualPoint",
           "at": {
             "x": 20,
@@ -1945,7 +1791,7 @@
         },
         {
           "id": "point-4slxp2ou",
-          "name": "",
+          "name": "OL_10",
           "kind": "virtualPoint",
           "at": {
             "x": 20,
@@ -1954,7 +1800,7 @@
         },
         {
           "id": "point-22vqs8w5",
-          "name": "",
+          "name": "OL_12",
           "kind": "virtualPoint",
           "at": {
             "x": 23,
@@ -1963,7 +1809,7 @@
         },
         {
           "id": "point-dxcolq96",
-          "name": "",
+          "name": "OL_11",
           "kind": "virtualPoint",
           "at": {
             "x": 23,
@@ -1972,7 +1818,7 @@
         },
         {
           "id": "point-0qcn6y7q",
-          "name": "",
+          "name": "OL_12",
           "kind": "virtualPoint",
           "at": {
             "x": 51,
@@ -1981,7 +1827,7 @@
         },
         {
           "id": "point-vyo75fx4",
-          "name": "",
+          "name": "OL_11",
           "kind": "virtualPoint",
           "at": {
             "x": 51,
@@ -1989,44 +1835,8 @@
           }
         },
         {
-          "id": "point-7nxdu0w7",
-          "name": "",
-          "kind": "virtualPoint",
-          "at": {
-            "x": 61,
-            "y": 32
-          }
-        },
-        {
-          "id": "point-k9c2s238",
-          "name": "",
-          "kind": "virtualPoint",
-          "at": {
-            "x": 61,
-            "y": 24
-          }
-        },
-        {
-          "id": "point-rorbvyi2",
-          "name": "",
-          "kind": "virtualPoint",
-          "at": {
-            "x": 61,
-            "y": 26
-          }
-        },
-        {
-          "id": "point-b1czw7vp",
-          "name": "",
-          "kind": "virtualPoint",
-          "at": {
-            "x": 57,
-            "y": 10
-          }
-        },
-        {
           "id": "point-epmnj3li",
-          "name": "",
+          "name": "OL_03",
           "kind": "virtualPoint",
           "at": {
             "x": 47,
@@ -2035,7 +1845,7 @@
         },
         {
           "id": "point-r0fzf72e",
-          "name": "",
+          "name": "OL_01",
           "kind": "virtualPoint",
           "at": {
             "x": 47,
@@ -2044,7 +1854,7 @@
         },
         {
           "id": "point-gfpoft1i",
-          "name": "",
+          "name": "OL_02",
           "kind": "virtualPoint",
           "at": {
             "x": 21,
@@ -2053,7 +1863,7 @@
         },
         {
           "id": "point-rrlen5vq",
-          "name": "",
+          "name": "OL_01",
           "kind": "virtualPoint",
           "at": {
             "x": 21,
@@ -2062,7 +1872,7 @@
         },
         {
           "id": "point-nci077lx",
-          "name": "",
+          "name": "OL_04",
           "kind": "virtualPoint",
           "at": {
             "x": 21,
@@ -2071,7 +1881,7 @@
         },
         {
           "id": "point-u6ahhzvo",
-          "name": "",
+          "name": "OL_04",
           "kind": "virtualPoint",
           "at": {
             "x": 21,
@@ -2080,7 +1890,7 @@
         },
         {
           "id": "point-roy2oz4k",
-          "name": "",
+          "name": "OL_451",
           "kind": "virtualPoint",
           "at": {
             "x": 5,
@@ -2089,7 +1899,7 @@
         },
         {
           "id": "point-ts666agr",
-          "name": "",
+          "name": "OL_480",
           "kind": "virtualPoint",
           "at": {
             "x": 6,
@@ -2098,7 +1908,7 @@
         },
         {
           "id": "point-b2tbk96c",
-          "name": "",
+          "name": "OL_481",
           "kind": "virtualPoint",
           "at": {
             "x": 13,
@@ -2107,7 +1917,7 @@
         },
         {
           "id": "point-y05t3om1",
-          "name": "",
+          "name": "OL_490",
           "kind": "virtualPoint",
           "at": {
             "x": 16,
@@ -2116,7 +1926,7 @@
         },
         {
           "id": "point-gftze9pt",
-          "name": "",
+          "name": "OL_486",
           "kind": "virtualPoint",
           "at": {
             "x": 18,
@@ -2125,7 +1935,7 @@
         },
         {
           "id": "point-bbj9d1p0",
-          "name": "",
+          "name": "OL_390",
           "kind": "virtualPoint",
           "at": {
             "x": 54,
@@ -2134,7 +1944,7 @@
         },
         {
           "id": "point-w7d9djsa",
-          "name": "",
+          "name": "OL_388",
           "kind": "virtualPoint",
           "at": {
             "x": 56,
@@ -2143,7 +1953,7 @@
         },
         {
           "id": "point-g3o8qzi3",
-          "name": "",
+          "name": "OL_383",
           "kind": "virtualPoint",
           "at": {
             "x": 54,
@@ -2152,7 +1962,7 @@
         },
         {
           "id": "point-5ljvz08u",
-          "name": "",
+          "name": "OL_382",
           "kind": "virtualPoint",
           "at": {
             "x": 50,
@@ -2161,7 +1971,7 @@
         },
         {
           "id": "point-jo1r28h4",
-          "name": "",
+          "name": "OL_681",
           "kind": "virtualPoint",
           "at": {
             "x": 54,
@@ -2170,7 +1980,7 @@
         },
         {
           "id": "point-dizryehs",
-          "name": "",
+          "name": "OL_681",
           "kind": "virtualPoint",
           "at": {
             "x": 55,
@@ -2179,11 +1989,347 @@
         },
         {
           "id": "point-yw194a3a",
-          "name": "",
+          "name": "OL_681",
           "kind": "virtualPoint",
           "at": {
             "x": 56,
             "y": 8
+          }
+        },
+        {
+          "id": "track-n7vr95xn",
+          "name": "OL_389",
+          "kind": "track",
+          "points": [
+            {
+              "x": 55,
+              "y": 32
+            },
+            {
+              "x": 67,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "id": "track-x7if2k4k",
+          "name": "OL_365",
+          "kind": "track",
+          "points": [
+            {
+              "x": 59,
+              "y": 26
+            },
+            {
+              "x": 67,
+              "y": 26
+            }
+          ]
+        },
+        {
+          "id": "track-vxnvpi0a",
+          "name": "OL_364",
+          "kind": "track",
+          "points": [
+            {
+              "x": 59,
+              "y": 24
+            },
+            {
+              "x": 67,
+              "y": 24
+            }
+          ]
+        },
+        {
+          "id": "connector-t0y2wqeh",
+          "name": "OL_364",
+          "kind": "connector",
+          "at": {
+            "x": 67,
+            "y": 24
+          },
+          "textColor": "red",
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-r1tq8f4s",
+            "connectorId": "connector-kxrkx2fn"
+          }
+        },
+        {
+          "id": "connector-m0mptqyg",
+          "name": "OL_365",
+          "kind": "connector",
+          "at": {
+            "x": 67,
+            "y": 26
+          },
+          "textColor": "yellow",
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-r1tq8f4s",
+            "connectorId": "connector-hmdrbqqd"
+          }
+        },
+        {
+          "id": "connector-1b1p0q5k",
+          "name": "OL_389",
+          "kind": "connector",
+          "at": {
+            "x": 67,
+            "y": 32
+          },
+          "textColor": "green",
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-vjzaj3un",
+            "connectorId": "connector-0xff2biq"
+          }
+        },
+        {
+          "id": "track-kc5ftbtg",
+          "name": "OL_381",
+          "kind": "track",
+          "points": [
+            {
+              "x": 53,
+              "y": 10
+            },
+            {
+              "x": 63,
+              "y": 10
+            },
+            {
+              "x": 68,
+              "y": 5
+            }
+          ]
+        },
+        {
+          "id": "connector-0xff2biq",
+          "name": "OL_381",
+          "kind": "connector",
+          "at": {
+            "x": 68,
+            "y": 5
+          },
+          "textColor": "green",
+          "direction": "NE",
+          "pairedWith": {
+            "viewId": "view-vjzaj3un",
+            "connectorId": "connector-1b1p0q5k"
+          }
+        },
+        {
+          "id": "turnout-2rj51u3j",
+          "name": "OL_451",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": -17,
+            "y": 5
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "manual"
+          }
+        },
+        {
+          "id": "turnout-x1onux5z",
+          "name": "OL_485",
+          "kind": "turnout",
+          "type": "right",
+          "at": {
+            "x": -14,
+            "y": 32
+          },
+          "orientation": "W",
+          "control": {
+            "kind": "manual"
+          }
+        },
+        {
+          "id": "turnout-l3rxyqvs",
+          "name": "OL_499",
+          "kind": "turnout",
+          "type": "left",
+          "at": {
+            "x": -24,
+            "y": 22
+          },
+          "orientation": "S",
+          "control": {
+            "kind": "manual"
+          }
+        },
+        {
+          "id": "track-h052evva",
+          "name": "OL_485",
+          "kind": "track",
+          "points": [
+            {
+              "x": 17,
+              "y": 32
+            },
+            {
+              "x": -13,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "id": "track-piym6m1i",
+          "name": "Line",
+          "kind": "track",
+          "points": [
+            {
+              "x": -15,
+              "y": 31
+            },
+            {
+              "x": -23,
+              "y": 23
+            }
+          ]
+        },
+        {
+          "id": "track-my90eczg",
+          "name": "Line",
+          "kind": "track",
+          "points": [
+            {
+              "x": -18,
+              "y": 6
+            },
+            {
+              "x": -24,
+              "y": 12
+            },
+            {
+              "x": -24,
+              "y": 21
+            }
+          ]
+        },
+        {
+          "id": "track-3s2chjhl",
+          "name": "Line",
+          "kind": "track",
+          "points": [
+            {
+              "x": 7,
+              "y": 15
+            },
+            {
+              "x": -3,
+              "y": 5
+            },
+            {
+              "x": -16,
+              "y": 5
+            }
+          ]
+        },
+        {
+          "id": "track-70c7ulmy",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": -18,
+              "y": 5
+            },
+            {
+              "x": -27,
+              "y": 5
+            }
+          ]
+        },
+        {
+          "id": "track-4x5ncgxv",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": -15,
+              "y": 32
+            },
+            {
+              "x": -27,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "id": "track-zbtyy132",
+          "name": "",
+          "kind": "track",
+          "points": [
+            {
+              "x": -24,
+              "y": 23
+            },
+            {
+              "x": -24,
+              "y": 35
+            }
+          ]
+        },
+        {
+          "id": "connector-0ywn3ru3",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": -27,
+            "y": 32
+          },
+          "direction": "W"
+        },
+        {
+          "id": "connector-fvsuuf55",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": -24,
+            "y": 35
+          },
+          "direction": "S"
+        },
+        {
+          "id": "connector-y987v3kx",
+          "name": "",
+          "kind": "connector",
+          "at": {
+            "x": -27,
+            "y": 5
+          },
+          "direction": "W"
+        },
+        {
+          "id": "point-qv6w3dn8",
+          "name": "OL_451",
+          "kind": "virtualPoint",
+          "at": {
+            "x": -15,
+            "y": 5
+          }
+        },
+        {
+          "id": "point-14sgp6c4",
+          "name": "OL_485",
+          "kind": "virtualPoint",
+          "at": {
+            "x": -12,
+            "y": 32
+          }
+        },
+        {
+          "id": "point-rdb6ax3s",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": -24,
+            "y": 20
           }
         }
       ]
@@ -2195,7 +2341,7 @@
       "elements": [
         {
           "id": "track-2u95t8h8",
-          "name": "",
+          "name": "INS_888",
           "kind": "track",
           "points": [
             {
@@ -2214,7 +2360,7 @@
         },
         {
           "id": "track-vfrn09sj",
-          "name": "",
+          "name": "INS_887",
           "kind": "track",
           "points": [
             {
@@ -2233,7 +2379,7 @@
         },
         {
           "id": "track-29h5guk9",
-          "name": "",
+          "name": "INS_806",
           "kind": "track",
           "points": [
             {
@@ -2248,7 +2394,7 @@
         },
         {
           "id": "track-suzn4fvx",
-          "name": "",
+          "name": "INS_886",
           "kind": "track",
           "points": [
             {
@@ -2263,7 +2409,7 @@
         },
         {
           "id": "track-5ml1iji0",
-          "name": "",
+          "name": "INS_05",
           "kind": "track",
           "points": [
             {
@@ -2282,7 +2428,7 @@
         },
         {
           "id": "track-9v1iwi7j",
-          "name": "",
+          "name": "INS_805",
           "kind": "track",
           "points": [
             {
@@ -2297,7 +2443,7 @@
         },
         {
           "id": "track-swaccf98",
-          "name": "",
+          "name": "INS_885",
           "kind": "track",
           "points": [
             {
@@ -2312,7 +2458,7 @@
         },
         {
           "id": "track-sthmzfyz",
-          "name": "",
+          "name": "INS_04",
           "kind": "track",
           "points": [
             {
@@ -2327,7 +2473,7 @@
         },
         {
           "id": "track-3mfd2fgi",
-          "name": "",
+          "name": "INS_894",
           "kind": "track",
           "points": [
             {
@@ -2342,7 +2488,7 @@
         },
         {
           "id": "track-pegvs4sc",
-          "name": "",
+          "name": "INS_804",
           "kind": "track",
           "points": [
             {
@@ -2357,7 +2503,7 @@
         },
         {
           "id": "track-stg7y3jf",
-          "name": "",
+          "name": "INS_803",
           "kind": "track",
           "points": [
             {
@@ -2372,7 +2518,7 @@
         },
         {
           "id": "track-xeouiuhs",
-          "name": "",
+          "name": "INS_814",
           "kind": "track",
           "points": [
             {
@@ -2387,7 +2533,7 @@
         },
         {
           "id": "track-pn9c9td7",
-          "name": "",
+          "name": "INS_03",
           "kind": "track",
           "points": [
             {
@@ -2402,7 +2548,7 @@
         },
         {
           "id": "track-bpu9f8d3",
-          "name": "",
+          "name": "INS_802",
           "kind": "track",
           "points": [
             {
@@ -2417,7 +2563,7 @@
         },
         {
           "id": "track-rgbghdmh",
-          "name": "",
+          "name": "INS_02",
           "kind": "track",
           "points": [
             {
@@ -2432,7 +2578,7 @@
         },
         {
           "id": "track-ct5n1m11",
-          "name": "",
+          "name": "INS_801",
           "kind": "track",
           "points": [
             {
@@ -2447,7 +2593,7 @@
         },
         {
           "id": "track-lylu96yo",
-          "name": "",
+          "name": "INS_800",
           "kind": "track",
           "points": [
             {
@@ -2462,7 +2608,7 @@
         },
         {
           "id": "track-1udn6p16",
-          "name": "",
+          "name": "INS_01",
           "kind": "track",
           "points": [
             {
@@ -2477,7 +2623,7 @@
         },
         {
           "id": "track-vi0kpmi8",
-          "name": "",
+          "name": "INS_890",
           "kind": "track",
           "points": [
             {
@@ -2491,107 +2637,8 @@
           ]
         },
         {
-          "id": "track-swh448t4",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 13,
-              "y": 24
-            },
-            {
-              "x": 4,
-              "y": 24
-            },
-            {
-              "x": 4,
-              "y": 16
-            },
-            {
-              "x": 19,
-              "y": 16
-            }
-          ]
-        },
-        {
-          "id": "track-tqqwxv4p",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 21,
-              "y": 24
-            },
-            {
-              "x": 26,
-              "y": 24
-            }
-          ]
-        },
-        {
-          "id": "track-2091i6g2",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 26,
-              "y": 26
-            },
-            {
-              "x": 19,
-              "y": 26
-            }
-          ]
-        },
-        {
-          "id": "track-0jmuqrfs",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 15,
-              "y": 24
-            },
-            {
-              "x": 19,
-              "y": 24
-            }
-          ]
-        },
-        {
-          "id": "track-k1kng3j7",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 15,
-              "y": 26
-            },
-            {
-              "x": 4,
-              "y": 26
-            },
-            {
-              "x": 2,
-              "y": 24
-            },
-            {
-              "x": 2,
-              "y": 16
-            },
-            {
-              "x": 4,
-              "y": 14
-            },
-            {
-              "x": 19,
-              "y": 14
-            }
-          ]
-        },
-        {
           "id": "turnout-gov3s15h",
-          "name": "",
+          "name": "INS_197",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -2600,16 +2647,12 @@
           },
           "orientation": "E",
           "control": {
-            "kind": "dcc",
-            "addresses": [
-              197
-            ],
-            "invert": true
+            "kind": "manual"
           }
         },
         {
           "id": "turnout-v1si5yzw",
-          "name": "",
+          "name": "INS_198",
           "kind": "turnout",
           "type": "doubleSlip",
           "at": {
@@ -2618,16 +2661,12 @@
           },
           "orientation": "E",
           "control": {
-            "kind": "dcc",
-            "addresses": [
-              198
-            ],
-            "invert": true
+            "kind": "manual"
           }
         },
         {
           "id": "turnout-58jbwgo0",
-          "name": "",
+          "name": "INS_195",
           "kind": "turnout",
           "type": "doubleSlip",
           "at": {
@@ -2636,16 +2675,12 @@
           },
           "orientation": "E",
           "control": {
-            "kind": "dcc",
-            "addresses": [
-              195
-            ],
-            "invert": true
+            "kind": "manual"
           }
         },
         {
           "id": "turnout-1ld3u8za",
-          "name": "",
+          "name": "INS_196",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -2654,16 +2689,12 @@
           },
           "orientation": "E",
           "control": {
-            "kind": "dcc",
-            "addresses": [
-              196
-            ],
-            "invert": true
+            "kind": "manual"
           }
         },
         {
           "id": "turnout-f9ryvkcs",
-          "name": "",
+          "name": "INS_194",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -2672,16 +2703,12 @@
           },
           "orientation": "NE",
           "control": {
-            "kind": "dcc",
-            "addresses": [
-              193
-            ],
-            "invert": true
+            "kind": "manual"
           }
         },
         {
           "id": "turnout-ecbipytt",
-          "name": "",
+          "name": "INS_106",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -2699,7 +2726,7 @@
         },
         {
           "id": "turnout-5wmh0vl9",
-          "name": "",
+          "name": "INS_194",
           "kind": "turnout",
           "type": "doubleSlip",
           "at": {
@@ -2708,16 +2735,12 @@
           },
           "orientation": "SE",
           "control": {
-            "kind": "dcc",
-            "addresses": [
-              194
-            ],
-            "invert": true
+            "kind": "manual"
           }
         },
         {
           "id": "turnout-qpctmpaz",
-          "name": "",
+          "name": "INS_101",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -2735,7 +2758,7 @@
         },
         {
           "id": "turnout-mbgf1jk9",
-          "name": "",
+          "name": "INS_103",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -2753,7 +2776,7 @@
         },
         {
           "id": "turnout-abph7vhm",
-          "name": "",
+          "name": "INS_105",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -2771,7 +2794,7 @@
         },
         {
           "id": "turnout-iyy6clhv",
-          "name": "",
+          "name": "INS_102",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -2789,7 +2812,7 @@
         },
         {
           "id": "turnout-ubt8y9yp",
-          "name": "",
+          "name": "INS_107",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -2807,7 +2830,7 @@
         },
         {
           "id": "turnout-shv1ur2v",
-          "name": "",
+          "name": "INS_190",
           "kind": "turnout",
           "type": "right",
           "at": {
@@ -2816,16 +2839,12 @@
           },
           "orientation": "W",
           "control": {
-            "kind": "dcc",
-            "addresses": [
-              190
-            ],
-            "invert": true
+            "kind": "manual"
           }
         },
         {
           "id": "turnout-sknue4fm",
-          "name": "",
+          "name": "INS_191",
           "kind": "turnout",
           "type": "left",
           "at": {
@@ -2834,21 +2853,17 @@
           },
           "orientation": "E",
           "control": {
-            "kind": "dcc",
-            "addresses": [
-              191
-            ],
-            "invert": true
+            "kind": "manual"
           }
         },
         {
           "id": "turnout-433pg38b",
-          "name": "",
+          "name": "DEN_202",
           "kind": "turnout",
           "type": "right",
           "at": {
-            "x": 14,
-            "y": 24
+            "x": 27,
+            "y": 30
           },
           "orientation": "E",
           "control": {
@@ -2861,12 +2876,12 @@
         },
         {
           "id": "turnout-1av0o8yj",
-          "name": "",
+          "name": "DEN_201",
           "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 20,
-            "y": 24
+            "x": 29,
+            "y": 30
           },
           "orientation": "W",
           "control": {
@@ -2879,12 +2894,12 @@
         },
         {
           "id": "turnout-5u986owz",
-          "name": "",
+          "name": "DEN_204",
           "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 18,
-            "y": 26
+            "x": 27,
+            "y": 32
           },
           "orientation": "E",
           "control": {
@@ -2897,12 +2912,12 @@
         },
         {
           "id": "turnout-hhcf04r5",
-          "name": "",
+          "name": "DEN_203",
           "kind": "turnout",
           "type": "right",
           "at": {
-            "x": 16,
-            "y": 26
+            "x": 29,
+            "y": 32
           },
           "orientation": "W",
           "control": {
@@ -2915,58 +2930,32 @@
         },
         {
           "id": "connector-hmdrbqqd",
-          "name": "Päärata Kel",
+          "name": "INS_802",
           "kind": "connector",
           "at": {
             "x": 52,
             "y": 14
           },
+          "textColor": "yellow",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
-            "connectorId": "connector-mvqs4h17"
+            "connectorId": "connector-m0mptqyg"
           }
         },
         {
           "id": "connector-kxrkx2fn",
-          "name": "Päärata Pun",
+          "name": "INS_801",
           "kind": "connector",
           "at": {
             "x": 52,
             "y": 16
           },
+          "textColor": "red",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
-            "connectorId": "connector-dk6972br"
-          }
-        },
-        {
-          "id": "connector-26eozpdb",
-          "name": "Päärata Pun",
-          "kind": "connector",
-          "at": {
-            "x": 26,
-            "y": 24
-          },
-          "direction": "E",
-          "pairedWith": {
-            "viewId": "view-78aa6la2",
-            "connectorId": "connector-5e2emubv"
-          }
-        },
-        {
-          "id": "connector-9yqpyfr1",
-          "name": "Päärata Kel",
-          "kind": "connector",
-          "at": {
-            "x": 26,
-            "y": 26
-          },
-          "direction": "E",
-          "pairedWith": {
-            "viewId": "view-78aa6la2",
-            "connectorId": "connector-zww25x5u"
+            "connectorId": "connector-t0y2wqeh"
           }
         },
         {
@@ -2979,17 +2968,6 @@
           },
           "text": "4",
           "size": "small"
-        },
-        {
-          "id": "label-lswt4y53",
-          "name": "",
-          "kind": "label",
-          "at": {
-            "x": 7,
-            "y": 12
-          },
-          "text": "Päärata Kel",
-          "size": "normal"
         },
         {
           "id": "label-6w3d530l",
@@ -3012,17 +2990,6 @@
           },
           "text": "2",
           "size": "small"
-        },
-        {
-          "id": "label-odcxteun",
-          "name": "",
-          "kind": "label",
-          "at": {
-            "x": 7,
-            "y": 18
-          },
-          "text": "Päärata Pun",
-          "size": "normal"
         },
         {
           "id": "label-myr9reyr",
@@ -3144,6 +3111,298 @@
             "y": 18
           },
           "direction": "W"
+        },
+        {
+          "id": "point-r6o032au",
+          "name": "INS_01",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 39,
+            "y": 18
+          }
+        },
+        {
+          "id": "point-jbgvo0yl",
+          "name": "INS_02",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 39,
+            "y": 16
+          }
+        },
+        {
+          "id": "point-gr28h15f",
+          "name": "INS_03",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 41,
+            "y": 14
+          }
+        },
+        {
+          "id": "point-uay0u9d9",
+          "name": "INS_04",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 38,
+            "y": 10
+          }
+        },
+        {
+          "id": "point-4oyhsi37",
+          "name": "INS_04",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 26,
+            "y": 10
+          }
+        },
+        {
+          "id": "point-nyscxvl4",
+          "name": "INS_01",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 23,
+            "y": 18
+          }
+        },
+        {
+          "id": "point-fiiwdl6w",
+          "name": "INS_92",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 23,
+            "y": 16
+          }
+        },
+        {
+          "id": "point-t3vw6rws",
+          "name": "INS_03",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 23,
+            "y": 14
+          }
+        },
+        {
+          "id": "track-66cpnpzc",
+          "name": "DEN_912",
+          "kind": "track",
+          "points": [
+            {
+              "x": 19,
+              "y": 14
+            },
+            {
+              "x": 11,
+              "y": 14
+            },
+            {
+              "x": 6,
+              "y": 19
+            },
+            {
+              "x": 6,
+              "y": 28
+            },
+            {
+              "x": 10,
+              "y": 32
+            },
+            {
+              "x": 26,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "id": "track-p97k3uo6",
+          "name": "DEN_911",
+          "kind": "track",
+          "points": [
+            {
+              "x": 26,
+              "y": 30
+            },
+            {
+              "x": 11,
+              "y": 30
+            },
+            {
+              "x": 8,
+              "y": 27
+            },
+            {
+              "x": 8,
+              "y": 20
+            },
+            {
+              "x": 12,
+              "y": 16
+            },
+            {
+              "x": 19,
+              "y": 16
+            }
+          ]
+        },
+        {
+          "id": "platform-4w44e2ae",
+          "name": "",
+          "kind": "platform",
+          "at": {
+            "x": 20,
+            "y": 29
+          },
+          "width": 6,
+          "height": 1
+        },
+        {
+          "id": "platform-fyab32hw",
+          "name": "",
+          "kind": "platform",
+          "at": {
+            "x": 20,
+            "y": 32
+          },
+          "width": 6,
+          "height": 1
+        },
+        {
+          "id": "point-pnm5ueto",
+          "name": "DEN_002",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 20,
+            "y": 32
+          }
+        },
+        {
+          "id": "point-wts9u0nv",
+          "name": "DEN_001",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 26,
+            "y": 30
+          }
+        },
+        {
+          "id": "track-u3gzrbx3",
+          "name": "DEN_901",
+          "kind": "track",
+          "points": [
+            {
+              "x": 30,
+              "y": 30
+            },
+            {
+              "x": 33,
+              "y": 30
+            }
+          ]
+        },
+        {
+          "id": "track-t2irjlfn",
+          "name": "DEN_902",
+          "kind": "track",
+          "points": [
+            {
+              "x": 30,
+              "y": 32
+            },
+            {
+              "x": 33,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "id": "connector-mzl7j15t",
+          "name": "DEN_901",
+          "kind": "connector",
+          "at": {
+            "x": 33,
+            "y": 30
+          },
+          "textColor": "red",
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-78aa6la2",
+            "connectorId": "connector-f2ifo6yj"
+          }
+        },
+        {
+          "id": "connector-b7uuwnx1",
+          "name": "DEN_902",
+          "kind": "connector",
+          "at": {
+            "x": 33,
+            "y": 32
+          },
+          "textColor": "yellow",
+          "direction": "E",
+          "pairedWith": {
+            "viewId": "view-78aa6la2",
+            "connectorId": "connector-yn33ydjv"
+          }
+        },
+        {
+          "id": "point-0dndrfal",
+          "name": "INS_800",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 20,
+            "y": 18
+          }
+        },
+        {
+          "id": "point-i3e5xi8g",
+          "name": "INS_803",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 20,
+            "y": 12
+          }
+        },
+        {
+          "id": "point-oqrw13m4",
+          "name": "INS_05",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 26,
+            "y": 8
+          }
+        },
+        {
+          "id": "point-sr4omedl",
+          "name": "",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 42,
+            "y": 10
+          }
+        },
+        {
+          "id": "platform-nx5ksd83",
+          "name": "",
+          "kind": "platform",
+          "at": {
+            "x": 24,
+            "y": 11
+          },
+          "width": 16,
+          "height": 2
+        },
+        {
+          "id": "platform-7u917h1h",
+          "name": "",
+          "kind": "platform",
+          "at": {
+            "x": 23,
+            "y": 19
+          },
+          "width": 17,
+          "height": 1
         }
       ]
     },
@@ -3154,239 +3413,164 @@
       "elements": [
         {
           "id": "track-u5ty8476",
-          "name": "",
+          "name": "SS_200",
           "kind": "track",
           "points": [
             {
-              "x": 9,
-              "y": 16
+              "x": 50,
+              "y": 21
             },
             {
-              "x": 13,
-              "y": 16
+              "x": 46,
+              "y": 21
             }
           ]
         },
         {
           "id": "track-bzj7sxub",
-          "name": "",
+          "name": "SS_01",
           "kind": "track",
           "points": [
             {
-              "x": 15,
-              "y": 16
+              "x": 44,
+              "y": 21
             },
             {
-              "x": 35,
-              "y": 16
+              "x": 24,
+              "y": 21
             }
           ]
         },
         {
           "id": "track-p50gpzdq",
-          "name": "",
+          "name": "SS_100",
           "kind": "track",
           "points": [
             {
-              "x": 37,
-              "y": 16
+              "x": 22,
+              "y": 21
             },
             {
-              "x": 41,
-              "y": 16
+              "x": 18,
+              "y": 21
             }
           ]
         },
         {
           "id": "track-i3o9g6m9",
-          "name": "",
+          "name": "SS_201",
           "kind": "track",
           "points": [
             {
-              "x": 6,
-              "y": 18
+              "x": 53,
+              "y": 19
             },
             {
-              "x": 11,
-              "y": 18
+              "x": 48,
+              "y": 19
             }
           ]
         },
         {
           "id": "track-rwr5w4aj",
-          "name": "",
+          "name": "SS_02",
           "kind": "track",
           "points": [
             {
-              "x": 13,
-              "y": 18
+              "x": 46,
+              "y": 19
             },
             {
-              "x": 37,
-              "y": 18
-            }
-          ]
-        },
-        {
-          "id": "track-h5zvsh17",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 41,
-              "y": 18
-            },
-            {
-              "x": 39,
-              "y": 18
-            }
-          ]
-        },
-        {
-          "id": "track-mqmzg7qy",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 49,
-              "y": 18
-            },
-            {
-              "x": 52,
-              "y": 18
+              "x": 22,
+              "y": 19
             }
           ]
         },
         {
           "id": "track-dxj2eook",
-          "name": "",
+          "name": "SS_202",
           "kind": "track",
           "points": [
             {
-              "x": 6,
-              "y": 20
+              "x": 53,
+              "y": 17
             },
             {
-              "x": 11,
-              "y": 20
+              "x": 48,
+              "y": 17
             }
           ]
         },
         {
           "id": "track-ujhscwmg",
-          "name": "",
+          "name": "SS_03",
           "kind": "track",
           "points": [
             {
-              "x": 13,
-              "y": 20
+              "x": 46,
+              "y": 17
             },
             {
-              "x": 37,
-              "y": 20
-            }
-          ]
-        },
-        {
-          "id": "track-sicj4ojm",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 39,
-              "y": 20
-            },
-            {
-              "x": 43,
-              "y": 20
-            }
-          ]
-        },
-        {
-          "id": "track-i1yvzs40",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 52,
-              "y": 20
-            },
-            {
-              "x": 47,
-              "y": 20
+              "x": 22,
+              "y": 17
             }
           ]
         },
         {
           "id": "track-f6nwzbeh",
-          "name": "",
+          "name": "SS_203",
           "kind": "track",
           "points": [
             {
-              "x": 9,
-              "y": 22
+              "x": 50,
+              "y": 15
             },
             {
-              "x": 13,
-              "y": 22
+              "x": 46,
+              "y": 15
             }
           ]
         },
         {
           "id": "track-309uzmew",
-          "name": "",
+          "name": "SS_04",
           "kind": "track",
           "points": [
             {
-              "x": 15,
-              "y": 22
+              "x": 44,
+              "y": 15
             },
             {
-              "x": 35,
-              "y": 22
+              "x": 24,
+              "y": 15
             }
           ]
         },
         {
           "id": "track-qvzq35af",
-          "name": "",
+          "name": "SS_103",
           "kind": "track",
           "points": [
             {
-              "x": 37,
-              "y": 22
+              "x": 22,
+              "y": 15
             },
             {
-              "x": 41,
-              "y": 22
-            }
-          ]
-        },
-        {
-          "id": "track-ehdyvyb9",
-          "name": "",
-          "kind": "track",
-          "points": [
-            {
-              "x": 43,
-              "y": 18
-            },
-            {
-              "x": 47,
-              "y": 18
+              "x": 18,
+              "y": 15
             }
           ]
         },
         {
           "id": "turnout-jie7iyfk",
-          "name": "",
+          "name": "SS_304",
           "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 14,
-            "y": 16
+            "x": 45,
+            "y": 21
           },
-          "orientation": "W",
+          "orientation": "E",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3397,14 +3581,14 @@
         },
         {
           "id": "turnout-721ke1bw",
-          "name": "",
+          "name": "SS_307",
           "kind": "turnout",
           "type": "right",
           "at": {
-            "x": 36,
-            "y": 16
+            "x": 23,
+            "y": 21
           },
-          "orientation": "E",
+          "orientation": "W",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3415,14 +3599,14 @@
         },
         {
           "id": "turnout-ksu7r9n7",
-          "name": "",
+          "name": "SS_303",
           "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 12,
-            "y": 18
+            "x": 47,
+            "y": 19
           },
-          "orientation": "E",
+          "orientation": "W",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3433,14 +3617,14 @@
         },
         {
           "id": "turnout-sfhnxnl2",
-          "name": "",
+          "name": "SS_305",
           "kind": "turnout",
           "type": "right",
           "at": {
-            "x": 38,
-            "y": 18
+            "x": 21,
+            "y": 19
           },
-          "orientation": "W",
+          "orientation": "E",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3451,14 +3635,14 @@
         },
         {
           "id": "turnout-b88c3du0",
-          "name": "",
+          "name": "SS_310",
           "kind": "turnout",
           "type": "right",
           "at": {
-            "x": 42,
-            "y": 18
+            "x": 17,
+            "y": 19
           },
-          "orientation": "E",
+          "orientation": "W",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3469,14 +3653,14 @@
         },
         {
           "id": "turnout-mrpz8l7q",
-          "name": "",
+          "name": "SS_312",
           "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 48,
-            "y": 18
+            "x": 15,
+            "y": 19
           },
-          "orientation": "W",
+          "orientation": "E",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3487,14 +3671,14 @@
         },
         {
           "id": "turnout-p1jjhdlw",
-          "name": "",
+          "name": "SS_302",
           "kind": "turnout",
           "type": "right",
           "at": {
-            "x": 12,
-            "y": 20
+            "x": 47,
+            "y": 17
           },
-          "orientation": "E",
+          "orientation": "W",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3505,14 +3689,14 @@
         },
         {
           "id": "turnout-2w7tjjua",
-          "name": "",
+          "name": "SS_306",
           "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 38,
-            "y": 20
+            "x": 21,
+            "y": 17
           },
-          "orientation": "W",
+          "orientation": "E",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3523,14 +3707,14 @@
         },
         {
           "id": "turnout-qzi2w4cb",
-          "name": "",
+          "name": "SS_309",
           "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 46,
-            "y": 20
+            "x": 17,
+            "y": 17
           },
-          "orientation": "E",
+          "orientation": "W",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3541,14 +3725,14 @@
         },
         {
           "id": "turnout-8zulhvoh",
-          "name": "",
+          "name": "SS_311",
           "kind": "turnout",
           "type": "right",
           "at": {
-            "x": 44,
-            "y": 20
+            "x": 15,
+            "y": 17
           },
-          "orientation": "W",
+          "orientation": "E",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3559,14 +3743,14 @@
         },
         {
           "id": "turnout-c06iaplh",
-          "name": "",
+          "name": "SS_301",
           "kind": "turnout",
           "type": "right",
           "at": {
-            "x": 14,
-            "y": 22
+            "x": 45,
+            "y": 15
           },
-          "orientation": "W",
+          "orientation": "E",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3577,14 +3761,14 @@
         },
         {
           "id": "turnout-p0l36lbj",
-          "name": "",
+          "name": "SS_308",
           "kind": "turnout",
           "type": "left",
           "at": {
-            "x": 36,
-            "y": 22
+            "x": 23,
+            "y": 15
           },
-          "orientation": "E",
+          "orientation": "W",
           "control": {
             "kind": "dcc",
             "addresses": [
@@ -3595,58 +3779,32 @@
         },
         {
           "id": "connector-yn33ydjv",
-          "name": "Päärata Punainen",
+          "name": "SS_202",
           "kind": "connector",
           "at": {
-            "x": 6,
-            "y": 20
+            "x": 53,
+            "y": 17
           },
-          "direction": "W",
-          "pairedWith": {
-            "viewId": "view-vjzaj3un",
-            "connectorId": "connector-xedg3alo"
-          }
-        },
-        {
-          "id": "connector-5e2emubv",
-          "name": "Päärata pun",
-          "kind": "connector",
-          "at": {
-            "x": 52,
-            "y": 20
-          },
+          "textColor": "yellow",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-r1tq8f4s",
-            "connectorId": "connector-26eozpdb"
+            "connectorId": "connector-b7uuwnx1"
           }
         },
         {
           "id": "connector-f2ifo6yj",
-          "name": "Päärata Keltainen",
+          "name": "SS_201",
           "kind": "connector",
           "at": {
-            "x": 6,
-            "y": 18
+            "x": 53,
+            "y": 19
           },
-          "direction": "W",
-          "pairedWith": {
-            "viewId": "view-vjzaj3un",
-            "connectorId": "connector-43htub70"
-          }
-        },
-        {
-          "id": "connector-zww25x5u",
-          "name": "Päärata kel",
-          "kind": "connector",
-          "at": {
-            "x": 52,
-            "y": 18
-          },
+          "textColor": "red",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-r1tq8f4s",
-            "connectorId": "connector-9yqpyfr1"
+            "connectorId": "connector-mzl7j15t"
           }
         },
         {
@@ -3654,8 +3812,8 @@
           "name": "",
           "kind": "label",
           "at": {
-            "x": 24,
-            "y": 15
+            "x": 35,
+            "y": 22
           },
           "text": "1",
           "size": "small"
@@ -3665,8 +3823,8 @@
           "name": "",
           "kind": "label",
           "at": {
-            "x": 24,
-            "y": 17
+            "x": 35,
+            "y": 20
           },
           "text": "2",
           "size": "small"
@@ -3676,8 +3834,8 @@
           "name": "",
           "kind": "label",
           "at": {
-            "x": 24,
-            "y": 19
+            "x": 35,
+            "y": 18
           },
           "text": "3",
           "size": "small"
@@ -3687,8 +3845,8 @@
           "name": "",
           "kind": "label",
           "at": {
-            "x": 24,
-            "y": 21
+            "x": 35,
+            "y": 16
           },
           "text": "4",
           "size": "small"
@@ -3698,40 +3856,224 @@
           "name": "",
           "kind": "bufferStop",
           "at": {
-            "x": 9,
-            "y": 16
+            "x": 50,
+            "y": 21
           },
-          "direction": "E"
+          "direction": "W"
         },
         {
           "id": "stop-nyhna7uk",
           "name": "",
           "kind": "bufferStop",
           "at": {
-            "x": 9,
-            "y": 22
+            "x": 50,
+            "y": 15
           },
-          "direction": "E"
+          "direction": "W"
         },
         {
           "id": "stop-bxtheaxo",
           "name": "",
           "kind": "bufferStop",
           "at": {
-            "x": 41,
-            "y": 22
+            "x": 18,
+            "y": 15
           },
-          "direction": "W"
+          "direction": "E"
         },
         {
           "id": "stop-t40d86jx",
           "name": "",
           "kind": "bufferStop",
           "at": {
-            "x": 41,
-            "y": 16
+            "x": 18,
+            "y": 21
           },
-          "direction": "W"
+          "direction": "E"
+        },
+        {
+          "id": "point-fjlkqlbe",
+          "name": "SS_01",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 44,
+            "y": 21
+          }
+        },
+        {
+          "id": "point-5c617l3a",
+          "name": "SS_02",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 44,
+            "y": 19
+          }
+        },
+        {
+          "id": "point-zmd15cew",
+          "name": "SS_03",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 44,
+            "y": 17
+          }
+        },
+        {
+          "id": "point-le4j8ckn",
+          "name": "SS_04",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 44,
+            "y": 15
+          }
+        },
+        {
+          "id": "point-9osoxjhy",
+          "name": "SS_04",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 24,
+            "y": 15
+          }
+        },
+        {
+          "id": "point-uakhfs8q",
+          "name": "SS_03",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 24,
+            "y": 17
+          }
+        },
+        {
+          "id": "point-s3dpqo65",
+          "name": "SS_02",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 24,
+            "y": 19
+          }
+        },
+        {
+          "id": "point-x6mp414o",
+          "name": "SS_01",
+          "kind": "virtualPoint",
+          "at": {
+            "x": 24,
+            "y": 21
+          }
+        },
+        {
+          "id": "track-fq88cmk1",
+          "name": "SS_101",
+          "kind": "track",
+          "points": [
+            {
+              "x": 20,
+              "y": 19
+            },
+            {
+              "x": 18,
+              "y": 19
+            }
+          ]
+        },
+        {
+          "id": "track-27bx60x5",
+          "name": "SS_102",
+          "kind": "track",
+          "points": [
+            {
+              "x": 20,
+              "y": 17
+            },
+            {
+              "x": 18,
+              "y": 17
+            }
+          ]
+        },
+        {
+          "id": "track-8fcnwkar",
+          "name": "SS_101",
+          "kind": "track",
+          "points": [
+            {
+              "x": 14,
+              "y": 19
+            },
+            {
+              "x": 7,
+              "y": 19
+            }
+          ]
+        },
+        {
+          "id": "track-4z93msbu",
+          "name": "SS_102",
+          "kind": "track",
+          "points": [
+            {
+              "x": 14,
+              "y": 17
+            },
+            {
+              "x": 7,
+              "y": 17
+            }
+          ]
+        },
+        {
+          "id": "connector-j2cvvmf0",
+          "name": "SS_101",
+          "kind": "connector",
+          "at": {
+            "x": 7,
+            "y": 19
+          },
+          "textColor": "red",
+          "direction": "W",
+          "pairedWith": {
+            "viewId": "view-vjzaj3un",
+            "connectorId": "connector-xedg3alo"
+          }
+        },
+        {
+          "id": "connector-r4f9pte6",
+          "name": "SS_102",
+          "kind": "connector",
+          "at": {
+            "x": 7,
+            "y": 17
+          },
+          "textColor": "yellow",
+          "direction": "W",
+          "pairedWith": {
+            "viewId": "view-vjzaj3un",
+            "connectorId": "connector-43htub70"
+          }
+        },
+        {
+          "id": "platform-onhc9rwl",
+          "name": "",
+          "kind": "platform",
+          "at": {
+            "x": 24,
+            "y": 22
+          },
+          "width": 20,
+          "height": 1
+        },
+        {
+          "id": "platform-pb6z6rn0",
+          "name": "",
+          "kind": "platform",
+          "at": {
+            "x": 24,
+            "y": 13
+          },
+          "width": 20,
+          "height": 1
         }
       ]
     }
@@ -3750,15 +4092,15 @@
         },
         {
           "viewId": "view-r1tq8f4s",
-          "x": -10,
-          "y": -109,
+          "x": 14,
+          "y": -91,
           "scale": 1,
           "rotation": 0
         },
         {
           "viewId": "view-78aa6la2",
-          "x": 9,
-          "y": -12,
+          "x": 29,
+          "y": 17,
           "scale": 1,
           "rotation": 270
         }
