@@ -224,6 +224,9 @@ Select an element to see its properties on the right:
 - **Area**: every station is one automation area. Add areas (layout properties, **Automation
   areas**) for parts of a station or the line between stations, then choose the area for an
   element, or for several selected elements at once. Area borders are drawn while editing.
+- **Text and station exits**: **Text colour** (red, orange, yellow, green, blue, violet, grey, or
+  _Normal_), for example to mark the red and yellow main lines. Each colour has a shade for the
+  light and the dark theme.
 
 Nothing selected: the station, the layout, the **central unit settings** and the **edit password**.
 

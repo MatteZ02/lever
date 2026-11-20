@@ -9,6 +9,21 @@ import {z} from 'zod';
 import {feedbackInputRefSchema} from '../shared/feedback';
 import {directionSchema, gridPointSchema} from './geometry';
 
+// Colours an operator may give to text (labels, exit names), e.g. to mark
+// the red and yellow main lines. Names, not values: the theme gives each a
+// light and a dark shade (renderer/theme/colors.ts, label* tokens).
+export const TEXT_COLORS = [
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'blue',
+  'violet',
+  'grey',
+] as const;
+export const textColorSchema = z.enum(TEXT_COLORS);
+export type TextColor = z.infer<typeof textColorSchema>;
+
 export const idSchema = z.string().min(1).max(64);
 
 // Turnout and accessory addresses are stored as the Roco app displays them
@@ -125,6 +140,8 @@ export const stationConnectorSchema = z.object({
   ...base,
   kind: z.literal('connector'),
   at: gridPointSchema,
+  // Colour of its name; absent = the usual label colour.
+  textColor: textColorSchema.optional(),
   // The direction out of the view.
   direction: directionSchema,
   pairedWith: z.object({viewId: idSchema, connectorId: idSchema}).optional(),
@@ -147,6 +164,7 @@ export const labelSchema = z.object({
   at: gridPointSchema,
   text: z.string().max(200),
   size: z.enum(['small', 'normal', 'large']).default('normal'),
+  textColor: textColorSchema.optional(),
 });
 
 // Decorative rectangle, e.g. a platform (EDT-2).

@@ -14,6 +14,7 @@ import {
   Platform,
   Signal,
   StationConnector,
+  TextColor,
   Track,
   Turnout,
   VirtualPoint,
@@ -52,6 +53,19 @@ export type ElementDisplay = {
 // --- helpers ---------------------------------------------------------------
 
 const HIT_WIDTH = 0.7;
+
+// The colour of a label or exit name.
+const TEXT_FILL: Record<TextColor, string> = {
+  red: color.labelRed,
+  orange: color.labelOrange,
+  yellow: color.labelYellow,
+  green: color.labelGreen,
+  blue: color.labelBlue,
+  violet: color.labelViolet,
+  grey: color.labelGrey,
+};
+const textFill = (textColor: TextColor | undefined) =>
+  textColor ? TEXT_FILL[textColor] : color.diagramLabel;
 const unit = (direction: Direction) => {
   const v = vector(direction);
   const length = Math.hypot(v.x, v.y);
@@ -610,7 +624,7 @@ const ConnectorShape = ({
           textAnchor={
             onScreen.x < -0.1 ? 'end' : onScreen.x > 0.1 ? 'start' : 'middle'
           }
-          style={{fill: color.diagramLabel, fontSize: 0.5}}
+          style={{fill: textFill(element.textColor), fontSize: 0.5}}
         >
           {element.name}
         </text>
@@ -699,7 +713,7 @@ const LabelShape = ({
       <text
         x={element.at.x}
         y={element.at.y}
-        style={{fill: color.diagramLabel, fontSize: size}}
+        style={{fill: textFill(element.textColor), fontSize: size}}
       >
         {element.text}
       </text>

@@ -195,6 +195,44 @@ describe('project files', () => {
     expect(result).toEqual({ok: true, project});
   });
 
+  it('keeps the text colour of labels and exits, and none means the usual one', () => {
+    const project = sidingLayout();
+    project.views[0].elements.push(
+      {
+        kind: 'label',
+        id: 'L1',
+        name: '',
+        at: {x: 0, y: 4},
+        text: 'Pun',
+        size: 'normal',
+        textColor: 'red',
+      },
+      {
+        kind: 'connector',
+        id: 'C9',
+        name: 'Kel',
+        at: {x: 30, y: 0},
+        direction: 'E',
+        textColor: 'yellow',
+      },
+      {
+        kind: 'label',
+        id: 'L2',
+        name: '',
+        at: {x: 0, y: 6},
+        text: 'plain',
+        size: 'normal',
+      },
+    );
+    const result = loadProject(serializeProject(project));
+    expect(result).toEqual({ok: true, project});
+    const text = serializeProject(project);
+    expect(text).toMatch(/"textColor": ?"red"/);
+    expect(
+      loadProject(text.replace(/("textColor": ?)"red"/, '$1"pink"')),
+    ).toMatchObject({ok: false});
+  });
+
   it('rejects other files and newer versions', () => {
     expect(loadProject('nope')).toMatchObject({
       ok: false,

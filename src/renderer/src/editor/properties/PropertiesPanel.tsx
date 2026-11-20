@@ -20,6 +20,8 @@ import {
   GenericAccessory,
   Signal,
   StationConnector,
+  TEXT_COLORS,
+  TextColor,
   Track,
   TURNOUT_TYPES,
   Turnout,
@@ -278,7 +280,13 @@ const ElementProperties = ({
         <AccessoryProperties project={project} accessory={element} />
       )}
       {element.kind === 'connector' && (
-        <ConnectorPairing project={project} connector={element} />
+        <>
+          <TextColorField
+            value={element.textColor}
+            onCommit={(textColor) => update({...element, textColor})}
+          />
+          <ConnectorPairing project={project} connector={element} />
+        </>
       )}
       {element.kind === 'label' && (
         <>
@@ -295,6 +303,10 @@ const ElementProperties = ({
               label: strings.properties.sizes[size],
             }))}
             onCommit={(size) => update({...element, size})}
+          />
+          <TextColorField
+            value={element.textColor}
+            onCommit={(textColor) => update({...element, textColor})}
           />
         </>
       )}
@@ -736,3 +748,25 @@ const TestButtons = ({
     </Section>
   );
 };
+
+// Text colour of a label or exit name ('' = the usual colour).
+const TextColorField = ({
+  value,
+  onCommit,
+}: {
+  value: TextColor | undefined;
+  onCommit: (value: TextColor | undefined) => void;
+}) => (
+  <SelectField<TextColor | ''>
+    label={strings.properties.textColor}
+    value={value ?? ''}
+    options={[
+      {value: '', label: strings.properties.textColors.default},
+      ...TEXT_COLORS.map((c) => ({
+        value: c,
+        label: strings.properties.textColors[c],
+      })),
+    ]}
+    onCommit={(next) => onCommit(next || undefined)}
+  />
+);

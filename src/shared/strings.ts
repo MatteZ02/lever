@@ -428,6 +428,17 @@ export const strings = {
       string,
       string
     >,
+    textColor: 'Text colour',
+    textColors: {
+      default: 'Normal',
+      red: 'Red',
+      orange: 'Orange',
+      yellow: 'Yellow',
+      green: 'Green',
+      blue: 'Blue',
+      violet: 'Violet',
+      grey: 'Grey',
+    } as Record<string, string>,
     width: 'Width',
     height: 'Height',
     stationName: 'Station name',
