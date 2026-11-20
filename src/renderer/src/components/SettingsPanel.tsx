@@ -1,5 +1,6 @@
 import {FormEvent, useState} from 'react';
 import {LANGUAGES} from '../../../shared/language';
+import {Settings} from '../../../shared/settings';
 import {strings} from '../../../shared/strings';
 import {useEngineStore} from '../store/engineStore';
 import {updateSettings, useSettingsStore} from '../store/settingsStore';
@@ -63,10 +64,13 @@ const CentralUnitForm = (props: CentralUnitFormProps) => {
   );
 };
 
-// Keys offered for "undo last route": none of them is Esc (STOP) or
-// typed text, and Ctrl+Z is never used (RTE-6b).
-const UNDO_ROUTE_KEYS = [
-  ...Array.from({length: 12}, (_, i) => `F${i + 1}`),
+// Keys offered for the quick keys: none of them is typed text, Ctrl+Z is
+// never used (RTE-6b), and F11 belongs to the menu (full screen). Esc is
+// offered for STOP only.
+const QUICK_KEYS = [
+  ...Array.from({length: 12}, (_, i) => `F${i + 1}`).filter(
+    (key) => key !== 'F11',
+  ),
   'Backspace',
   'Insert',
   'Home',
@@ -74,6 +78,67 @@ const UNDO_ROUTE_KEYS = [
   'PageUp',
   'PageDown',
 ];
+
+const QUICK_KEY_ACTIONS = [
+  'stop',
+  'resume',
+  'trackPowerOff',
+  'undoRoute',
+  'newRoute',
+  'fitView',
+] as const;
+type QuickKeyAction = (typeof QUICK_KEY_ACTIONS)[number];
+
+const QuickKeys = ({shortcuts}: {shortcuts: Settings['shortcuts']}) => {
+  // Which action has a key, so one key is never given to two actions.
+  const usedBy = (key: string, except: QuickKeyAction) =>
+    QUICK_KEY_ACTIONS.find(
+      (action) => action !== except && shortcuts[action] === key,
+    );
+  return (
+    <fieldset>
+      <legend>{strings.settings.quickKeys}</legend>
+      <small className="muted">{strings.settings.quickKeysHelp}</small>
+      {QUICK_KEY_ACTIONS.map((action) => {
+        const keys = action === 'stop' ? ['Escape', ...QUICK_KEYS] : QUICK_KEYS;
+        return (
+          <label key={action} className="field">
+            <span>{strings.settings.quickKeyActions[action]}</span>
+            <select
+              value={shortcuts[action] ?? ''}
+              onChange={(event) =>
+                void updateSettings({
+                  shortcuts: {
+                    ...shortcuts,
+                    [action]: event.target.value || null,
+                  },
+                })
+              }
+            >
+              {/* STOP always has a key. */}
+              {action !== 'stop' && (
+                <option value="">{strings.settings.noKey}</option>
+              )}
+              {keys.map((key) => {
+                const other = usedBy(key, action);
+                return (
+                  <option key={key} value={key} disabled={other !== undefined}>
+                    {other
+                      ? strings.settings.keyUsedBy(
+                          key,
+                          strings.settings.quickKeyActions[other],
+                        )
+                      : key}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+        );
+      })}
+    </fieldset>
+  );
+};
 
 export const SettingsPanel = () => {
   const settings = useSettingsStore((state) => state.settings);
@@ -144,27 +209,7 @@ export const SettingsPanel = () => {
         {strings.settings.protocolLog}
       </label>
 
-      <label className="field">
-        <span>{strings.settings.undoRouteKey}</span>
-        <select
-          value={settings.shortcuts.undoRoute ?? ''}
-          onChange={(event) =>
-            void updateSettings({
-              shortcuts: {
-                ...settings.shortcuts,
-                undoRoute: event.target.value || null,
-              },
-            })
-          }
-        >
-          <option value="">{strings.settings.noKey}</option>
-          {UNDO_ROUTE_KEYS.map((key) => (
-            <option key={key} value={key}>
-              {key}
-            </option>
-          ))}
-        </select>
-      </label>
+      <QuickKeys shortcuts={settings.shortcuts} />
     </section>
   );
 };

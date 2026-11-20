@@ -35,6 +35,11 @@ export const settingsSchema = z.object({
       // Undo the last route (RTE-6b). Never Ctrl+Z alone in operating
       // mode; no default.
       undoRoute: z.string().min(1).nullable().default(null),
+      // Track power on / resume after STOP, start a new route, fit the
+      // diagram to the window. No defaults.
+      resume: z.string().min(1).nullable().default(null),
+      newRoute: z.string().min(1).nullable().default(null),
+      fitView: z.string().min(1).nullable().default(null),
     })
     .prefault({}),
   theme: z.enum(['system', 'light', 'dark']).default('system'),
@@ -84,6 +89,9 @@ export const settingsUpdateSchema = z.object({
       stop: z.string().min(1),
       trackPowerOff: z.string().min(1).nullable(),
       undoRoute: z.string().min(1).nullable().optional(),
+      resume: z.string().min(1).nullable().optional(),
+      newRoute: z.string().min(1).nullable().optional(),
+      fitView: z.string().min(1).nullable().optional(),
     })
     .optional(),
   theme: z.enum(['system', 'light', 'dark']).optional(),

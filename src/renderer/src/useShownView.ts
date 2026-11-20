@@ -9,6 +9,7 @@ import {strings} from '../../shared/strings';
 import {formatWindowTarget, WindowTarget} from '../../shared/windowTarget';
 import {fitViewport} from './diagram/DiagramView';
 import {fitArrangement} from './full/ViewCanvas';
+import {FIT_EVENT} from './quickKeys';
 import {sendCommand} from './store/engineStore';
 import {
   activeView,
@@ -59,6 +60,12 @@ export const useShownView = ({
       );
     }
   }, [project, arrangement]);
+
+  // The fit-to-view quick key.
+  useEffect(() => {
+    window.addEventListener(FIT_EVENT, fit);
+    return () => window.removeEventListener(FIT_EVENT, fit);
+  }, [fit]);
 
   // The engine refreshes the positions of what is on screen.
   const shownViews = fullView

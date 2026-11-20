@@ -5,12 +5,27 @@
 export type SafetyShortcuts = {
   stop: string;
   trackPowerOff: string | null;
-  // Undo the last route (RTE-6b); not a safety action, but handled here so
-  // it follows the same rules (no modifiers, not while typing).
+  // Track power on, which also resumes after STOP.
+  resume?: string | null;
+  // The rest are not safety actions, but follow the same rules (no
+  // modifiers, not while typing).
   undoRoute?: string | null;
+  newRoute?: string | null;
+  fitView?: string | null;
 };
 
-export type ShortcutAction = 'stop' | 'trackPowerOff' | 'undoRoute';
+export type ShortcutAction =
+  'stop' | 'trackPowerOff' | 'resume' | 'undoRoute' | 'newRoute' | 'fitView';
+
+// Checked in this order, so STOP always wins a shared key.
+const ACTIONS: ShortcutAction[] = [
+  'stop',
+  'trackPowerOff',
+  'resume',
+  'undoRoute',
+  'newRoute',
+  'fitView',
+];
 
 const TEXT_INPUT_TYPES = new Set([
   'text',
@@ -56,24 +71,34 @@ export const shortcutAction = (
   if (isTypingTarget(event.target)) {
     return undefined;
   }
-  if (event.key === shortcuts.stop) {
-    // A held key repeats STOP; harmless, and it never turns into anything
-    // else.
-    return 'stop';
-  }
-  if (
-    shortcuts.trackPowerOff !== null &&
-    event.key === shortcuts.trackPowerOff &&
-    !event.repeat
-  ) {
-    return 'trackPowerOff';
-  }
-  if (
-    shortcuts.undoRoute &&
-    event.key === shortcuts.undoRoute &&
-    !event.repeat
-  ) {
-    return 'undoRoute';
+  for (const action of ACTIONS) {
+    if (shortcuts[action] && event.key === shortcuts[action]) {
+      // A held key repeats STOP; harmless, and it never turns into anything
+      // else. Other actions run once per press.
+      return action === 'stop' || !event.repeat ? action : undefined;
+    }
   }
   return undefined;
+};
+
+// Number keys 1–9 switch to the first nine tabs (views, then stations), left
+// to right: the tab's index, or undefined. Not while typing or in a list.
+export const tabNumberKey = (
+  event: Pick<
+    KeyboardEvent,
+    'key' | 'target' | 'ctrlKey' | 'altKey' | 'metaKey' | 'repeat'
+  >,
+): number | undefined => {
+  if (
+    event.ctrlKey ||
+    event.altKey ||
+    event.metaKey ||
+    event.repeat ||
+    isTypingTarget(event.target) ||
+    (event.target as {tagName?: string} | null)?.tagName === 'SELECT' ||
+    !/^[1-9]$/.test(event.key)
+  ) {
+    return undefined;
+  }
+  return Number(event.key) - 1;
 };

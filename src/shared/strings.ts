@@ -154,7 +154,18 @@ const en = {
     devTools: 'Developer tools',
     devToolsHelp:
       'Shows Feedback, Accessory test and Protocol log in the main bar.',
-    undoRouteKey: 'Key for “Undo last route”',
+    quickKeys: 'Quick keys',
+    quickKeysHelp:
+      'They work in every window, except while typing in a text field.',
+    quickKeyActions: {
+      stop: 'STOP',
+      resume: 'Track power on / resume',
+      trackPowerOff: 'Track power off',
+      undoRoute: 'Undo last route',
+      newRoute: 'New route',
+      fitView: 'Fit to view',
+    } as Record<string, string>,
+    keyUsedBy: (key: string, action: string) => `${key} (${action})`,
     noKey: 'None (use the button)',
   },
 

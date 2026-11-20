@@ -37,7 +37,13 @@ Sissach, imported from the Z21 app with their addresses.
 
 The window opens in **Operate**. To change the layout, click **Edit layout**; if the layout has an
 edit password, Lever asks for it. While editing, an orange line and the word **EDITING** are shown.
-**Esc is always STOP**, also while editing.
+**Esc is STOP**, also while editing (another key can be chosen, see below).
+
+**Quick keys** (**Settings → Quick keys**): a key each for STOP, track power on / resume, track
+power off, undo last route, new route and fit to view. Only STOP has one by default; a key used by
+one action cannot be given to another. They work in every window, but not while typing in a text
+field. The number keys **1–9** open the tabs from left to right (views first, then stations); tabs
+beyond the ninth have no number key.
 
 Stations appear as tabs. **+ Add station** creates a new one; its name and default automation level
 are set in the properties when nothing is selected.
@@ -140,7 +146,7 @@ appears at the top right of the diagram, in every window.
 4. **Release** returns the route's signals to stop and leaves the turnouts as they are. **Undo
    last route** also puts its turnouts back where they were, except any moved since (Lever says
    which) and manual ones (Lever lists them to put back by hand). A key for undo can be chosen in
-   **Settings** (never Ctrl+Z).
+   **Settings → Quick keys** (never Ctrl+Z).
 
 If a turnout of a set route moves, for whatever reason (another control station, a Throttle, the
 Roco app, a handset, or a click here), the route's signals go to **stop at once** and the route

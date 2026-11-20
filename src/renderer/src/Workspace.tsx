@@ -87,6 +87,16 @@ export const Workspace = () => {
   const [placeRotation, setPlaceRotation] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const {view, fullView, arrangement, fit, targetText} = useShownView();
+  // A switch to another tab (by click or number key) drops a half-drawn
+  // track and the view tools' state.
+  const shownKey = fullView ? `view:${arrangement?.id}` : `station:${view?.id}`;
+  const [lastShown, setLastShown] = useState(shownKey);
+  if (lastShown !== shownKey) {
+    setLastShown(shownKey);
+    setDrawing([]);
+    setViewSelection(null);
+    setViewTool({kind: 'select'});
+  }
   const rotatePlacement = useCallback(() => setPlaceRotation((r) => r + 1), []);
   useEditorKeys({drawing, setDrawing, rotatePlacement, fit});
   // Validation runs at low priority: the diagram updates at once after an
@@ -142,11 +152,6 @@ export const Workspace = () => {
           shownArrangementId={arrangement?.id}
           shownViewId={fullView ? undefined : view?.id}
           editing={editing}
-          onSwitch={() => {
-            setDrawing([]);
-            setViewSelection(null);
-            setViewTool({kind: 'select'});
-          }}
         >
           {editing && (
             <button

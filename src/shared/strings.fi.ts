@@ -146,7 +146,18 @@ export const fi: Strings = {
     devTools: 'Kehittäjätyökalut',
     devToolsHelp:
       'Näyttää yläpalkissa Takaisinilmaisun, Lisälaitetestin ja Protokollalokin.',
-    undoRouteKey: 'Näppäin: ”Kumoa viimeisin kulkutie”',
+    quickKeys: 'Pikanäppäimet',
+    quickKeysHelp:
+      'Toimivat kaikissa ikkunoissa, paitsi kun kirjoitat tekstikenttään.',
+    quickKeyActions: {
+      stop: 'STOP',
+      resume: 'Ajovirta päälle / jatka',
+      trackPowerOff: 'Ajovirta pois',
+      undoRoute: 'Kumoa viimeisin kulkutie',
+      newRoute: 'Uusi kulkutie',
+      fitView: 'Sovita näkymään',
+    } as Record<string, string>,
+    keyUsedBy: (key: string, action: string) => `${key} (${action})`,
     noKey: 'Ei mitään (käytä painiketta)',
   },
 

@@ -2,7 +2,8 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {applyTheme, resolveThemeMode} from '../theme';
 import {App} from './App';
-import {shortcutAction} from './safety/shortcuts';
+import {requestFit, startNewRoute, switchToTab} from './quickKeys';
+import {shortcutAction, tabNumberKey} from './safety/shortcuts';
 import {bindEngineStore, sendCommand} from './store/engineStore';
 import {bindProjectStore} from './store/projectStore';
 import {bindSettingsStore, useSettingsStore} from './store/settingsStore';
@@ -30,8 +31,9 @@ updateTheme();
 darkQuery.addEventListener('change', updateTheme);
 useSettingsStore.subscribe(updateTheme);
 
-// STOP and track power shortcuts (CARRY-2). Registered in the capture phase
-// on window, so no component can swallow them.
+// STOP, track power and the other quick keys (CARRY-2), and 1–9 for the
+// tabs. Registered in the capture phase on window, so no component can
+// swallow them.
 window.addEventListener(
   'keydown',
   (event) => {
@@ -45,9 +47,23 @@ window.addEventListener(
     } else if (action === 'trackPowerOff') {
       event.preventDefault();
       sendCommand({type: 'setTrackPower', on: false});
+    } else if (action === 'resume') {
+      event.preventDefault();
+      sendCommand({type: 'setTrackPower', on: true});
     } else if (action === 'undoRoute') {
       event.preventDefault();
       sendCommand({type: 'undoRoute'});
+    } else if (action === 'newRoute') {
+      event.preventDefault();
+      startNewRoute();
+    } else if (action === 'fitView') {
+      event.preventDefault();
+      requestFit();
+    } else {
+      const tab = tabNumberKey(event);
+      if (tab !== undefined && switchToTab(tab)) {
+        event.preventDefault();
+      }
     }
   },
   {capture: true},
