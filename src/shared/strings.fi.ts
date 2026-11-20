@@ -143,6 +143,9 @@ export const fi: Strings = {
     languageNames: {en: 'English', fi: 'Suomi'} as Record<string, string>,
     languageHelp: 'Leverin ikkunat latautuvat uudelleen uudella kielellä.',
     protocolLog: 'Protokollaloki (vianetsintään)',
+    devTools: 'Kehittäjätyökalut',
+    devToolsHelp:
+      'Näyttää yläpalkissa Takaisinilmaisun, Lisälaitetestin ja Protokollalokin.',
     undoRouteKey: 'Näppäin: ”Kumoa viimeisin kulkutie”',
     noKey: 'Ei mitään (käytä painiketta)',
   },

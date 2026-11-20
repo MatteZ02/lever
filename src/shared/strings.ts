@@ -151,6 +151,9 @@ const en = {
     languageNames: {en: 'English', fi: 'Suomi'} as Record<string, string>,
     languageHelp: 'Lever’s windows reload in the new language.',
     protocolLog: 'Protocol log (for troubleshooting)',
+    devTools: 'Developer tools',
+    devToolsHelp:
+      'Shows Feedback, Accessory test and Protocol log in the main bar.',
     undoRouteKey: 'Key for “Undo last route”',
     noKey: 'None (use the button)',
   },

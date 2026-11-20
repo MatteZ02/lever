@@ -82,7 +82,8 @@ free. Status is never shown by colour alone: there is always a pattern, marker o
 
 **Feedback** (top bar) opens the feedback monitor: every detector input in the layout or reported
 by the central unit, whether it is occupied, and which block or turnout uses it. Use it to check
-wiring.
+wiring. **Feedback**, **Accessory test** and **Protocol log** are developer tools: they appear in
+the top bar only when **Settings → Developer tools** is on.
 
 **Levels** shows the automation areas and their level. You can change a level while operating,
 without the edit password. Lowering a level never moves turnouts or changes signals. Level 3 and 4

@@ -41,6 +41,9 @@ export const settingsSchema = z.object({
   // Language of the user interface (strings.ts, strings.fi.ts).
   language: z.enum(LANGUAGES).default('en'),
   protocolLog: z.boolean().default(false),
+  // Developer tools in the main bar: feedback monitor, accessory test and
+  // protocol log. Off: the bar shows only what operators need.
+  devTools: z.boolean().default(false),
   // Reopened at start-up (PRJ-4). Set by the main process only.
   lastProjectPath: z.string().nullable().default(null),
   // The windows open when Lever last closed (VIEW-2), reopened at start-up
@@ -86,5 +89,6 @@ export const settingsUpdateSchema = z.object({
   theme: z.enum(['system', 'light', 'dark']).optional(),
   language: z.enum(LANGUAGES).optional(),
   protocolLog: z.boolean().optional(),
+  devTools: z.boolean().optional(),
 });
 export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;

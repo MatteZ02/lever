@@ -36,11 +36,24 @@ import {
   undo,
   useProjectStore,
 } from './store/projectStore';
+import {useSettingsStore} from './store/settingsStore';
 import {useShownView} from './useShownView';
 import {ViewTabs} from './ViewTabs';
 
 type Drawer = 'areas' | 'feedback' | 'settings' | 'developer' | 'log' | null;
 type BottomPanel = 'problems' | 'addresses';
+
+const ALL_DRAWERS = [
+  'areas',
+  'feedback',
+  'settings',
+  'developer',
+  'log',
+] as const;
+const OPERATOR_DRAWERS: readonly Exclude<Drawer, null>[] = [
+  'areas',
+  'settings',
+];
 
 const DRAWER_LABELS: Record<Exclude<Drawer, null>, string> = {
   areas: strings.operate.areasShort,
@@ -64,7 +77,11 @@ export const Workspace = () => {
   const canRedo = useProjectStore((state) => state.future.length > 0);
   const [viewTool, setViewTool] = useState<ViewTool>({kind: 'select'});
   const [viewSelection, setViewSelection] = useState<ViewSelection>(null);
-  const [drawer, setDrawer] = useState<Drawer>(null);
+  const [openDrawer, setDrawer] = useState<Drawer>(null);
+  const devTools = useSettingsStore((state) => state.settings.devTools);
+  // Feedback, accessory test and protocol log only with developer tools on.
+  const drawers = devTools ? ALL_DRAWERS : OPERATOR_DRAWERS;
+  const drawer = openDrawer && drawers.includes(openDrawer) ? openDrawer : null;
   const [bottom, setBottom] = useState<BottomPanel>('problems');
   const [drawing, setDrawing] = useState<GridPoint[]>([]);
   const [placeRotation, setPlaceRotation] = useState(0);
@@ -215,19 +232,17 @@ export const Workspace = () => {
           >
             {strings.windows.open}
           </button>
-          {(['areas', 'feedback', 'settings', 'developer', 'log'] as const).map(
-            (name) => (
-              <button
-                key={name}
-                type="button"
-                className={`button${drawer === name ? ' button--active' : ''}`}
-                aria-pressed={drawer === name}
-                onClick={() => setDrawer(drawer === name ? null : name)}
-              >
-                {DRAWER_LABELS[name]}
-              </button>
-            ),
-          )}
+          {drawers.map((name) => (
+            <button
+              key={name}
+              type="button"
+              className={`button${drawer === name ? ' button--active' : ''}`}
+              aria-pressed={drawer === name}
+              onClick={() => setDrawer(drawer === name ? null : name)}
+            >
+              {DRAWER_LABELS[name]}
+            </button>
+          ))}
         </div>
       </div>
 

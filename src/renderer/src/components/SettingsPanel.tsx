@@ -123,6 +123,18 @@ export const SettingsPanel = () => {
       <label className="choice">
         <input
           type="checkbox"
+          checked={settings.devTools}
+          onChange={(event) =>
+            void updateSettings({devTools: event.target.checked})
+          }
+        />
+        {strings.settings.devTools}
+      </label>
+      <small className="muted">{strings.settings.devToolsHelp}</small>
+
+      <label className="choice">
+        <input
+          type="checkbox"
           checked={protocolLog}
           // The main process applies the setting to the engine.
           onChange={(event) =>
