@@ -264,16 +264,22 @@ type AutomationArea = {id: string; name: string; level: 1 | 2 | 3 | 4};
 - Prepared for ownership (MULTI-7): areas have stable ids, and the engine processes every command
   through `levelOf` and the area, so an `ownerInstance` check can be added in one place later.
 
-### 4.6.1 Full layout view (Phase 4)
+### 4.6.1 Layout views (Phase 4, reworked)
 
-`arrangements[]` (FULL-5): each panel is `{viewId, x, y, scale}` and draws the view's **own grid
-coordinates** through `translate(x, y) scale(scale)` (`src/model/arrangement.ts`), so editing a
-station never moves its panel; the frame is the drawing's bounds plus a margin. Until the operator
-changes something, a default arrangement (stations below each other, id `arrangement-default`)
-is shown and not saved; `arrangementsOf` keeps saved arrangements in step with added and deleted
-stations. The renderer draws all panels in one `DiagramView` (one SVG, one viewport) with
-`ViewLayer` per panel; element ids are unique per project, so hit testing is unchanged. Click
-actions are shared with the station view (`useOperateActions`).
+`arrangements[]` (FULL-5) are the operator's **views** (called arrangements in code, so they are
+not mixed up with `StationView`). A view starts empty; the operator draws **frames**
+`{id, viewId, x, y, width, height, rotation}` and **lines** `{id, points}` on it
+(`src/model/arrangement.ts`). A frame shows its station fitted inside (`frameTransform`: the
+drawing's bounds plus a margin, scaled to fit, centred, turned by quarter turns) and draws the
+station's **own grid coordinates** through `translate(x, y) scale(s) rotate(r)`, so editing a
+station never moves its frame. A line point is a place on the view or `{frameId, connectorId}`, a
+station exit in a frame, resolved when drawn, so lines follow their frames. Frames of deleted
+stations are hidden (`arrangementsOf`); deleting a frame or changing its station drops the line
+points at its exits. The renderer draws all frames in one `DiagramView` (one SVG, one viewport)
+with `ViewLayer` per frame; element ids are unique per project, so hit testing is unchanged. Click
+actions are shared with the station view (`useOperateActions`). Schema version 2 introduced this;
+the v1 migration turns each old panel `{viewId, x, y, scale}` into a frame around exactly what it
+showed, and the automatic lines between linked exits into drawn lines.
 
 ### 4.7 Project file
 
@@ -293,7 +299,7 @@ type Project = {
     restoreTurnoutsOnStartup: boolean; // ACC-4, default false
   };
   views: StationView[]; // {id, name, elements: DiagramElement[]}
-  arrangements: Arrangement[]; // full-layout panels: {viewId, x, y, scale}
+  arrangements: Arrangement[]; // views: {frames: StationFrame[], lines: ViewLine[]}
   areas: AutomationArea[];
   blocks: Block[];
   signalTypes: SignalType[]; // project-defined; built-in templates live in code

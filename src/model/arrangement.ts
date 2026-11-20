@@ -1,30 +1,42 @@
-// Full layout view (FULL-1, FULL-2, FULL-5): station views as panels on one
-// canvas, each placed, scaled and rotated (quarter turns) on its own. A panel
-// draws its view's own grid coordinates through
-// `translate(x, y) scale(scale) rotate(rotation)`, so editing a station never
-// moves its panel.
+// Layout views (FULL-1, FULL-2, FULL-5; reworked with the user 2026-11-20):
+// a view is a blank canvas on which the user draws station frames and the
+// lines between them. Each frame shows one station, fitted inside: the
+// station's own grid coordinates are drawn through
+// `translate(x, y) scale(scale) rotate(rotation)` (a FrameTransform), so
+// editing a station never moves its frame. (Internally a view of this kind is
+// an "arrangement", so it is not mixed up with StationView.)
 import {Bounds, GridPoint, rotatePoint90} from './geometry';
-import {Arrangement, newId, Project, StationView} from './project';
+import {
+  Arrangement,
+  LinePoint,
+  newId,
+  Project,
+  StationFrame,
+  StationView,
+  ViewLine,
+} from './project';
 
-export type Panel = Arrangement['panels'][number];
-export type PanelRotation = Panel['rotation'];
+export type FrameRotation = StationFrame['rotation'];
+export type Point = {x: number; y: number};
+export type Rect = {x: number; y: number; width: number; height: number};
+// Where a station's grid lands on the view.
+export type FrameTransform = {
+  x: number;
+  y: number;
+  scale: number;
+  rotation: FrameRotation;
+};
 
 const ORIGIN: GridPoint = {x: 0, y: 0};
 
-// A point of the view, rotated as the panel draws it (before scaling).
-const rotated = (point: GridPoint, rotation: PanelRotation): GridPoint =>
-  rotatePoint90(point, ORIGIN, rotation / 90);
-
-// Space around a station's drawing inside its panel frame (view units).
-export const PANEL_MARGIN = 2;
-// Space between panels in a new arrangement (full-view units).
-const PANEL_GAP = 4;
-export const MIN_PANEL_SCALE = 0.2;
-export const MAX_PANEL_SCALE = 5;
+// Space around a station's drawing inside its frame (station units).
+export const FRAME_MARGIN = 2;
+// The smallest frame that can be drawn (view units).
+export const MIN_FRAME_SIZE = 3;
 
 const EMPTY_BOUNDS: Bounds = {minX: 0, minY: 0, maxX: 12, maxY: 6};
 
-// Where a view has something drawn (labels count by their anchor).
+// Where a station has something drawn (labels count by their anchor).
 export const viewBounds = (view: StationView): Bounds => {
   const points: GridPoint[] = view.elements.flatMap((element) =>
     element.kind === 'track'
@@ -47,16 +59,13 @@ export const viewBounds = (view: StationView): Bounds => {
   };
 };
 
-export type Rect = {x: number; y: number; width: number; height: number};
-
-// The view's drawing with its margin, rotated, relative to the panel's
-// origin (before scaling).
-const rotatedBounds = (view: StationView, rotation: PanelRotation): Bounds => {
+// The station's drawing with its margin, turned, before scaling.
+const rotatedBounds = (view: StationView, rotation: FrameRotation): Bounds => {
   const bounds = viewBounds(view);
   const corners = [
-    {x: bounds.minX - PANEL_MARGIN, y: bounds.minY - PANEL_MARGIN},
-    {x: bounds.maxX + PANEL_MARGIN, y: bounds.maxY + PANEL_MARGIN},
-  ].map((corner) => rotated(corner, rotation));
+    {x: bounds.minX - FRAME_MARGIN, y: bounds.minY - FRAME_MARGIN},
+    {x: bounds.maxX + FRAME_MARGIN, y: bounds.maxY + FRAME_MARGIN},
+  ].map((corner) => rotatePoint90(corner, ORIGIN, rotation / 90));
   return {
     minX: Math.min(...corners.map((c) => c.x)),
     minY: Math.min(...corners.map((c) => c.y)),
@@ -65,190 +74,323 @@ const rotatedBounds = (view: StationView, rotation: PanelRotation): Bounds => {
   };
 };
 
-// A panel's frame in full-view units.
-export const panelFrame = (panel: Panel, view: StationView): Rect => {
-  const bounds = rotatedBounds(view, panel.rotation);
-  return {
-    x: panel.x + bounds.minX * panel.scale,
-    y: panel.y + bounds.minY * panel.scale,
-    width: (bounds.maxX - bounds.minX) * panel.scale,
-    height: (bounds.maxY - bounds.minY) * panel.scale,
-  };
-};
-
-// A point of the view in full-view units.
-export const toFullView = (panel: Panel, point: GridPoint): GridPoint => {
-  const turned = rotated(point, panel.rotation);
-  return {
-    x: panel.x + turned.x * panel.scale,
-    y: panel.y + turned.y * panel.scale,
-  };
-};
-
-// Panel placed with its frame's top-left corner at (left, top).
-const placePanel = (
+// The station fitted into its frame: as large as fits, centred.
+export const frameTransform = (
+  frame: StationFrame,
   view: StationView,
-  left: number,
-  top: number,
-  scale = 1,
-  rotation: PanelRotation = 0,
-): Panel => {
-  const bounds = rotatedBounds(view, rotation);
+): FrameTransform => {
+  const bounds = rotatedBounds(view, frame.rotation);
+  const width = bounds.maxX - bounds.minX;
+  const height = bounds.maxY - bounds.minY;
+  const scale = Math.min(frame.width / width, frame.height / height);
   return {
-    viewId: view.id,
-    x: left - bounds.minX * scale,
-    y: top - bounds.minY * scale,
+    x: frame.x + (frame.width - width * scale) / 2 - bounds.minX * scale,
+    y: frame.y + (frame.height - height * scale) / 2 - bounds.minY * scale,
     scale,
-    rotation,
+    rotation: frame.rotation,
   };
 };
 
-// Bottom edge of the lowest panel (0 for none).
-const bottomOf = (project: Project, panels: Panel[]): number =>
-  Math.max(
-    0,
-    ...panels.flatMap((panel) => {
-      const view = project.views.find((v) => v.id === panel.viewId);
-      if (!view) {
-        return [];
-      }
-      const frame = panelFrame(panel, view);
-      return [frame.y + frame.height];
-    }),
-  );
-
-// Id of the arrangement shown before any is saved; stable, so a change to
-// it (which saves it) keeps the same viewport and selection.
-export const DEFAULT_ARRANGEMENT_ID = 'arrangement-default';
-
-// Every station, one below the other, at full size.
-export const defaultArrangement = (
-  project: Project,
-  name: string,
-  id: string = newId('arrangement'),
-): Arrangement => {
-  const panels: Panel[] = [];
-  let top = 0;
-  for (const view of project.views) {
-    const panel = placePanel(view, 0, top);
-    panels.push(panel);
-    top = bottomOf(project, [panel]) + PANEL_GAP;
-  }
-  return {id, name, panels, showConnectorLines: true};
+// The rectangle a transform fills (the station with its margin).
+export const transformBounds = (
+  transform: FrameTransform,
+  view: StationView,
+): Rect => {
+  const bounds = rotatedBounds(view, transform.rotation);
+  return {
+    x: transform.x + bounds.minX * transform.scale,
+    y: transform.y + bounds.minY * transform.scale,
+    width: (bounds.maxX - bounds.minX) * transform.scale,
+    height: (bounds.maxY - bounds.minY) * transform.scale,
+  };
 };
 
-// The arrangement with a panel for every view: new stations go below the
-// others; panels of deleted stations are dropped.
+// A point of the station on the view.
+export const toView = (transform: FrameTransform, point: GridPoint): Point => {
+  const turned = rotatePoint90(point, ORIGIN, transform.rotation / 90);
+  return {
+    x: transform.x + turned.x * transform.scale,
+    y: transform.y + turned.y * transform.scale,
+  };
+};
+
+// --- views ---------------------------------------------------------------
+
+export const createArrangement = (name: string): Arrangement => ({
+  id: newId('arrangement'),
+  name,
+  frames: [],
+  lines: [],
+});
+
+// Frames of deleted stations are not shown, nor line points at them.
 export const syncArrangement = (
   project: Project,
   arrangement: Arrangement,
 ): Arrangement => {
   const viewIds = new Set(project.views.map((view) => view.id));
-  const panels = arrangement.panels.filter((panel) =>
-    viewIds.has(panel.viewId),
+  const frames = arrangement.frames.filter((frame) =>
+    viewIds.has(frame.viewId),
   );
-  const placed = new Set(panels.map((panel) => panel.viewId));
-  const missing = project.views.filter((view) => !placed.has(view.id));
-  if (missing.length === 0 && panels.length === arrangement.panels.length) {
+  if (frames.length === arrangement.frames.length) {
     return arrangement;
   }
-  for (const view of missing) {
-    const top = panels.length > 0 ? bottomOf(project, panels) + PANEL_GAP : 0;
-    panels.push(placePanel(view, 0, top));
-  }
-  return {...arrangement, panels};
+  return withoutDeadLines({...arrangement, frames});
 };
 
-// The arrangements to show: the saved ones (kept in step with the views), or
-// a default one that is saved only once it is changed.
-export const arrangementsOf = (
-  project: Project,
-  defaultName: string,
-): Arrangement[] =>
-  project.arrangements.length > 0
-    ? project.arrangements.map((a) => syncArrangement(project, a))
-    : [defaultArrangement(project, defaultName, DEFAULT_ARRANGEMENT_ID)];
+export const arrangementsOf = (project: Project): Arrangement[] =>
+  project.arrangements.map((a) => syncArrangement(project, a));
 
-// Applies a change to one arrangement and saves all of them (the default
-// one too, the first time).
+// Applies a change to one view.
 export const updateArrangement = (
   project: Project,
-  defaultName: string,
   arrangementId: string,
   change: (arrangement: Arrangement) => Arrangement,
 ): Project => ({
   ...project,
-  arrangements: arrangementsOf(project, defaultName).map((arrangement) =>
-    arrangement.id === arrangementId ? change(arrangement) : arrangement,
+  arrangements: project.arrangements.map((arrangement) =>
+    arrangement.id === arrangementId
+      ? change(syncArrangement(project, arrangement))
+      : arrangement,
   ),
 });
 
-export const movePanel = (
-  arrangement: Arrangement,
-  viewId: string,
-  dx: number,
-  dy: number,
-): Arrangement => ({
-  ...arrangement,
-  panels: arrangement.panels.map((panel) =>
-    panel.viewId === viewId
-      ? {...panel, x: panel.x + dx, y: panel.y + dy}
-      : panel,
-  ),
-});
+// --- frames ----------------------------------------------------------------
 
-// Scales a panel about its frame's top-left corner, so it grows to the
-// right and down.
-export const scalePanel = (
-  project: Project,
-  arrangement: Arrangement,
-  viewId: string,
-  scale: number,
-): Arrangement => {
-  const view = project.views.find((v) => v.id === viewId);
-  const clamped =
-    Math.round(
-      Math.min(MAX_PANEL_SCALE, Math.max(MIN_PANEL_SCALE, scale)) * 100,
-    ) / 100;
-  return {
-    ...arrangement,
-    panels: arrangement.panels.map((panel) => {
-      if (panel.viewId !== viewId || !view) {
-        return panel;
-      }
-      const frame = panelFrame(panel, view);
-      return placePanel(view, frame.x, frame.y, clamped, panel.rotation);
-    }),
-  };
+// A rectangle between two corners, on whole grid units.
+export const rectBetween = (a: Point, b: Point): Rect => {
+  const x1 = Math.round(Math.min(a.x, b.x));
+  const y1 = Math.round(Math.min(a.y, b.y));
+  const x2 = Math.round(Math.max(a.x, b.x));
+  const y2 = Math.round(Math.max(a.y, b.y));
+  return {x: x1, y: y1, width: x2 - x1, height: y2 - y1};
 };
 
-// Turns a panel by quarter turns (1 = 90° clockwise, -1 = back) about its
-// frame's centre, kept on whole grid steps.
-export const rotatePanel = (
-  project: Project,
+export const isFrameSize = (rect: Rect): boolean =>
+  rect.width >= MIN_FRAME_SIZE && rect.height >= MIN_FRAME_SIZE;
+
+export const addFrame = (
   arrangement: Arrangement,
   viewId: string,
+  rect: Rect,
+  id: string = newId('frame'),
+): Arrangement => ({
+  ...arrangement,
+  frames: [...arrangement.frames, {id, viewId, rotation: 0, ...rect}],
+});
+
+const changeFrame = (
+  arrangement: Arrangement,
+  frameId: string,
+  change: (frame: StationFrame) => StationFrame,
+): Arrangement => ({
+  ...arrangement,
+  frames: arrangement.frames.map((frame) =>
+    frame.id === frameId ? change(frame) : frame,
+  ),
+});
+
+export const moveFrame = (
+  arrangement: Arrangement,
+  frameId: string,
+  dx: number,
+  dy: number,
+): Arrangement =>
+  changeFrame(arrangement, frameId, (frame) => ({
+    ...frame,
+    x: frame.x + dx,
+    y: frame.y + dy,
+  }));
+
+// Moves the frame's bottom-right corner to `corner` (whole grid units), never
+// smaller than the minimum.
+export const resizeFrame = (
+  arrangement: Arrangement,
+  frameId: string,
+  corner: Point,
+): Arrangement =>
+  changeFrame(arrangement, frameId, (frame) => ({
+    ...frame,
+    width: Math.max(MIN_FRAME_SIZE, Math.round(corner.x - frame.x)),
+    height: Math.max(MIN_FRAME_SIZE, Math.round(corner.y - frame.y)),
+  }));
+
+// The frame's station turned by quarter turns (1 = 90° clockwise).
+export const rotateFrame = (
+  arrangement: Arrangement,
+  frameId: string,
   quarterTurns: number,
-): Arrangement => {
-  const view = project.views.find((v) => v.id === viewId);
-  return {
+): Arrangement =>
+  changeFrame(arrangement, frameId, (frame) => ({
+    ...frame,
+    rotation: (((((frame.rotation / 90 + quarterTurns) % 4) + 4) % 4) *
+      90) as FrameRotation,
+  }));
+
+// Another station in the frame; lines at the old station's exits let go.
+export const setFrameStation = (
+  arrangement: Arrangement,
+  frameId: string,
+  viewId: string,
+): Arrangement =>
+  withoutDeadLines(
+    changeFrame(arrangement, frameId, (frame) => ({...frame, viewId})),
+    frameId,
+  );
+
+export const deleteFrame = (
+  arrangement: Arrangement,
+  frameId: string,
+): Arrangement =>
+  withoutDeadLines({
     ...arrangement,
-    panels: arrangement.panels.map((panel) => {
-      if (panel.viewId !== viewId || !view) {
-        return panel;
-      }
-      const rotation = (((((panel.rotation / 90 + quarterTurns) % 4) + 4) % 4) *
-        90) as PanelRotation;
-      const before = panelFrame(panel, view);
-      const turned = placePanel(view, 0, 0, panel.scale, rotation);
-      const after = panelFrame(turned, view);
-      const dx = before.x + before.width / 2 - (after.x + after.width / 2);
-      const dy = before.y + before.height / 2 - (after.y + after.height / 2);
-      return {
-        ...turned,
-        x: Math.round(turned.x + dx),
-        y: Math.round(turned.y + dy),
-      };
-    }),
+    frames: arrangement.frames.filter((frame) => frame.id !== frameId),
+  });
+
+// Drops line points at frames that are gone (or at `releasedFrame`), and
+// lines left with fewer than two points.
+const withoutDeadLines = (
+  arrangement: Arrangement,
+  releasedFrame?: string,
+): Arrangement => {
+  const frameIds = new Set(arrangement.frames.map((frame) => frame.id));
+  const lines = arrangement.lines
+    .map((line) => ({
+      ...line,
+      points: line.points.filter(
+        (point) =>
+          !('frameId' in point) ||
+          (frameIds.has(point.frameId) && point.frameId !== releasedFrame),
+      ),
+    }))
+    .filter((line) => line.points.length >= 2);
+  return {...arrangement, lines};
+};
+
+// --- lines -----------------------------------------------------------------
+
+export const addLine = (
+  arrangement: Arrangement,
+  points: LinePoint[],
+  id: string = newId('line'),
+): Arrangement =>
+  points.length < 2
+    ? arrangement
+    : {...arrangement, lines: [...arrangement.lines, {id, points}]};
+
+export const deleteLine = (
+  arrangement: Arrangement,
+  lineId: string,
+): Arrangement => ({
+  ...arrangement,
+  lines: arrangement.lines.filter((line) => line.id !== lineId),
+});
+
+// A station exit shown on the view, where a line can attach.
+export type ExitOnView = {
+  frameId: string;
+  connectorId: string;
+  at: Point;
+};
+
+export const exitsOnView = (
+  project: Project,
+  arrangement: Arrangement,
+): ExitOnView[] =>
+  arrangement.frames.flatMap((frame) => {
+    const view = project.views.find((v) => v.id === frame.viewId);
+    if (!view) {
+      return [];
+    }
+    const transform = frameTransform(frame, view);
+    return view.elements.flatMap((element) =>
+      element.kind === 'connector'
+        ? [
+            {
+              frameId: frame.id,
+              connectorId: element.id,
+              at: toView(transform, element.at),
+            },
+          ]
+        : [],
+    );
+  });
+
+// Where a line point lies now; undefined if its exit is gone.
+export const resolveLinePoint = (
+  project: Project,
+  arrangement: Arrangement,
+  point: LinePoint,
+): Point | undefined => {
+  if (!('frameId' in point)) {
+    return point;
+  }
+  const frame = arrangement.frames.find((f) => f.id === point.frameId);
+  const view = project.views.find((v) => v.id === frame?.viewId);
+  const connector = view?.elements.find((e) => e.id === point.connectorId);
+  return frame && view && connector && 'at' in connector
+    ? toView(frameTransform(frame, view), connector.at)
+    : undefined;
+};
+
+export const linePoints = (
+  project: Project,
+  arrangement: Arrangement,
+  line: ViewLine,
+): Point[] =>
+  line.points.flatMap((point) => {
+    const at = resolveLinePoint(project, arrangement, point);
+    return at ? [at] : [];
+  });
+
+// How close (view units) a click must be to an exit to attach to it.
+export const EXIT_SNAP = 1;
+
+// The point to add for a click while drawing a line: a station exit if one
+// is near, otherwise the nearest grid point.
+export const linePointAt = (exits: ExitOnView[], at: Point): LinePoint => {
+  let best: ExitOnView | undefined;
+  let bestDistance = EXIT_SNAP;
+  for (const exit of exits) {
+    const distance = Math.hypot(exit.at.x - at.x, exit.at.y - at.y);
+    if (distance <= bestDistance) {
+      best = exit;
+      bestDistance = distance;
+    }
+  }
+  return best
+    ? {frameId: best.frameId, connectorId: best.connectorId}
+    : {x: Math.round(at.x), y: Math.round(at.y)};
+};
+
+export const sameLinePoint = (a: LinePoint, b: LinePoint): boolean =>
+  'frameId' in a
+    ? 'frameId' in b &&
+      a.frameId === b.frameId &&
+      a.connectorId === b.connectorId
+    : !('frameId' in b) && a.x === b.x && a.y === b.y;
+
+// Everything drawn on the view, for fitting it to the window.
+export const arrangementBounds = (
+  project: Project,
+  arrangement: Arrangement,
+): Bounds | undefined => {
+  const points: Point[] = [
+    ...arrangement.frames.flatMap((frame) => [
+      {x: frame.x, y: frame.y},
+      {x: frame.x + frame.width, y: frame.y + frame.height},
+    ]),
+    ...arrangement.lines.flatMap((line) =>
+      linePoints(project, arrangement, line),
+    ),
+  ];
+  if (points.length === 0) {
+    return undefined;
+  }
+  return {
+    minX: Math.min(...points.map((p) => p.x)),
+    minY: Math.min(...points.map((p) => p.y)),
+    maxX: Math.max(...points.map((p) => p.x)),
+    maxY: Math.max(...points.map((p) => p.y)),
   };
 };

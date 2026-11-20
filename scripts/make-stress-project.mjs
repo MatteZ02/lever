@@ -115,7 +115,7 @@ for (let row = 0; row < side; row++) {
 
 const project = {
   format: 'lever-project',
-  schemaVersion: 1,
+  schemaVersion: 2,
   id: 'stress',
   name: `Stress test (${elements.length} elements)`,
   views: [{id: 'v', name: 'Stress', areaId: 'a', elements}],

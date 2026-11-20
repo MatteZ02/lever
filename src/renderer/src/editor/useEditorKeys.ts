@@ -48,10 +48,8 @@ export const useEditorKeys = ({
       ) {
         return;
       }
+      // Undo and redo work in layout views too; the rest needs a station.
       const view = activeView();
-      if (!view) {
-        return;
-      }
       const ctrl = event.ctrlKey || event.metaKey;
       const key = event.key.toLowerCase();
       const handled = () => event.preventDefault();
@@ -62,6 +60,8 @@ export const useEditorKeys = ({
       } else if (ctrl && (key === 'y' || (key === 'z' && event.shiftKey))) {
         handled();
         redo();
+      } else if (!view) {
+        return;
       } else if (ctrl && key === 'c') {
         handled();
         copySelection();

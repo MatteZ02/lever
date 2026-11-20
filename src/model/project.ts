@@ -7,7 +7,7 @@ import {diagramElementSchema, idSchema} from './elements';
 import {signalTypeSchema} from './signalTypes';
 
 export const PROJECT_FORMAT = 'lever-project';
-export const PROJECT_SCHEMA_VERSION = 1;
+export const PROJECT_SCHEMA_VERSION = 2;
 export const PROJECT_FILE_EXTENSION = 'lever';
 
 export const automationLevelSchema = z.union([
@@ -47,27 +47,50 @@ export const stationViewSchema = z.object({
 });
 export type StationView = z.infer<typeof stationViewSchema>;
 
-// Full layout view (FULL-2, FULL-5): where each station panel goes, its
-// scale and rotation (src/model/arrangement.ts). Panel x/y: where the view's
-// grid origin lies in full-view units; rotation: clockwise on screen, in
-// quarter turns, about that origin.
+// Layout views (FULL-1, FULL-2, FULL-5; user 2026-11-20): canvases the user
+// builds by drawing station frames and connecting lines. A view starts empty;
+// several can be kept, e.g. one big station for one monitor and two smaller
+// ones joined in another window (src/model/arrangement.ts). Units are the
+// view's own grid units.
+const canvasPointSchema = z.object({x: z.number(), y: z.number()});
+
+// A rectangle on the view showing one station, fitted inside it (scaled,
+// centred, optionally turned by quarter turns), so the station's own drawing
+// never moves.
+export const stationFrameSchema = z.object({
+  id: idSchema,
+  viewId: idSchema,
+  x: z.number(),
+  y: z.number(),
+  width: z.number().positive(),
+  height: z.number().positive(),
+  rotation: z
+    .union([z.literal(0), z.literal(90), z.literal(180), z.literal(270)])
+    .default(0),
+});
+export type StationFrame = z.infer<typeof stationFrameSchema>;
+
+// A point of a connecting line: a place on the view, or a station exit shown
+// in a frame (the line then follows the frame when it moves).
+export const linePointSchema = z.union([
+  canvasPointSchema,
+  z.object({frameId: idSchema, connectorId: idSchema}),
+]);
+export type LinePoint = z.infer<typeof linePointSchema>;
+
+// A line drawn between frames (e.g. the track between two stations). It is
+// a drawing only: no occupancy or routes.
+export const viewLineSchema = z.object({
+  id: idSchema,
+  points: z.array(linePointSchema).min(2).max(200),
+});
+export type ViewLine = z.infer<typeof viewLineSchema>;
+
 export const arrangementSchema = z.object({
   id: idSchema,
   name: z.string().min(1).max(100),
-  panels: z
-    .array(
-      z.object({
-        viewId: idSchema,
-        x: z.number(),
-        y: z.number(),
-        scale: z.number().positive().max(10),
-        rotation: z
-          .union([z.literal(0), z.literal(90), z.literal(180), z.literal(270)])
-          .default(0),
-      }),
-    )
-    .default([]),
-  showConnectorLines: z.boolean().default(true),
+  frames: z.array(stationFrameSchema).default([]),
+  lines: z.array(viewLineSchema).default([]),
 });
 export type Arrangement = z.infer<typeof arrangementSchema>;
 

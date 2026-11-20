@@ -3,7 +3,6 @@
 // panels. Settings, the accessory test panel and the protocol log open in a
 // side drawer.
 import {useCallback, useDeferredValue, useState} from 'react';
-import {movePanel} from '../../model/arrangement';
 import {deleteElements, rotateElements} from '../../model/editing';
 import {GridPoint} from '../../model/geometry';
 import {createView} from '../../model/project';
@@ -19,8 +18,10 @@ import {ProblemsPanel, useProblems} from './editor/ProblemsPanel';
 import {PropertiesPanel} from './editor/properties/PropertiesPanel';
 import {Toolbox} from './editor/Toolbox';
 import {useEditorKeys} from './editor/useEditorKeys';
-import {ArrangementPanel, changeArrangement} from './full/ArrangementPanel';
-import {FullLayoutCanvas} from './full/FullLayoutCanvas';
+import {ViewCanvas} from './full/ViewCanvas';
+import {ViewSelection, ViewTool} from './full/viewEdits';
+import {ViewPanel} from './full/ViewPanel';
+import {ViewToolbox} from './full/ViewToolbox';
 import {AreasPanel} from './operate/AreasPanel';
 import {FeedbackMonitor} from './operate/FeedbackMonitor';
 import {OperateCanvas} from './operate/OperateCanvas';
@@ -29,7 +30,6 @@ import {
   edit,
   redo,
   select,
-  setActiveArrangement,
   setActiveView,
   setHint,
   setTestMode,
@@ -37,6 +37,7 @@ import {
   useProjectStore,
 } from './store/projectStore';
 import {useShownView} from './useShownView';
+import {ViewTabs} from './ViewTabs';
 
 type Drawer = 'areas' | 'feedback' | 'settings' | 'developer' | 'log' | null;
 type BottomPanel = 'problems' | 'addresses';
@@ -61,14 +62,14 @@ export const Workspace = () => {
   const hint = useProjectStore((state) => state.hint);
   const canUndo = useProjectStore((state) => state.past.length > 0);
   const canRedo = useProjectStore((state) => state.future.length > 0);
-  const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
+  const [viewTool, setViewTool] = useState<ViewTool>({kind: 'select'});
+  const [viewSelection, setViewSelection] = useState<ViewSelection>(null);
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [bottom, setBottom] = useState<BottomPanel>('problems');
   const [drawing, setDrawing] = useState<GridPoint[]>([]);
   const [placeRotation, setPlaceRotation] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const {view, fullView, arrangement, arrangements, fit, targetText} =
-    useShownView();
+  const {view, fullView, arrangement, fit, targetText} = useShownView();
   const rotatePlacement = useCallback(() => setPlaceRotation((r) => r + 1), []);
   useEditorKeys({drawing, setDrawing, rotatePlacement, fit});
   // Validation runs at low priority: the diagram updates at once after an
@@ -119,36 +120,17 @@ export const Workspace = () => {
             {strings.operate.levelBadge(viewLevel)}
           </button>
         )}
-        <div className="view-tabs" role="tablist">
-          {project.views.length > 1 && arrangement && (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={fullView}
-              className={`view-tab${fullView ? ' view-tab--active' : ''}`}
-              onClick={() => {
-                setDrawing([]);
-                setActiveArrangement(arrangement.id);
-              }}
-            >
-              {strings.full.tab}
-            </button>
-          )}
-          {project.views.map((candidate) => (
-            <button
-              key={candidate.id}
-              type="button"
-              role="tab"
-              aria-selected={!fullView && candidate.id === view?.id}
-              className={`view-tab${!fullView && candidate.id === view?.id ? ' view-tab--active' : ''}`}
-              onClick={() => {
-                setDrawing([]);
-                setActiveView(candidate.id);
-              }}
-            >
-              {candidate.name}
-            </button>
-          ))}
+        <ViewTabs
+          project={project}
+          shownArrangementId={arrangement?.id}
+          shownViewId={fullView ? undefined : view?.id}
+          editing={editing}
+          onSwitch={() => {
+            setDrawing([]);
+            setViewSelection(null);
+            setViewTool({kind: 'select'});
+          }}
+        >
           {editing && (
             <button
               type="button"
@@ -168,7 +150,7 @@ export const Workspace = () => {
               + {strings.editor.addView}
             </button>
           )}
-        </div>
+        </ViewTabs>
         <div className="bar-actions">
           {editing && (
             <>
@@ -251,19 +233,23 @@ export const Workspace = () => {
 
       <div className="layout-main">
         {editing && !fullView && <Toolbox />}
+        {editing && fullView && (
+          <ViewToolbox
+            project={project}
+            tool={viewTool}
+            onToolChange={setViewTool}
+          />
+        )}
         <div className="canvas-area">
           {fullView && arrangement && (
-            <FullLayoutCanvas
+            <ViewCanvas
               project={project}
               arrangement={arrangement}
               editing={editing}
-              selectedPanel={selectedPanel}
-              onSelectPanel={setSelectedPanel}
-              onMovePanel={(viewId, dx, dy) =>
-                changeArrangement(arrangement.id, (a) =>
-                  movePanel(a, viewId, dx, dy),
-                )
-              }
+              tool={viewTool}
+              onToolChange={setViewTool}
+              selection={viewSelection}
+              onSelect={setViewSelection}
             />
           )}
           {!fullView &&
@@ -303,11 +289,11 @@ export const Workspace = () => {
           <PropertiesPanel project={project} view={view} />
         )}
         {editing && fullView && arrangement && (
-          <ArrangementPanel
+          <ViewPanel
             project={project}
-            arrangements={arrangements}
             arrangement={arrangement}
-            selectedPanel={selectedPanel}
+            selection={viewSelection}
+            onSelect={setViewSelection}
           />
         )}
         {drawer && (

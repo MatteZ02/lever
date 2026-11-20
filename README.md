@@ -23,9 +23,9 @@ reports it.
   shows more certainty than the central unit gives: a position only reported at start-up, or not
   reported at all, is shown as such.
 - **STOP** (Esc) and track power in every window, always.
-- **Full layout view**: all stations on one canvas, each placed and sized freely; stations linked
-  at their exits. Any station or the full layout can be opened in its own window, e.g. one per
-  monitor.
+- **Views**: pages you compose yourself from station frames and the lines between them, as many as
+  you like; stations are linked at their exits. Any station or view can be opened in its own
+  window, e.g. one per monitor.
 - **Several control stations** at once (also several on one PC), next to Throttles, the Roco app
   and other software, with all commands paced so the central unit is not flooded.
 

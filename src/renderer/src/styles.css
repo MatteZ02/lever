@@ -1160,3 +1160,25 @@ span.level-badge {
 .color-picker-preset[aria-pressed='true'] {
   outline: 2px solid var(--color-accent);
 }
+
+/* Layout views (full/ViewCanvas.tsx): their tabs come before the stations'. */
+.view-tab--layout {
+  font-style: italic;
+}
+
+.view-tabs-separator {
+  width: 1px;
+  margin: 4px 4px;
+  background: var(--color-border);
+}
+
+.view-empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: 420px;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}

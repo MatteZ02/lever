@@ -87,7 +87,7 @@ src/main/project/       ProjectDocument (the open .lever: atomic writes, autosav
                         Main owns the document; windows send whole projects (validated).
 src/main/uiAutomation.ts  Dev-only hidden-window UI automation (see pitfalls above);
                         {"window": n} drives another window.
-src/main/windows.ts     WindowManager: several windows, each showing a view or the full view
+src/main/windows.ts     WindowManager: several windows, each showing a station or a layout view
                         (target in the URL hash), saved and reopened (settings.windows).
 src/main/z21File.ts     Reads a Z21 app .z21 export (zipReader.ts + node:sqlite) for the pure
                         importer src/model/z21Import.ts (File → Import from Z21 app).
@@ -98,15 +98,15 @@ src/engine/             utilityProcess entry (index.ts) + Engine (no Electron im
 src/connection/         ConnectionManager (from Throttle, see COPIED_FROM.md; runtime broadcast
                         flags), Node dgram transport (ephemeral port), AccessoryQueue (LOAD-2),
                         FeedbackTracker (R-Bus/LocoNet/CAN → one input-state shape).
-src/model/              PURE: project.ts (schema v1, .lever), migrations.ts, elements.ts,
+src/model/              PURE: project.ts (schema v2, .lever), migrations.ts, elements.ts,
                         geometry.ts (grid, 8 directions), ports.ts (turnout legs/positions —
                         one source for drawing and routing), signalTypes.ts (built-in
                         templates), centralUnitProfile.ts (EVERYTHING that may differ on the
                         DR5000: offset, straight output, pulse, gap, Q mode, confirmation),
                         accessoryCommands.ts (element + position → FAdr/output/pulse),
                         topology.ts (derived graph; project graph joined at paired exits),
-                        connectors.ts, arrangement.ts (full view), routing.ts (route finding,
-                        ROUTE_WEIGHTS), routeSignals.ts (RTE-5 rules), validation.ts, addressTable.ts,
+                        connectors.ts, arrangement.ts (layout views: frames and lines),
+                        routing.ts (route finding, ROUTE_WEIGHTS), routeSignals.ts (RTE-5 rules), validation.ts, addressTable.ts,
                         editing.ts (pure edit ops), placement.ts.
 src/interlocking/       PURE: Interlocking.ts (Level 1 live state: positions/aspects from outputs,
                         confirmation timeout + one retry, blocks with release delay, train
@@ -126,8 +126,8 @@ src/renderer/src/       React app; Zustand stores (engineStore mirrors engine ev
                         diagram/ (SVG shapes and DiagramView, shared by operate and edit);
                         editor/ (canvas, toolbox, properties, problems, address table, test
                         mode, keys); operate/ (OperateCanvas, useOperateActions,
-                        FeedbackMonitor, AreasPanel); full/ (FullLayoutCanvas,
-                        ArrangementPanel);
+                        FeedbackMonitor, AreasPanel); full/ (layout views: ViewCanvas,
+                        ViewToolbox, ViewPanel, viewEdits); components/ColorPicker.tsx;
                         Workspace.tsx (layout); safety/shortcuts.ts.
 samples/alppirata.lever  olten, inselburg-dettingen, Sissach, imported from the club's Z21 app
                         export (real addresses); edited in Lever now; a test keeps it clean.

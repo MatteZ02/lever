@@ -234,27 +234,39 @@ export const strings = {
     followExit: 'Go to the other end',
   },
 
+  // Layout views: canvases with station frames and drawn lines.
   full: {
-    title: 'Full layout',
-    defaultName: 'Full layout',
-    tab: 'Full layout',
-    editHelp:
-      'Drag a station by its frame or title to move it; click it to change its size. Double-click a title to open that station.',
-    arrangement: 'Arrangement',
+    title: 'View',
+    newName: (n: number) => `View ${n}`,
+    add: 'View',
+    tabsLabel: 'Views and stations',
     name: 'Name',
-    connectorLines: 'Lines between linked exits',
-    add: 'New arrangement',
-    reset: 'Stations below each other',
-    remove: 'Delete arrangement',
-    newName: (n: number) => `Arrangement ${n}`,
-    scale: 'Size (%)',
-    smaller: 'Smaller',
-    larger: 'Larger',
+    remove: 'Delete view',
+    editHelp:
+      'A view shows the stations you draw frames for, joined by lines you draw. Open it in its own window with New window, e.g. one view per monitor.',
+    tools: 'View tools',
+    select: 'Select',
+    line: 'Line',
+    frameFor: 'Frame for',
+    selectHelp:
+      'Drag a frame or its title to move it, its corner to resize it. Double-click a title to open that station.',
+    frameHelp: 'Drag on the canvas to draw the frame. The station fits inside.',
+    lineHelp:
+      'Click to add points; a click near a station exit attaches the line to it. Finish on an exit, by clicking the last point again, or with Enter. Backspace removes the last point.',
+    station: 'Station',
     rotation: (degrees: number) => `Rotation: ${degrees}°`,
     rotateLeft: 'Rotate left',
     rotateRight: 'Rotate right',
     openStation: 'Open station',
-    selectPanel: 'Click a station to change its size.',
+    deleteFrame: 'Delete frame',
+    deleteLine: 'Delete line',
+    lineTitle: 'Line',
+    linePoints: (n: number) => `${n} points`,
+    selectHint: 'Click a frame or a line to change it.',
+    empty:
+      'This view is empty. Choose a station under "Frame for" and drag on the canvas to draw its frame.',
+    emptyOperate:
+      'This view is empty. Switch to Edit layout to draw station frames on it.',
   },
 
   operate: {

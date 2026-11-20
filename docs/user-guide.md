@@ -106,7 +106,7 @@ Every part of the layout runs at an **automation level**:
 
 The parts are **automation areas**. Every station is one; in the editor you can add areas for part
 of a station or the line between stations, and choose an element's area in its properties. Each
-station's level is shown in the bar (and in the full layout, on each station's title); boundaries
+station's level is shown in the bar (and in a view, on each station's title); boundaries
 between areas are marked on the diagram.
 
 To change a level, open **Levels** and choose it; no edit password is needed. Lowering a level
@@ -166,18 +166,30 @@ hand at Level 2.
 look like turnouts set by someone else, and a turnout thrown by another station can break your
 route. Operate each area from one control station at a time.
 
-## Full layout, linked stations and windows
+## Views, linked stations and windows
 
-**Full layout** (the first tab when there are several stations) shows every station on one
-canvas. It works like a station: click turnouts, signals and tracks as usual; each station shows
-its automation level in its title. Double-click a station's title to open it.
+A **view** is a page you put together yourself: frames with stations in them, and lines drawn
+between them. Make as many as you need, for example one large station on one monitor and two
+smaller stations side by side on another. Views have their own tabs, before the stations' tabs. A
+view works like a station: click turnouts, signals and tracks as usual; each frame shows its
+station's automation level in its title. Double-click a title to open that station.
 
-To arrange it, switch to **Edit layout** while on **Full layout**: drag a station by its frame or
-title, click it and change its **Size**, or turn it with **Rotate left** / **Rotate right** (a
-quarter turn each; names and numbers stay upright). Turning a station here changes only how it
-sits in this arrangement, not its own drawing. **Lines between linked exits** draws a dashed line
-between stations whose exits are linked. **New arrangement** keeps several arrangements (for
-example one per monitor); **Stations below each other** starts over.
+To make one, switch to **Edit layout** and click **+ View**. A new view is empty:
+
+- **Frame for** (left): choose a station, then drag on the canvas. The station is fitted inside
+  the frame, as large as fits. Drag a frame (or its title) to move it, and the square at its
+  bottom-right corner to resize it. With a frame selected you can change its **Station**, turn it
+  with **Rotate left** / **Rotate right** (a quarter turn each; names and numbers stay upright),
+  or delete it. Turning a station here changes only how it sits in this view, not its own drawing.
+- **Line**: click to add points. Station exits are marked with circles; a click near one attaches
+  the line to that exit, so the line follows when the frame moves. Finish on an exit, by clicking
+  the last point again, or with Enter; Backspace removes the last point. Lines are a drawing only
+  (dashed): they show no occupancy or routes.
+- **Select**: click a frame or a line to change or delete it (Delete key works too). Rename or
+  delete the view on the right.
+
+Projects from Lever 0.1.2 and earlier keep their arrangements as views, with the lines between
+linked exits as drawn lines.
 
 **Linking stations:** select a station exit in the editor and choose where it **leads to**: the
 exit at the other end of the line, in another station or in the same one (for example the two
@@ -185,8 +197,8 @@ ends of a line through a hidden spiral). Lever joins the stations there, so rout
 through it, and in operating mode clicking a linked exit opens the other end. Unlinked exits are
 normal where the line between stations is not drawn.
 
-**New window** opens what is shown (a station or the full layout) in a plain window, e.g. on a
-second monitor: only the diagram and the station tabs, for operating. Editing, settings and track
+**New window** opens what is shown (a station or a view) in a plain window, e.g. on a second
+monitor: only the diagram and the view and station tabs, for operating. Editing, settings and track
 power stay in the main window. All windows show the same live state, and **Esc is STOP in every
 window**. Closing a plain window just closes it; closing the main window quits Lever. When Lever
 starts again, it reopens its windows where they were.

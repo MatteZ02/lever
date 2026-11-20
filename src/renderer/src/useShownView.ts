@@ -1,4 +1,4 @@
-// What a window shows: a station, or an arrangement of the full layout view.
+// What a window shows: a station, or a layout view.
 // Shared by the main window and plain station windows. Tells the engine
 // which stations are on screen (position refresh), tells the main process
 // what the window shows (reopened there next time), sets the window title,
@@ -8,7 +8,7 @@ import {arrangementsOf} from '../../model/arrangement';
 import {strings} from '../../shared/strings';
 import {formatWindowTarget, WindowTarget} from '../../shared/windowTarget';
 import {fitViewport} from './diagram/DiagramView';
-import {fitArrangement} from './full/FullLayoutCanvas';
+import {fitArrangement} from './full/ViewCanvas';
 import {sendCommand} from './store/engineStore';
 import {
   activeView,
@@ -35,14 +35,18 @@ export const useShownView = ({
     (state) => state.activeArrangementId,
   );
   const view = activeView();
-  const fullView = activeViewId === FULL_VIEW;
-  // Arrangements of the full view (FULL-5); a default one until saved.
+  // The layout views (FULL-5); none until the user makes one.
   const arrangements = useMemo(
-    () => (project ? arrangementsOf(project, strings.full.defaultName) : []),
+    () => (project ? arrangementsOf(project) : []),
     [project],
   );
   const arrangement =
-    arrangements.find((a) => a.id === activeArrangementId) ?? arrangements[0];
+    activeViewId === FULL_VIEW
+      ? (arrangements.find((a) => a.id === activeArrangementId) ??
+        arrangements[0])
+      : undefined;
+  // A view that is gone falls back to a station (activeView).
+  const fullView = arrangement !== undefined;
 
   const fit = useCallback(() => {
     const current = activeView();
@@ -58,7 +62,7 @@ export const useShownView = ({
 
   // The engine refreshes the positions of what is on screen.
   const shownViews = fullView
-    ? (arrangement?.panels.map((panel) => panel.viewId).join(',') ?? '')
+    ? [...new Set(arrangement.frames.map((frame) => frame.viewId))].join(',')
     : (view?.id ?? '');
   useEffect(() => {
     sendCommand({

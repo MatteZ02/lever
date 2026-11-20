@@ -36,11 +36,11 @@ export type Viewport = {
 
 export const DEFAULT_VIEWPORT: Viewport = {x: -2, y: -2, scale: 24};
 
-// activeViewId of the full layout view (FULL-1); its arrangement is
+// activeViewId while a layout view (FULL-1) is shown; which one is
 // activeArrangementId.
 export const FULL_VIEW = '__full';
 
-// Viewport key of an arrangement in the full view.
+// Viewport key of a layout view.
 export const fullViewportKey = (arrangementId: string) =>
   `full:${arrangementId}`;
 
@@ -61,7 +61,7 @@ type ProjectStore = {
   mode: Mode;
   testMode: boolean;
   activeViewId: string | null;
-  // Which arrangement the full view shows (null: the first).
+  // Which layout view is shown (null: the first).
   activeArrangementId: string | null;
   selection: string[];
   tool: Tool;
@@ -92,10 +92,11 @@ export const useProjectStore = create<ProjectStore>()(() => ({
 const get = useProjectStore.getState;
 const set = useProjectStore.setState;
 
-// The station shown; undefined in the full layout view.
+// The station shown; undefined while a layout view is shown (if there is
+// none any more, the first station).
 export const activeView = () => {
   const {project, activeViewId} = get();
-  if (activeViewId === FULL_VIEW) {
+  if (activeViewId === FULL_VIEW && (project?.arrangements.length ?? 0) > 0) {
     return undefined;
   }
   return (

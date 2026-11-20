@@ -1,18 +1,28 @@
 // Phase 4 model: station connectors (FULL-3), the project topology across
-// stations, and full-view arrangements (FULL-2, FULL-5).
+// stations, and layout views with drawn frames and lines (FULL-2, FULL-5).
 import {describe, expect, it} from 'vitest';
 import {
+  addFrame,
+  addLine,
   arrangementsOf,
-  defaultArrangement,
-  panelFrame,
-  rotatePanel,
-  scalePanel,
-  syncArrangement,
-  toFullView,
+  createArrangement,
+  deleteFrame,
+  exitsOnView,
+  frameTransform,
+  linePointAt,
+  linePoints,
+  moveFrame,
+  rectBetween,
+  resizeFrame,
+  rotateFrame,
+  setFrameStation,
+  toView,
+  transformBounds,
 } from '../arrangement';
 import {pairConnectors, partnerOf, unpairConnector} from '../connectors';
 import {deleteElements} from '../editing';
 import {DiagramElement, StationConnector} from '../elements';
+import {loadProject, serializeProject} from '../migrations';
 import {Project} from '../project';
 import {buildProjectTopology, edgesAtNode, nodeId} from '../topology';
 import {validateProject} from '../validation';
@@ -40,7 +50,7 @@ const twoStations = (): Project => {
   });
   return {
     format: 'lever-project',
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: 'p',
     name: 'Test',
     settings: {} as Project['settings'],
@@ -131,105 +141,163 @@ describe('station connectors (FULL-3)', () => {
   });
 });
 
-describe('full layout arrangements (FULL-2, FULL-5)', () => {
-  it('stacks stations without overlap by default', () => {
-    const project = twoStations();
-    const arrangement = defaultArrangement(project, 'Full layout');
-    const [a, b] = arrangement.panels.map((panel, i) =>
-      panelFrame(panel, project.views[i]),
-    );
-    expect(a.x).toBe(0);
-    expect(b.x).toBe(0);
-    expect(b.y).toBeGreaterThanOrEqual(a.y + a.height);
+describe('layout views (FULL-2, FULL-5)', () => {
+  // A view with A in a wide frame and B in a tall one.
+  const twoFrames = () => {
+    let view = createArrangement('Main');
+    view = addFrame(view, 'A', {x: 0, y: 0, width: 20, height: 10}, 'fA');
+    view = addFrame(view, 'B', {x: 30, y: 0, width: 10, height: 20}, 'fB');
+    return view;
+  };
+
+  it('starts empty: no station is shown until a frame is drawn for it', () => {
+    const view = createArrangement('Main');
+    expect(view.frames).toEqual([]);
+    expect(view.lines).toEqual([]);
   });
 
-  it('is not saved until changed, and keeps up with added and deleted stations', () => {
-    const project = twoStations();
-    expect(arrangementsOf(project, 'Full layout')).toHaveLength(1);
-    // Stable until saved, so a change can find it again.
-    expect(arrangementsOf(project, 'Full layout')[0].id).toBe(
-      arrangementsOf(project, 'Full layout')[0].id,
-    );
-    expect(project.arrangements).toEqual([]);
+  it('draws frames between two corners on whole grid steps', () => {
+    expect(rectBetween({x: 5.4, y: 8.6}, {x: 1.2, y: 2.4})).toEqual({
+      x: 1,
+      y: 2,
+      width: 4,
+      height: 7,
+    });
+  });
 
-    const saved = defaultArrangement(project, 'Full layout');
-    const withC: Project = {
+  it('given a frame, fits its station inside, centred and as large as fits', () => {
+    const project = twoStations();
+    for (const frame of twoFrames().frames) {
+      const view = project.views.find((v) => v.id === frame.viewId)!;
+      const filled = transformBounds(frameTransform(frame, view), view);
+      // Touches the frame on one axis, centred on both.
+      const fitsWidth = Math.abs(filled.width - frame.width) < 1e-9;
+      const fitsHeight = Math.abs(filled.height - frame.height) < 1e-9;
+      expect(fitsWidth || fitsHeight).toBe(true);
+      expect(filled.x + filled.width / 2).toBeCloseTo(
+        frame.x + frame.width / 2,
+      );
+      expect(filled.y + filled.height / 2).toBeCloseTo(
+        frame.y + frame.height / 2,
+      );
+    }
+  });
+
+  it('turns the station inside its frame by quarter turns, the frame staying', () => {
+    const project = twoStations();
+    let arrangement = rotateFrame(twoFrames(), 'fB', 1);
+    const frame = arrangement.frames[1];
+    expect(frame).toMatchObject({rotation: 90, x: 30, width: 10});
+    const transform = frameTransform(frame, project.views[1]);
+    // B runs along x; turned 90° clockwise it runs down the tall frame.
+    const west = toView(transform, {x: 0, y: 4});
+    const east = toView(transform, {x: 8, y: 4});
+    expect(east.x).toBeCloseTo(west.x);
+    expect(east.y).toBeGreaterThan(west.y);
+    for (let i = 0; i < 3; i++) arrangement = rotateFrame(arrangement, 'fB', 1);
+    expect(arrangement.frames[1].rotation).toBe(0);
+  });
+
+  it('moves and resizes frames, never below the minimum size', () => {
+    let arrangement = moveFrame(twoFrames(), 'fA', 2, -1);
+    expect(arrangement.frames[0]).toMatchObject({x: 2, y: -1});
+    arrangement = resizeFrame(arrangement, 'fA', {x: 12.4, y: 0});
+    expect(arrangement.frames[0]).toMatchObject({width: 10, height: 3});
+  });
+
+  it('attaches line ends to nearby exits, which then follow their frame', () => {
+    const project = twoStations();
+    let arrangement = twoFrames();
+    const exits = exitsOnView(project, arrangement);
+    const aEast = exits.find((e) => e.connectorId === 'A-east')!;
+    const start = linePointAt(exits, {x: aEast.at.x + 0.3, y: aEast.at.y});
+    expect(start).toEqual({frameId: 'fA', connectorId: 'A-east'});
+    // Away from exits: the nearest grid point.
+    expect(linePointAt(exits, {x: 25.4, y: 2.6})).toEqual({x: 25, y: 3});
+    const end = linePointAt(
+      exits,
+      exits.find((e) => e.connectorId === 'B-west')!.at,
+    );
+    arrangement = addLine(arrangement, [start, {x: 25, y: 3}, end], 'L');
+    const before = linePoints(project, arrangement, arrangement.lines[0]);
+    const moved = moveFrame(arrangement, 'fA', 0, 5);
+    const after = linePoints(project, moved, moved.lines[0]);
+    expect(after[0]).toEqual({x: before[0].x, y: before[0].y + 5});
+    expect(after[1]).toEqual(before[1]);
+    expect(after[2]).toEqual(before[2]);
+  });
+
+  it('drops line ends at a deleted frame, and lines left with one point', () => {
+    let arrangement = addLine(
+      twoFrames(),
+      [
+        {frameId: 'fA', connectorId: 'A-east'},
+        {frameId: 'fB', connectorId: 'B-west'},
+      ],
+      'short',
+    );
+    arrangement = addLine(
+      arrangement,
+      [
+        {frameId: 'fA', connectorId: 'A-east'},
+        {x: 25, y: 3},
+        {x: 25, y: 8},
+      ],
+      'long',
+    );
+    const withoutB = deleteFrame(arrangement, 'fB');
+    expect(withoutB.lines.map((line) => line.id)).toEqual(['long']);
+    // Another station in A's frame: A's exits are not there any more.
+    const swapped = setFrameStation(arrangement, 'fA', 'B');
+    expect(swapped.lines.map((line) => line.points.length)).toEqual([2]);
+    expect(swapped.lines[0].id).toBe('long');
+  });
+
+  it('hides frames of deleted stations', () => {
+    const project = twoStations();
+    const withView: Project = {
       ...project,
-      views: [
-        project.views[1],
-        {id: 'C', name: 'C', areaId: 'area-B', elements: []},
+      arrangements: [twoFrames()],
+      views: [project.views[1]],
+    };
+    expect(arrangementsOf(withView)[0].frames.map((f) => f.id)).toEqual(['fB']);
+  });
+
+  it('given a version 1 file, keeps each arrangement looking the same', () => {
+    const project = pairConnectors(twoStations(), 'A-east', 'B-west');
+    const v1 = {
+      ...JSON.parse(serializeProject(project)),
+      schemaVersion: 1,
+      arrangements: [
+        {
+          id: 'arr',
+          name: 'Full layout',
+          panels: [
+            {viewId: 'A', x: 0, y: 0, scale: 1, rotation: 0},
+            {viewId: 'B', x: 3, y: 10, scale: 0.5, rotation: 90},
+          ],
+          showConnectorLines: true,
+        },
       ],
     };
-    const synced = syncArrangement(withC, saved);
-    expect(synced.panels.map((panel) => panel.viewId)).toEqual(['B', 'C']);
-  });
-
-  it('scales a panel about its top-left corner', () => {
-    const project = twoStations();
-    const arrangement = defaultArrangement(project, 'Full layout');
-    const before = panelFrame(arrangement.panels[1], project.views[1]);
-    const scaled = scalePanel(project, arrangement, 'B', 0.5);
-    const panel = scaled.panels[1];
-    const after = panelFrame(panel, project.views[1]);
-    expect(panel.scale).toBe(0.5);
-    expect(after.x).toBeCloseTo(before.x);
-    expect(after.y).toBeCloseTo(before.y);
-    expect(after.width).toBeCloseTo(before.width / 2);
-    // A point of the station follows the panel.
-    expect(toFullView(panel, {x: 2, y: 4})).toEqual({
-      x: panel.x + 1,
-      y: panel.y + 2,
-    });
-  });
-
-  it('rotates a panel by quarter turns about its centre, points following', () => {
-    const project = twoStations();
-    const arrangement = defaultArrangement(project, 'Full layout');
-    const view = project.views[1];
-    const before = panelFrame(arrangement.panels[1], view);
-    const turned = rotatePanel(project, arrangement, 'B', 1);
-    const panel = turned.panels[1];
-    expect(panel.rotation).toBe(90);
-    const after = panelFrame(panel, view);
-    // A quarter turn swaps width and height, about the same centre.
-    expect(after.width).toBeCloseTo(before.height);
-    expect(after.height).toBeCloseTo(before.width);
-    expect(after.x + after.width / 2).toBeCloseTo(
-      before.x + before.width / 2,
-      0,
-    );
-    expect(Number.isInteger(panel.x) && Number.isInteger(panel.y)).toBe(true);
-    // 90° clockwise on screen: the view's x axis points down.
-    expect(toFullView(panel, {x: 2, y: 4})).toEqual({
-      x: panel.x - 4,
-      y: panel.y + 2,
-    });
-    // Every point of the station lies inside the frame.
-    for (const element of view.elements) {
-      if ('at' in element) {
-        const p = toFullView(panel, element.at);
-        expect(p.x).toBeGreaterThanOrEqual(after.x);
-        expect(p.x).toBeLessThanOrEqual(after.x + after.width);
-        expect(p.y).toBeGreaterThanOrEqual(after.y);
-        expect(p.y).toBeLessThanOrEqual(after.y + after.height);
-      }
+    const result = loadProject(JSON.stringify(v1));
+    expect(result).toMatchObject({ok: true, migratedFrom: 1});
+    if (!result.ok) {
+      return;
     }
-    // Back the other way, and four turns come round to the start.
-    expect(rotatePanel(project, turned, 'B', -1).panels[1].rotation).toBe(0);
-    let full = arrangement;
-    for (let i = 0; i < 4; i++) full = rotatePanel(project, full, 'B', 1);
-    expect(full.panels[1].rotation).toBe(0);
-  });
-
-  it('scaling keeps the rotation', () => {
-    const project = twoStations();
-    const turned = rotatePanel(
-      project,
-      defaultArrangement(project, 'Full layout'),
-      'B',
-      2,
-    );
-    const scaled = scalePanel(project, turned, 'B', 2);
-    expect(scaled.panels[1]).toMatchObject({rotation: 180, scale: 2});
+    const [arrangement] = result.project.arrangements;
+    expect(arrangement.name).toBe('Full layout');
+    const frameB = arrangement.frames[1];
+    const transform = frameTransform(frameB, result.project.views[1]);
+    expect(transform.scale).toBeCloseTo(0.5);
+    expect(transform.x).toBeCloseTo(3);
+    expect(transform.y).toBeCloseTo(10);
+    expect(transform.rotation).toBe(90);
+    // The automatic line between the linked exits is now a drawn one.
+    expect(arrangement.lines).toHaveLength(1);
+    expect(arrangement.lines[0].points).toEqual([
+      {frameId: arrangement.frames[0].id, connectorId: 'A-east'},
+      {frameId: frameB.id, connectorId: 'B-west'},
+    ]);
   });
 });

@@ -191,7 +191,7 @@ describe('engine against the fake Z21', () => {
 describe('operating a layout (Level 1) against the fake Z21', () => {
   const project = {
     format: 'lever-project',
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: 'p',
     name: 'Test',
     settings: {
