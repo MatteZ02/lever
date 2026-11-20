@@ -2,6 +2,7 @@
 // linked exits, more arrangements) and the selected station panel's scale.
 import {
   defaultArrangement,
+  rotatePanel,
   scalePanel,
   updateArrangement,
 } from '../../../model/arrangement';
@@ -45,6 +46,11 @@ export const ArrangementPanel = ({
     panel &&
     changeArrangement(arrangement.id, (a, p) =>
       scalePanel(p, a, panel.viewId, scale),
+    );
+  const rotate = (quarterTurns: number) =>
+    panel &&
+    changeArrangement(arrangement.id, (a, p) =>
+      rotatePanel(p, a, panel.viewId, quarterTurns),
     );
 
   return (
@@ -149,6 +155,23 @@ export const ArrangementPanel = ({
               percent !== undefined && setScale(percent / 100)
             }
           />
+          <p className="small">{strings.full.rotation(panel.rotation)}</p>
+          <div className="button-row">
+            <button
+              type="button"
+              className="button button--small"
+              onClick={() => rotate(-1)}
+            >
+              ↺ {strings.full.rotateLeft}
+            </button>
+            <button
+              type="button"
+              className="button button--small"
+              onClick={() => rotate(1)}
+            >
+              ↻ {strings.full.rotateRight}
+            </button>
+          </div>
           <div className="button-row">
             <button
               type="button"

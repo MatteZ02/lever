@@ -28,6 +28,7 @@ import {turnoutGeometry, turnoutPorts} from '../../../model/ports';
 import {AspectIcon} from '../../../model/signalTypes';
 import {LiveStatus} from '../../../shared/liveState';
 import {color, diagramDash, diagramStroke} from '../../theme';
+import {useScreenDirection, useUpright} from './upright';
 
 // --- live state (Phase 3 fills these in) -----------------------------------
 
@@ -142,8 +143,9 @@ const TrainLabel = ({points, text}: {points: GridPoint[]; text: string}) => {
   const x = (best.a.x + best.b.x) / 2;
   const y = (best.a.y + best.b.y) / 2;
   const width = Math.max(1.2, text.length * 0.32 + 0.4);
+  const upright = useUpright();
   return (
-    <g pointerEvents="none">
+    <g pointerEvents="none" transform={upright(x, y)}>
       <rect
         x={x - width / 2}
         y={y - 0.33}
@@ -182,6 +184,7 @@ const TurnoutShape = ({
   selected: boolean;
   display?: TurnoutDisplay;
 }) => {
+  const upright = useUpright();
   const geometry = turnoutGeometry(turnout.type, turnout.orientation);
   const ports = turnoutPorts(turnout);
   const centre = turnout.at;
@@ -311,6 +314,7 @@ const TurnoutShape = ({
         <text
           x={centre.x}
           y={centre.y - 0.35}
+          transform={upright(centre.x, centre.y - 0.47)}
           textAnchor="middle"
           style={{fill: color.turnoutManual, fontSize: 0.36, fontWeight: 700}}
         >
@@ -321,6 +325,7 @@ const TurnoutShape = ({
         <text
           x={centre.x}
           y={centre.y + 0.6}
+          transform={upright(centre.x, centre.y + 0.4)}
           textAnchor="middle"
           style={{
             fill: problem ? color.trackRouteBroken : color.turnoutUnknown,
@@ -582,6 +587,8 @@ const ConnectorShape = ({
   const paired = element.pairedWith !== undefined;
   const d = `M${left.x} ${left.y} L${tipPoint.x} ${tipPoint.y} L${right.x} ${right.y} Z`;
   const labelAt = along(element.at, element.direction, 1);
+  const upright = useUpright();
+  const onScreen = unit(useScreenDirection()(element.direction));
   return (
     <g>
       {selected && <Halo d={d} />}
@@ -599,12 +606,9 @@ const ConnectorShape = ({
         <text
           x={labelAt.x}
           y={labelAt.y + 0.18}
+          transform={upright(labelAt.x, labelAt.y)}
           textAnchor={
-            unit(element.direction).x < -0.1
-              ? 'end'
-              : unit(element.direction).x > 0.1
-                ? 'start'
-                : 'middle'
+            onScreen.x < -0.1 ? 'end' : onScreen.x > 0.1 ? 'start' : 'middle'
           }
           style={{fill: color.diagramLabel, fontSize: 0.5}}
         >
@@ -633,6 +637,7 @@ const AccessoryShape = ({
 }) => {
   const {x, y} = element.at;
   const d = `M${x - 0.3} ${y - 0.3} h0.6 v0.6 h-0.6 Z`;
+  const upright = useUpright();
   return (
     <g>
       {selected && <Halo d={d} />}
@@ -647,6 +652,7 @@ const AccessoryShape = ({
       <text
         x={x}
         y={y + 0.17}
+        transform={upright(x, y)}
         textAnchor="middle"
         style={{fill: color.diagramLabel, fontSize: 0.45, fontWeight: 700}}
       >
@@ -678,8 +684,9 @@ const LabelShape = ({
 }) => {
   const size = LABEL_SIZES[element.size];
   const width = Math.max(1, element.text.length * size * 0.55);
+  const upright = useUpright();
   return (
-    <g>
+    <g transform={upright(element.at.x + width / 2, element.at.y - size * 0.3)}>
       {selected && (
         <rect
           x={element.at.x - 0.1}

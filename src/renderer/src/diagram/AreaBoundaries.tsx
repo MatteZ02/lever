@@ -6,6 +6,7 @@ import {areaBoundaries} from '../../../model/areas';
 import {rotateDirection, vector} from '../../../model/geometry';
 import {Project, StationView} from '../../../model/project';
 import {color} from '../../theme';
+import {useUpright} from './upright';
 
 const LEVEL_COLOR = [
   color.areaLevel1,
@@ -26,6 +27,7 @@ export const AreaBoundaries = ({
     () => areaBoundaries(project, view),
     [project, view],
   );
+  const upright = useUpright();
   return (
     <g pointerEvents="none">
       {boundaries.map((boundary) => {
@@ -50,6 +52,7 @@ export const AreaBoundaries = ({
             <text
               x={x + ux * 0.9}
               y={y + uy * 0.9 + 0.15}
+              transform={upright(x + ux * 0.9, y + uy * 0.9)}
               textAnchor="middle"
               style={{
                 fill: LEVEL_COLOR[boundary.levels[0]],

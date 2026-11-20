@@ -172,7 +172,9 @@ canvas. It works like a station: click turnouts, signals and tracks as usual; ea
 its automation level in its title. Double-click a station's title to open it.
 
 To arrange it, switch to **Edit layout** while on **Full layout**: drag a station by its frame or
-title, click it and change its **Size**. **Lines between linked exits** draws a dashed line
+title, click it and change its **Size**, or turn it with **Rotate left** / **Rotate right** (a
+quarter turn each; names and numbers stay upright). Turning a station here changes only how it
+sits in this arrangement, not its own drawing. **Lines between linked exits** draws a dashed line
 between stations whose exits are linked. **New arrangement** keeps several arrangements (for
 example one per monitor); **Stations below each other** starts over.
 

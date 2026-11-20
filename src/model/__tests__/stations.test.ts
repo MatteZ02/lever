@@ -5,6 +5,7 @@ import {
   arrangementsOf,
   defaultArrangement,
   panelFrame,
+  rotatePanel,
   scalePanel,
   syncArrangement,
   toFullView,
@@ -179,5 +180,56 @@ describe('full layout arrangements (FULL-2, FULL-5)', () => {
       x: panel.x + 1,
       y: panel.y + 2,
     });
+  });
+
+  it('rotates a panel by quarter turns about its centre, points following', () => {
+    const project = twoStations();
+    const arrangement = defaultArrangement(project, 'Full layout');
+    const view = project.views[1];
+    const before = panelFrame(arrangement.panels[1], view);
+    const turned = rotatePanel(project, arrangement, 'B', 1);
+    const panel = turned.panels[1];
+    expect(panel.rotation).toBe(90);
+    const after = panelFrame(panel, view);
+    // A quarter turn swaps width and height, about the same centre.
+    expect(after.width).toBeCloseTo(before.height);
+    expect(after.height).toBeCloseTo(before.width);
+    expect(after.x + after.width / 2).toBeCloseTo(
+      before.x + before.width / 2,
+      0,
+    );
+    expect(Number.isInteger(panel.x) && Number.isInteger(panel.y)).toBe(true);
+    // 90° clockwise on screen: the view's x axis points down.
+    expect(toFullView(panel, {x: 2, y: 4})).toEqual({
+      x: panel.x - 4,
+      y: panel.y + 2,
+    });
+    // Every point of the station lies inside the frame.
+    for (const element of view.elements) {
+      if ('at' in element) {
+        const p = toFullView(panel, element.at);
+        expect(p.x).toBeGreaterThanOrEqual(after.x);
+        expect(p.x).toBeLessThanOrEqual(after.x + after.width);
+        expect(p.y).toBeGreaterThanOrEqual(after.y);
+        expect(p.y).toBeLessThanOrEqual(after.y + after.height);
+      }
+    }
+    // Back the other way, and four turns come round to the start.
+    expect(rotatePanel(project, turned, 'B', -1).panels[1].rotation).toBe(0);
+    let full = arrangement;
+    for (let i = 0; i < 4; i++) full = rotatePanel(project, full, 'B', 1);
+    expect(full.panels[1].rotation).toBe(0);
+  });
+
+  it('scaling keeps the rotation', () => {
+    const project = twoStations();
+    const turned = rotatePanel(
+      project,
+      defaultArrangement(project, 'Full layout'),
+      'B',
+      2,
+    );
+    const scaled = scalePanel(project, turned, 'B', 2);
+    expect(scaled.panels[1]).toMatchObject({rotation: 180, scale: 2});
   });
 });

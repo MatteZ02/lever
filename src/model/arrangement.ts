@@ -1,11 +1,19 @@
 // Full layout view (FULL-1, FULL-2, FULL-5): station views as panels on one
-// canvas, each placed and scaled on its own. A panel draws its view's own
-// grid coordinates through `translate(x, y) scale(scale)`, so editing a
-// station never moves its panel.
-import {Bounds, GridPoint} from './geometry';
+// canvas, each placed, scaled and rotated (quarter turns) on its own. A panel
+// draws its view's own grid coordinates through
+// `translate(x, y) scale(scale) rotate(rotation)`, so editing a station never
+// moves its panel.
+import {Bounds, GridPoint, rotatePoint90} from './geometry';
 import {Arrangement, newId, Project, StationView} from './project';
 
 export type Panel = Arrangement['panels'][number];
+export type PanelRotation = Panel['rotation'];
+
+const ORIGIN: GridPoint = {x: 0, y: 0};
+
+// A point of the view, rotated as the panel draws it (before scaling).
+const rotated = (point: GridPoint, rotation: PanelRotation): GridPoint =>
+  rotatePoint90(point, ORIGIN, rotation / 90);
 
 // Space around a station's drawing inside its panel frame (view units).
 export const PANEL_MARGIN = 2;
@@ -41,22 +49,41 @@ export const viewBounds = (view: StationView): Bounds => {
 
 export type Rect = {x: number; y: number; width: number; height: number};
 
+// The view's drawing with its margin, rotated, relative to the panel's
+// origin (before scaling).
+const rotatedBounds = (view: StationView, rotation: PanelRotation): Bounds => {
+  const bounds = viewBounds(view);
+  const corners = [
+    {x: bounds.minX - PANEL_MARGIN, y: bounds.minY - PANEL_MARGIN},
+    {x: bounds.maxX + PANEL_MARGIN, y: bounds.maxY + PANEL_MARGIN},
+  ].map((corner) => rotated(corner, rotation));
+  return {
+    minX: Math.min(...corners.map((c) => c.x)),
+    minY: Math.min(...corners.map((c) => c.y)),
+    maxX: Math.max(...corners.map((c) => c.x)),
+    maxY: Math.max(...corners.map((c) => c.y)),
+  };
+};
+
 // A panel's frame in full-view units.
 export const panelFrame = (panel: Panel, view: StationView): Rect => {
-  const bounds = viewBounds(view);
+  const bounds = rotatedBounds(view, panel.rotation);
   return {
-    x: panel.x + (bounds.minX - PANEL_MARGIN) * panel.scale,
-    y: panel.y + (bounds.minY - PANEL_MARGIN) * panel.scale,
-    width: (bounds.maxX - bounds.minX + 2 * PANEL_MARGIN) * panel.scale,
-    height: (bounds.maxY - bounds.minY + 2 * PANEL_MARGIN) * panel.scale,
+    x: panel.x + bounds.minX * panel.scale,
+    y: panel.y + bounds.minY * panel.scale,
+    width: (bounds.maxX - bounds.minX) * panel.scale,
+    height: (bounds.maxY - bounds.minY) * panel.scale,
   };
 };
 
 // A point of the view in full-view units.
-export const toFullView = (panel: Panel, point: GridPoint): GridPoint => ({
-  x: panel.x + point.x * panel.scale,
-  y: panel.y + point.y * panel.scale,
-});
+export const toFullView = (panel: Panel, point: GridPoint): GridPoint => {
+  const turned = rotated(point, panel.rotation);
+  return {
+    x: panel.x + turned.x * panel.scale,
+    y: panel.y + turned.y * panel.scale,
+  };
+};
 
 // Panel placed with its frame's top-left corner at (left, top).
 const placePanel = (
@@ -64,13 +91,15 @@ const placePanel = (
   left: number,
   top: number,
   scale = 1,
+  rotation: PanelRotation = 0,
 ): Panel => {
-  const bounds = viewBounds(view);
+  const bounds = rotatedBounds(view, rotation);
   return {
     viewId: view.id,
-    x: left - (bounds.minX - PANEL_MARGIN) * scale,
-    y: top - (bounds.minY - PANEL_MARGIN) * scale,
+    x: left - bounds.minX * scale,
+    y: top - bounds.minY * scale,
     scale,
+    rotation,
   };
 };
 
@@ -188,7 +217,38 @@ export const scalePanel = (
         return panel;
       }
       const frame = panelFrame(panel, view);
-      return placePanel(view, frame.x, frame.y, clamped);
+      return placePanel(view, frame.x, frame.y, clamped, panel.rotation);
+    }),
+  };
+};
+
+// Turns a panel by quarter turns (1 = 90° clockwise, -1 = back) about its
+// frame's centre, kept on whole grid steps.
+export const rotatePanel = (
+  project: Project,
+  arrangement: Arrangement,
+  viewId: string,
+  quarterTurns: number,
+): Arrangement => {
+  const view = project.views.find((v) => v.id === viewId);
+  return {
+    ...arrangement,
+    panels: arrangement.panels.map((panel) => {
+      if (panel.viewId !== viewId || !view) {
+        return panel;
+      }
+      const rotation = (((((panel.rotation / 90 + quarterTurns) % 4) + 4) % 4) *
+        90) as PanelRotation;
+      const before = panelFrame(panel, view);
+      const turned = placePanel(view, 0, 0, panel.scale, rotation);
+      const after = panelFrame(turned, view);
+      const dx = before.x + before.width / 2 - (after.x + after.width / 2);
+      const dy = before.y + before.height / 2 - (after.y + after.height / 2);
+      return {
+        ...turned,
+        x: Math.round(turned.x + dx),
+        y: Math.round(turned.y + dy),
+      };
     }),
   };
 };

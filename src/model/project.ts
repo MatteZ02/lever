@@ -47,9 +47,10 @@ export const stationViewSchema = z.object({
 });
 export type StationView = z.infer<typeof stationViewSchema>;
 
-// Full layout view (FULL-2, FULL-5): where each station panel goes and its
-// scale (src/model/arrangement.ts). Panel x/y: where the view's grid origin
-// lies in full-view units.
+// Full layout view (FULL-2, FULL-5): where each station panel goes, its
+// scale and rotation (src/model/arrangement.ts). Panel x/y: where the view's
+// grid origin lies in full-view units; rotation: clockwise on screen, in
+// quarter turns, about that origin.
 export const arrangementSchema = z.object({
   id: idSchema,
   name: z.string().min(1).max(100),
@@ -60,6 +61,9 @@ export const arrangementSchema = z.object({
         x: z.number(),
         y: z.number(),
         scale: z.number().positive().max(10),
+        rotation: z
+          .union([z.literal(0), z.literal(90), z.literal(180), z.literal(270)])
+          .default(0),
       }),
     )
     .default([]),

@@ -19,6 +19,7 @@ import {color} from '../../theme';
 import {AreaBoundaries} from '../diagram/AreaBoundaries';
 import {DiagramPointer, DiagramView, ViewLayer} from '../diagram/DiagramView';
 import {RouteOverlay} from '../diagram/RouteOverlay';
+import {PanelRotationContext} from '../diagram/upright';
 import {buildDisplays} from '../operate/displays';
 import {useOperateActions} from '../operate/useOperateActions';
 import {
@@ -256,19 +257,21 @@ const StationPanel = ({
         }}
       />
       <g
-        transform={`translate(${panel.x} ${panel.y}) scale(${panel.scale})`}
+        transform={`translate(${panel.x} ${panel.y}) scale(${panel.scale}) rotate(${panel.rotation})`}
         style={{pointerEvents: editing ? 'none' : undefined}}
       >
-        <rect
-          x={bounds.minX - PANEL_MARGIN}
-          y={bounds.minY - PANEL_MARGIN}
-          width={bounds.maxX - bounds.minX + 2 * PANEL_MARGIN}
-          height={bounds.maxY - bounds.minY + 2 * PANEL_MARGIN}
-          style={{fill: 'none'}}
-        />
-        <ViewLayer project={project} view={view} displays={displays} />
-        <AreaBoundaries project={project} view={view} />
-        {!editing && <RouteOverlay project={project} viewId={view.id} />}
+        <PanelRotationContext.Provider value={panel.rotation}>
+          <rect
+            x={bounds.minX - PANEL_MARGIN}
+            y={bounds.minY - PANEL_MARGIN}
+            width={bounds.maxX - bounds.minX + 2 * PANEL_MARGIN}
+            height={bounds.maxY - bounds.minY + 2 * PANEL_MARGIN}
+            style={{fill: 'none'}}
+          />
+          <ViewLayer project={project} view={view} displays={displays} />
+          <AreaBoundaries project={project} view={view} />
+          {!editing && <RouteOverlay project={project} viewId={view.id} />}
+        </PanelRotationContext.Provider>
       </g>
       {/* Title with the station's level (FULL-7). Double-click opens it. */}
       <g
