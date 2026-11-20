@@ -156,7 +156,7 @@ const en = {
       'Shows Feedback, Accessory test and Protocol log in the main bar.',
     quickKeys: 'Quick keys',
     quickKeysHelp:
-      'They work in every window, except while typing in a text field.',
+      'They work in every window, except while typing in a text field and while Settings is open (the STOP button on screen always works). Letters work with or without Shift.',
     quickKeyActions: {
       stop: 'STOP',
       resume: 'Track power on / resume',
@@ -165,8 +165,13 @@ const en = {
       newRoute: 'New route',
       fitView: 'Fit to view',
     } as Record<string, string>,
-    keyUsedBy: (key: string, action: string) => `${key} (${action})`,
-    noKey: 'None (use the button)',
+    changeKey: 'Change',
+    cancelKey: 'Cancel',
+    removeKey: 'Remove',
+    pressKey: 'Press a key…',
+    keyTaken: (action: string) => `That key is already used for “${action}”.`,
+    keyWithModifier: 'Choose a key without Ctrl, Alt or Windows.',
+    noKey: 'None',
   },
 
   protocolLog: {

@@ -3,6 +3,7 @@
 import {TrackStatusValue} from '../../../shared/engineApi';
 import {strings} from '../../../shared/strings';
 import {color} from '../../theme';
+import {keyLabel} from '../safety/shortcuts';
 import {sendCommand, useEngineStore} from '../store/engineStore';
 import {useSettingsStore} from '../store/settingsStore';
 
@@ -14,8 +15,6 @@ const trackStatusColor: Record<TrackStatusValue, string> = {
   shortCircuit: color.statusShortCircuit,
   programming: color.statusProgramming,
 };
-
-const keyLabel = (key: string) => (key === 'Escape' ? 'Esc' : key);
 
 export const ConnectionIndicator = () => {
   const connection = useEngineStore((state) => state.connection);

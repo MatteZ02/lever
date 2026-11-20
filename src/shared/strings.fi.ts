@@ -148,7 +148,7 @@ export const fi: Strings = {
       'Näyttää yläpalkissa Takaisinilmaisun, Lisälaitetestin ja Protokollalokin.',
     quickKeys: 'Pikanäppäimet',
     quickKeysHelp:
-      'Toimivat kaikissa ikkunoissa, paitsi kun kirjoitat tekstikenttään.',
+      'Toimivat kaikissa ikkunoissa, paitsi kun kirjoitat tekstikenttään ja kun Asetukset on auki (näytön STOP-painike toimii aina). Kirjaimet toimivat Shiftin kanssa tai ilman.',
     quickKeyActions: {
       stop: 'STOP',
       resume: 'Ajovirta päälle / jatka',
@@ -157,8 +157,14 @@ export const fi: Strings = {
       newRoute: 'Uusi kulkutie',
       fitView: 'Sovita näkymään',
     } as Record<string, string>,
-    keyUsedBy: (key: string, action: string) => `${key} (${action})`,
-    noKey: 'Ei mitään (käytä painiketta)',
+    changeKey: 'Vaihda',
+    cancelKey: 'Peruuta',
+    removeKey: 'Poista',
+    pressKey: 'Paina näppäintä…',
+    keyTaken: (action: string) =>
+      `Näppäin on jo käytössä toiminnolle ”${action}”.`,
+    keyWithModifier: 'Valitse näppäin ilman Ctrl-, Alt- tai Windows-näppäintä.',
+    noKey: 'Ei mitään',
   },
 
   protocolLog: {

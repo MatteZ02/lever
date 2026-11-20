@@ -40,10 +40,13 @@ edit password, Lever asks for it. While editing, an orange line and the word **E
 **Esc is STOP**, also while editing (another key can be chosen, see below).
 
 **Quick keys** (**Settings → Quick keys**): a key each for STOP, track power on / resume, track
-power off, undo last route, new route and fit to view. Only STOP has one by default; a key used by
-one action cannot be given to another. They work in every window, but not while typing in a text
-field. The number keys **1–9** open the tabs from left to right (views first, then stations); tabs
-beyond the ninth have no number key.
+power off, undo last route, new route and fit to view. Only STOP has one by default. Click
+**Change** and press any key (without Ctrl, Alt or Windows); a key another action has is refused.
+Letters work with or without Shift. Quick keys work in every window, but not while typing in a text
+field, and **not while Settings is open** (so a key can be chosen there): the STOP key does nothing
+then either, but the STOP button on screen always works. The number keys **1–9** open the tabs from
+left to right (views first, then stations), unless one of them is a quick key; tabs beyond the
+ninth have no number key.
 
 Stations appear as tabs. While editing, drag a tab to put it somewhere else (stations among
 stations, views among views). **+ Add station** creates a new one; its name and default automation level

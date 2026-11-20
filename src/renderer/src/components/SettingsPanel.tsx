@@ -1,9 +1,14 @@
-import {FormEvent, useState} from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import {LANGUAGES} from '../../../shared/language';
 import {Settings} from '../../../shared/settings';
 import {strings} from '../../../shared/strings';
+import {isModifierKey, keyLabel, keyMatches} from '../safety/shortcuts';
 import {useEngineStore} from '../store/engineStore';
-import {updateSettings, useSettingsStore} from '../store/settingsStore';
+import {
+  setSettingsOpen,
+  updateSettings,
+  useSettingsStore,
+} from '../store/settingsStore';
 
 type CentralUnitFormProps = {host: string; port: number};
 
@@ -64,21 +69,6 @@ const CentralUnitForm = (props: CentralUnitFormProps) => {
   );
 };
 
-// Keys offered for the quick keys: none of them is typed text, Ctrl+Z is
-// never used (RTE-6b), and F11 belongs to the menu (full screen). Esc is
-// offered for STOP only.
-const QUICK_KEYS = [
-  ...Array.from({length: 12}, (_, i) => `F${i + 1}`).filter(
-    (key) => key !== 'F11',
-  ),
-  'Backspace',
-  'Insert',
-  'Home',
-  'End',
-  'PageUp',
-  'PageDown',
-];
-
 const QUICK_KEY_ACTIONS = [
   'stop',
   'resume',
@@ -89,59 +79,102 @@ const QUICK_KEY_ACTIONS = [
 ] as const;
 type QuickKeyAction = (typeof QUICK_KEY_ACTIONS)[number];
 
+// Any key can be a quick key: "Change", then press it. Keys with Ctrl, Alt
+// or Windows are not taken (they belong to the system and the menu), nor
+// a key another action has. Quick keys are off while this panel is open,
+// so the press only records.
 const QuickKeys = ({shortcuts}: {shortcuts: Settings['shortcuts']}) => {
-  // Which action has a key, so one key is never given to two actions.
-  const usedBy = (key: string, except: QuickKeyAction) =>
-    QUICK_KEY_ACTIONS.find(
-      (action) => action !== except && shortcuts[action] === key,
-    );
+  const [recording, setRecording] = useState<QuickKeyAction | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const text = strings.settings;
+
+  useEffect(() => {
+    if (!recording) {
+      return;
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (isModifierKey(event.key)) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.ctrlKey || event.altKey || event.metaKey) {
+        setMessage(text.keyWithModifier);
+        return;
+      }
+      const other = QUICK_KEY_ACTIONS.find((action) => {
+        const key = shortcuts[action];
+        return action !== recording && key && keyMatches(event.key, key);
+      });
+      if (other) {
+        setMessage(text.keyTaken(text.quickKeyActions[other]));
+        return;
+      }
+      setMessage(null);
+      setRecording(null);
+      void updateSettings({shortcuts: {...shortcuts, [recording]: event.key}});
+    };
+    window.addEventListener('keydown', onKey, {capture: true});
+    return () => window.removeEventListener('keydown', onKey, {capture: true});
+  }, [recording, shortcuts, text]);
+
   return (
     <fieldset>
-      <legend>{strings.settings.quickKeys}</legend>
-      <small className="muted">{strings.settings.quickKeysHelp}</small>
+      <legend>{text.quickKeys}</legend>
+      <small className="muted">{text.quickKeysHelp}</small>
       {QUICK_KEY_ACTIONS.map((action) => {
-        const keys = action === 'stop' ? ['Escape', ...QUICK_KEYS] : QUICK_KEYS;
+        const key = shortcuts[action];
+        const isRecording = recording === action;
         return (
-          <label key={action} className="field">
-            <span>{strings.settings.quickKeyActions[action]}</span>
-            <select
-              value={shortcuts[action] ?? ''}
-              onChange={(event) =>
-                void updateSettings({
-                  shortcuts: {
-                    ...shortcuts,
-                    [action]: event.target.value || null,
-                  },
-                })
-              }
+          <div key={action} className="quick-key">
+            <span>{text.quickKeyActions[action]}</span>
+            <kbd className="quick-key-value">
+              {isRecording ? text.pressKey : key ? keyLabel(key) : text.noKey}
+            </kbd>
+            <button
+              type="button"
+              className="button button--small"
+              aria-pressed={isRecording}
+              onClick={() => {
+                setMessage(null);
+                setRecording(isRecording ? null : action);
+              }}
             >
-              {/* STOP always has a key. */}
-              {action !== 'stop' && (
-                <option value="">{strings.settings.noKey}</option>
-              )}
-              {keys.map((key) => {
-                const other = usedBy(key, action);
-                return (
-                  <option key={key} value={key} disabled={other !== undefined}>
-                    {other
-                      ? strings.settings.keyUsedBy(
-                          key,
-                          strings.settings.quickKeyActions[other],
-                        )
-                      : key}
-                  </option>
-                );
-              })}
-            </select>
-          </label>
+              {isRecording ? text.cancelKey : text.changeKey}
+            </button>
+            {/* STOP always has a key. */}
+            {action !== 'stop' && key && !isRecording && (
+              <button
+                type="button"
+                className="button button--small"
+                onClick={() =>
+                  void updateSettings({
+                    shortcuts: {...shortcuts, [action]: null},
+                  })
+                }
+              >
+                {text.removeKey}
+              </button>
+            )}
+          </div>
         );
       })}
+      {message && (
+        <p className="small" role="status">
+          {message}
+        </p>
+      )}
     </fieldset>
   );
 };
 
 export const SettingsPanel = () => {
   const settings = useSettingsStore((state) => state.settings);
+  // Quick keys are off while this panel is open.
+  useEffect(() => {
+    setSettingsOpen(true);
+    return () => setSettingsOpen(false);
+  }, []);
   const protocolLog = useEngineStore((state) => state.protocolLog);
   const {host, port} = settings.centralUnit;
 

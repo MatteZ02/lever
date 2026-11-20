@@ -37,32 +37,40 @@ useSettingsStore.subscribe(updateTheme);
 window.addEventListener(
   'keydown',
   (event) => {
-    const action = shortcutAction(
-      event,
-      useSettingsStore.getState().settings.shortcuts,
-    );
-    if (action === 'stop') {
+    const {settings, settingsOpen} = useSettingsStore.getState();
+    // Off while Settings is open, so keys can be chosen there (the STOP
+    // button on screen still works).
+    if (settingsOpen) {
+      return;
+    }
+    // A quick key acts here and goes no further (e.g. not to the editor).
+    const handled = () => {
       event.preventDefault();
+      event.stopPropagation();
+    };
+    const action = shortcutAction(event, settings.shortcuts);
+    if (action === 'stop') {
+      handled();
       sendCommand({type: 'emergencyStop'});
     } else if (action === 'trackPowerOff') {
-      event.preventDefault();
+      handled();
       sendCommand({type: 'setTrackPower', on: false});
     } else if (action === 'resume') {
-      event.preventDefault();
+      handled();
       sendCommand({type: 'setTrackPower', on: true});
     } else if (action === 'undoRoute') {
-      event.preventDefault();
+      handled();
       sendCommand({type: 'undoRoute'});
     } else if (action === 'newRoute') {
-      event.preventDefault();
+      handled();
       startNewRoute();
     } else if (action === 'fitView') {
-      event.preventDefault();
+      handled();
       requestFit();
     } else {
       const tab = tabNumberKey(event);
       if (tab !== undefined && switchToTab(tab)) {
-        event.preventDefault();
+        handled();
       }
     }
   },

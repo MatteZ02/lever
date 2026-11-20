@@ -151,6 +151,8 @@ with 45° legs (turnout legs are one grid step).
 - STOP (`LAN_X_SET_STOP`) and track power bypass every queue and work at every level, also when
   other parts are busy or failing. STOP does not reset the interlocking (CARRY-2).
 - No confirmation on STOP. Status is never shown by colour alone.
+- Quick keys, the STOP key included, are off while the Settings panel is open (user decision, so
+  keys can be recorded there); the on-screen STOP button always works.
 - Displayed state never claims more than the central unit reported (ARC-2, MULTI-3).
 
 **Protocol and load (shared with up to 10 Throttles):**

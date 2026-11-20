@@ -8,12 +8,19 @@ import {
 type SettingsState = {
   settings: Settings;
   loaded: boolean;
+  // The settings panel is open in this window: quick keys are off, so a key
+  // can be recorded without acting.
+  settingsOpen: boolean;
 };
 
 export const useSettingsStore = create<SettingsState>()(() => ({
   settings: defaultSettings(),
   loaded: false,
+  settingsOpen: false,
 }));
+
+export const setSettingsOpen = (settingsOpen: boolean) =>
+  useSettingsStore.setState({settingsOpen});
 
 export const updateSettings = async (update: SettingsUpdate): Promise<void> => {
   const settings = await window.lever.settings.update(update);

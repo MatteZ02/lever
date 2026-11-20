@@ -1,5 +1,11 @@
 import {describe, expect, it} from 'vitest';
-import {isTypingTarget, shortcutAction, tabNumberKey} from './shortcuts';
+import {
+  isModifierKey,
+  isTypingTarget,
+  keyLabel,
+  shortcutAction,
+  tabNumberKey,
+} from './shortcuts';
 
 const element = (tagName: string, extra: Record<string, unknown> = {}) =>
   ({tagName, isContentEditable: false, ...extra}) as unknown as EventTarget;
@@ -110,5 +116,25 @@ describe('number keys for tabs', () => {
     ).toBeUndefined();
     expect(tabNumberKey(key('2', element('SELECT')))).toBeUndefined();
     expect(tabNumberKey({...key('3'), repeat: true})).toBeUndefined();
+  });
+});
+
+describe('any key as a quick key', () => {
+  it('given a letter, matches it with or without Shift', () => {
+    const shortcuts = {stop: 'Escape', trackPowerOff: null, fitView: 'f'};
+    expect(shortcutAction(key('f'), shortcuts)).toBe('fitView');
+    expect(shortcutAction(key('F'), shortcuts)).toBe('fitView');
+    expect(shortcutAction(key('g'), shortcuts)).toBeUndefined();
+    // F1 is not the letter F.
+    expect(shortcutAction(key('F1'), shortcuts)).toBeUndefined();
+  });
+
+  it('shows keys readably and never takes a modifier alone', () => {
+    expect(keyLabel('Escape')).toBe('Esc');
+    expect(keyLabel(' ')).toBe('Space');
+    expect(keyLabel('q')).toBe('Q');
+    expect(keyLabel('PageDown')).toBe('PageDown');
+    expect(isModifierKey('Shift')).toBe(true);
+    expect(isModifierKey('a')).toBe(false);
   });
 });

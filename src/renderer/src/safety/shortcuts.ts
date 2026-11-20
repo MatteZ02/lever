@@ -72,7 +72,8 @@ export const shortcutAction = (
     return undefined;
   }
   for (const action of ACTIONS) {
-    if (shortcuts[action] && event.key === shortcuts[action]) {
+    const configured = shortcuts[action];
+    if (configured && keyMatches(event.key, configured)) {
       // A held key repeats STOP; harmless, and it never turns into anything
       // else. Other actions run once per press.
       return action === 'stop' || !event.repeat ? action : undefined;
@@ -102,3 +103,27 @@ export const tabNumberKey = (
   }
   return Number(event.key) - 1;
 };
+
+// A pressed key against a configured one; letters match in either case,
+// so Shift or Caps Lock does not matter.
+export const keyMatches = (pressed: string, configured: string): boolean =>
+  pressed === configured ||
+  (pressed.length === 1 &&
+    configured.length === 1 &&
+    pressed.toLowerCase() === configured.toLowerCase());
+
+// Keys that only modify others; never a quick key on their own.
+export const isModifierKey = (key: string): boolean =>
+  ['Shift', 'Control', 'Alt', 'Meta', 'AltGraph', 'CapsLock', 'OS'].includes(
+    key,
+  );
+
+// How a key is shown (on the STOP button and in Settings).
+export const keyLabel = (key: string): string =>
+  key === 'Escape'
+    ? 'Esc'
+    : key === ' '
+      ? 'Space'
+      : key.length === 1
+        ? key.toUpperCase()
+        : key;
