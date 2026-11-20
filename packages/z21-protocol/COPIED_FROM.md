@@ -10,8 +10,7 @@ Lever-specific code and of Node, Electron, React and React Native imports.
 | `src/__tests__/*.test.ts`   | `src/protocol/__tests__/`                               |
 
 Source commit: **`789c70e`** (branch `release`, "docs: guides and App Store text for 0.2.1").
-`src/protocol/` is unchanged between that commit and `0663ac2`, the newest commit when it was copied
-(2026-11-17).
+`src/protocol/` is unchanged between that commit and `0663ac2`, the newest commit when it was copied.
 
 ## Differences from the source
 
@@ -22,8 +21,7 @@ Source commit: **`789c70e`** (branch `release`, "docs: guides and App Store text
 
 ## Additions since the copy
 
-General Z21 protocol, not Lever-specific, so they belong in the shared package (Phase 1,
-2026-11-17):
+General Z21 protocol, not Lever-specific, so they belong in the shared package (Phase 1):
 
 | File                                                                | Change                                                                                                                                               |
 | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,5 +1,5 @@
 // Rotating automatic backups (PRJ-3) and the backup before a migration
-// (PRJ-5). Backups of `Club.lever` live in `.lever-backups/Club/` next to the
+// (PRJ-5). Backups of `Layout.lever` live in `.lever-backups/Layout/` next to the
 // file, so they move with the project folder.
 import {copyFile, mkdir, readdir, stat, unlink} from 'node:fs/promises';
 import {basename, dirname, extname, join} from 'node:path';

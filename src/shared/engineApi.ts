@@ -1,5 +1,5 @@
 // The engine API (ARC-1): commands in, events out, as plain JSON-safe
-// messages. Renderers use it over MessagePorts today; the same messages can
+// messages. Renderers use it over MessagePorts; the same messages can
 // later be served over the network (Throttle integration, area ownership).
 //
 // Every message carries the API version `v`. Receivers validate messages

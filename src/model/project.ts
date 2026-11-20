@@ -47,7 +47,7 @@ export const stationViewSchema = z.object({
 });
 export type StationView = z.infer<typeof stationViewSchema>;
 
-// Layout views (FULL-1, FULL-2, FULL-5; user 2026-11-20): canvases the user
+// Layout views (FULL-1, FULL-2, FULL-5): canvases the user
 // builds by drawing station frames and connecting lines. A view starts empty;
 // several can be kept, e.g. one big station for one monitor and two smaller
 // ones joined in another window (src/model/arrangement.ts). Units are the

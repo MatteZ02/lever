@@ -1,5 +1,5 @@
-// The sample project (samples/alppirata.lever, imported from the club's
-// Z21 app control station with File → Import from Z21 app) must stay valid
+// The sample project (imported from a Z21 app control station with
+// File → Import from Z21 app) must stay valid
 // and clean. Known exceptions, both as drawn in the Z21 app and to be
 // checked by the user: the turnout whose address there is 9999 (no address
 // now), and the open tip of turnout 316 in the Sissach yard.

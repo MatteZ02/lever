@@ -1,8 +1,8 @@
-// Windows (VIEW-2, ARC-3): any station view or full-view arrangement can be
+// Windows (VIEW-2, ARC-3): any station or layout view can be
 // opened in its own window, e.g. one per monitor. All windows show the same
 // engine state (each gets its own engine port) and the same project. The
 // first window has the full interface; "New window" opens a plain station
-// window: only the diagram and the station picker (user, 2026-11-18).
+// window: only the diagram and the station picker.
 // The windows open at quit are reopened at start-up where they were.
 import {join} from 'node:path';
 import {app, BrowserWindow, Rectangle, screen} from 'electron';

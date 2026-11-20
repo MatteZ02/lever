@@ -2,7 +2,7 @@
 //
 // Two routes conflict when they share track, or need one turnout in
 // different positions, or run through the same passage of a turnout. Setting
-// a new route cancels the routes it conflicts with (user, 2026-11-20).
+// a new route cancels the routes it conflicts with.
 //
 // One exception: two routes that only cross each other inside a crossing
 // or slip (double slip straight/straight or curve/curve, a diamond), using

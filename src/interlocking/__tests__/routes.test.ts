@@ -357,7 +357,7 @@ const slipLayout = (): Project => {
   return {...base, areas: base.areas.map((area) => ({...area, level: 2}))};
 };
 
-describe('conflicting routes (user, 2026-11-20)', () => {
+describe('conflicting routes', () => {
   it('given a set route, a new route sharing its track cancels it, signals to stop first', () => {
     const {interlocking, jobs, notices, reportJobs, signalOutputs} =
       setup(layout());
@@ -457,7 +457,7 @@ describe('routeConflict (pure)', () => {
 });
 
 // A scissors crossover drawn with four turnouts whose diverging legs meet
-// at (6, 1) (as in the club's stations): W1/E1 on top, W2/E2 below.
+// at (6, 1): W1/E1 on top, W2/E2 below.
 const scissorsLayout = (): Project => {
   const exit = (id: string, x: number, y: number, direction: 'E' | 'W') =>
     ({
@@ -484,7 +484,7 @@ const scissorsLayout = (): Project => {
   return {...base, areas: base.areas.map((area) => ({...area, level: 2}))};
 };
 
-describe('scissors crossover drawn with four turnouts (user, 2026-11-20)', () => {
+describe('scissors crossover drawn with four turnouts', () => {
   it('the middle, where the four legs meet, is a crossing, not a junction', () => {
     const problems = validateProject(scissorsLayout()).map((p) => p.code);
     expect(problems).not.toContain('junctionWithoutTurnout');

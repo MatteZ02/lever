@@ -49,7 +49,7 @@ export const level1Module: LevelModule = {
 };
 
 // Level 2: manual routing without protection (8.8). Signals are set by
-// routes only, never by hand (user, 2026-11-19); turnouts stay freely
+// routes only, never by hand; turnouts stay freely
 // switchable (a turnout change breaks a set route, RTE-6c, it is not
 // refused).
 export const level2Module: LevelModule = {

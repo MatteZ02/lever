@@ -44,7 +44,7 @@ afterEach(async () => {
 describe('ProjectDocument', () => {
   it('saves as, then autosaves changes to the same file', async () => {
     const {document} = makeDocument();
-    const path = join(dir, 'Club.lever');
+    const path = join(dir, 'Layout.lever');
     await document.saveAs(path);
     const project = {...document.get().project, name: 'Renamed'};
     document.update(project);
@@ -56,8 +56,8 @@ describe('ProjectDocument', () => {
   });
 
   it('opens a file read-only while another instance has it (MULTI-5)', async () => {
-    const path = join(dir, 'Club.lever');
-    await writeFile(path, serializeProject(createProject('Club')));
+    const path = join(dir, 'Layout.lever');
+    await writeFile(path, serializeProject(createProject('Layout')));
     const first = makeDocument('a');
     const second = makeDocument('b');
     await first.document.open(path);
@@ -93,7 +93,7 @@ describe('ProjectDocument', () => {
 
   it('exports a copy without changing the open file', async () => {
     const {document} = makeDocument();
-    const path = join(dir, 'Club.lever');
+    const path = join(dir, 'Layout.lever');
     await document.saveAs(path);
     await document.exportCopy(join(dir, 'Copy.lever'));
     expect(document.get().path).toBe(path);
@@ -102,7 +102,7 @@ describe('ProjectDocument', () => {
 
   it('backs up the current file before restoring a backup', async () => {
     const {document} = makeDocument();
-    const path = join(dir, 'Club.lever');
+    const path = join(dir, 'Layout.lever');
     await document.saveAs(path);
     const older = join(dir, 'older.lever');
     await writeFile(older, serializeProject(createProject('Older')));
@@ -125,7 +125,7 @@ describe('ProjectDocument', () => {
 
 describe('what closing the layout would lose (unsavedRisk)', () => {
   const withTrack = () => {
-    const project = createProject('Club');
+    const project = createProject('Layout');
     project.views[0].elements.push({
       kind: 'track',
       id: 'track-1',
@@ -140,7 +140,7 @@ describe('what closing the layout would lose (unsavedRisk)', () => {
   const state = (changes: Partial<ProjectState>): ProjectState => ({
     revision: 1,
     path: null,
-    project: createProject('Club'),
+    project: createProject('Layout'),
     readOnly: false,
     unsaved: false,
     origin: 'file',
@@ -158,13 +158,13 @@ describe('what closing the layout would lose (unsavedRisk)', () => {
   });
 
   it('given a saved file, nothing is lost', () => {
-    expect(unsavedRisk(state({path: 'C:/club.lever', unsaved: false}))).toBe(
+    expect(unsavedRisk(state({path: 'C:/layout.lever', unsaved: false}))).toBe(
       'none',
     );
   });
 
   it('given a file whose last save failed, it must be asked about', () => {
-    expect(unsavedRisk(state({path: 'C:/club.lever', unsaved: true}))).toBe(
+    expect(unsavedRisk(state({path: 'C:/layout.lever', unsaved: true}))).toBe(
       'saveFailed',
     );
   });
@@ -172,7 +172,7 @@ describe('what closing the layout would lose (unsavedRisk)', () => {
   it('given a read-only copy, nothing can be lost', () => {
     expect(
       unsavedRisk(
-        state({path: 'C:/club.lever', readOnly: true, unsaved: true}),
+        state({path: 'C:/layout.lever', readOnly: true, unsaved: true}),
       ),
     ).toBe('none');
   });
@@ -180,8 +180,8 @@ describe('what closing the layout would lose (unsavedRisk)', () => {
   it('given an edit to a file, after flush nothing is lost', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'lever-risk-'));
     try {
-      const path = join(dir, 'club.lever');
-      await writeFile(path, serializeProject(createProject('Club')));
+      const path = join(dir, 'layout.lever');
+      await writeFile(path, serializeProject(createProject('Layout')));
       const document = new ProjectDocument({
         instanceId: 'risk',
         recoveryDir: join(dir, 'recovery'),

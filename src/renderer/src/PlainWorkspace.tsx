@@ -1,4 +1,4 @@
-// A plain station window (opened with "New window", user 2026-11-18): only
+// A plain station window (opened with "New window"): only
 // the live diagram and the view/station picker. No editing, settings,
 // drawers or track power buttons; always operating. Esc is STOP here too
 // (main.tsx).

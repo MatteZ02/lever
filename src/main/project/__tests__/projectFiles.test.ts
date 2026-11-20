@@ -12,7 +12,7 @@ let file: string;
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), 'lever-test-'));
-  file = join(dir, 'Club.lever');
+  file = join(dir, 'Layout.lever');
 });
 
 afterEach(async () => {
@@ -21,10 +21,10 @@ afterEach(async () => {
 
 describe('project files', () => {
   it('writes atomically and reads back', async () => {
-    const project = createProject('Club');
+    const project = createProject('Layout');
     await writeProjectFile(file, project);
     expect(await readProjectFile(file)).toEqual({ok: true, project});
-    expect(await readdir(dir)).toEqual(['Club.lever']);
+    expect(await readdir(dir)).toEqual(['Layout.lever']);
   });
 });
 

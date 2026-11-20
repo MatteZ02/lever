@@ -1,6 +1,6 @@
 // Keyboard shortcuts for STOP and track power off (CARRY-2). They work in
 // every view, but not while typing in a text field. Esc always means STOP:
-// dialogs never close with it (decided by the user, 2026-11-17).
+// dialogs never close with it.
 
 export type SafetyShortcuts = {
   stop: string;

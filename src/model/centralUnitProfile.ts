@@ -1,6 +1,6 @@
 // Everything about how accessories are driven that may differ between central
 // units (z21 start, Z21, DR5000) or between layouts, in one place. Stored per
-// project (PRJ-1), so a difference found on the club's DR5000 is fixed by
+// project (PRJ-1), so a difference found on a DR5000 is fixed by
 // changing a setting, not code. See docs/hardware-notes.md for what still has
 // to be verified.
 import {z} from 'zod';

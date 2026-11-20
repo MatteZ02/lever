@@ -1,5 +1,4 @@
-// A small modal dialog. It closes only with its buttons: Esc is STOP
-// (decided by the user, 2026-11-17).
+// A small modal dialog. It closes only with its buttons: Esc is STOP.
 import {ReactNode, useEffect, useRef} from 'react';
 
 export const Modal = ({

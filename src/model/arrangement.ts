@@ -1,4 +1,4 @@
-// Layout views (FULL-1, FULL-2, FULL-5; reworked with the user 2026-11-20):
+// Layout views (FULL-1, FULL-2, FULL-5):
 // a view is a blank canvas on which the user draws station frames and the
 // lines between them. Each frame shows one station, fitted inside: the
 // station's own grid coordinates are drawn through

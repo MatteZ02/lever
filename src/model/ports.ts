@@ -132,8 +132,8 @@ export const turnoutGeometry = (
       };
     case 'doubleSlip':
       // One position switches both ends together: straight = both straight
-      // lines, diverging = both slip curves. This is how the club's double
-      // slips work (one address, decided by the user), and also what two
+      // lines, diverging = both slip curves. This is how double slips with
+      // one address work, and also what two
       // motors moved together do: mixed positions open no through route.
       return {
         ports: crossingPorts(d),

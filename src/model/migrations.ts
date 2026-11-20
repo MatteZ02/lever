@@ -31,7 +31,7 @@ type ArrangementV1 = {
   showConnectorLines?: boolean;
 };
 
-// v1 → v2 (user 2026-11-20): a full-layout arrangement placed every station
+// v1 → v2: a full-layout arrangement placed every station
 // with a scale, and could draw lines between linked exits. Now a view holds
 // frames and drawn lines: each panel becomes a frame around exactly what it
 // showed (so it looks the same), and each automatic line becomes a drawn

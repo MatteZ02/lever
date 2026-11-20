@@ -1,4 +1,4 @@
-// A layout view (FULL-1 – FULL-7; reworked 2026-11-20): station frames the
+// A layout view (FULL-1 – FULL-7): station frames the
 // user has drawn, each showing its station fitted inside and fully operable,
 // and lines drawn between them. In edit mode the view tools draw frames and
 // lines; frames are moved by dragging and resized at their corner.

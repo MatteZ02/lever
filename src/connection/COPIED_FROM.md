@@ -2,7 +2,7 @@
 
 The connection layer follows Throttle's `src/connection/` (REU-4), from
 https://github.com/MatteZ02/throttle at commit **`789c70e`** (branch `release`). `src/connection/` is
-unchanged between that commit and `0663ac2`, the newest commit when it was copied (2026-11-17).
+unchanged between that commit and `0663ac2`, the newest commit when it was copied.
 
 | Lever file                            | Throttle source                       | Changes                                                                                                                                                                            |
 | ------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

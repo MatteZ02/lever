@@ -1,5 +1,5 @@
 // The Z21 app import, on small hand-made control stations. Codes and angles
-// as in the club's real export (see z21Import.ts).
+// as in a real export (see z21Import.ts).
 import {describe, expect, it} from 'vitest';
 import {Turnout} from '../elements';
 import {validateProject} from '../validation';

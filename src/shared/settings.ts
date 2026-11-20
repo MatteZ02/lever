@@ -25,7 +25,7 @@ export const settingsSchema = z.object({
     .prefault({}),
   // KeyboardEvent.key values. STOP works in every view except while typing
   // in a text field (CARRY-2). Esc always means STOP; dialogs do not close
-  // with it (decided by the user, 2026-11-17).
+  // with it.
   shortcuts: z
     .object({
       stop: z.string().min(1).default('Escape'),

@@ -3,7 +3,7 @@
 // passes the rows in.
 //
 // The Z21 format is not documented. What is used here was worked out from
-// an export of our own layout (docs/hardware-notes.md, "Z21 app export"):
+// a real export (docs/hardware-notes.md, "Z21 app export"):
 // - A page is a grid of tiles. `angle` is clockwise from north (0 = N,
 //   90 = E) in steps of 45°.
 // - Control types: 0 straight, 28 curve (joins angle+135° to angle),
@@ -12,7 +12,7 @@
 //   left), 24 sharp 90° curve (joins angle to angle+90°), 11 two-aspect
 //   signal (facing angle), 14 track end (angle points out of the track).
 // - Each controlled tile has states 0 and 1. State 0 is straight (turnouts,
-//   slips) and proceed (signals: checked on the club's layout, 2026-11-18);
+//   slips) and proceed (signals: checked on a real layout);
 //   `address1_value` is the output (0 = output 1, 1 = output 2).
 // - Route buttons list turnout states. Lever calculates routes itself
 //   (Level 2), so they are not imported; their caption notes are skipped.

@@ -7,7 +7,7 @@
 // Level 2 area opens a menu with "Route from here". While a route is being
 // made, clicking another of them offers "Route ends here" and "Via here";
 // other clicks switch nothing then. At Level 2 signals are set by routes
-// only, so a signal there has no aspect menu (user, 2026-11-19).
+// only, so a signal there has no aspect menu.
 import {useState} from 'react';
 import {levelOf} from '../../../model/areas';
 import {
