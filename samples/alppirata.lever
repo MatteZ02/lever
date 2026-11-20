@@ -1,8 +1,8 @@
 {
   "format": "lever-project",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "club-layout",
-  "name": "Club layout",
+  "name": "Alppirautatie",
   "settings": {
     "defaultLevel": 1,
     "centralUnit": {
@@ -1476,7 +1476,7 @@
             "x": 63,
             "y": 38
           },
-          "textColor": "yellow",
+          "textColor": "#ffbe00",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-78aa6la2",
@@ -1491,7 +1491,7 @@
             "x": 63,
             "y": 40
           },
-          "textColor": "red",
+          "textColor": "#ff0000",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-78aa6la2",
@@ -2049,7 +2049,7 @@
             "x": 67,
             "y": 24
           },
-          "textColor": "red",
+          "textColor": "#ff0000",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-r1tq8f4s",
@@ -2064,7 +2064,7 @@
             "x": 67,
             "y": 26
           },
-          "textColor": "yellow",
+          "textColor": "#ffbe00",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-r1tq8f4s",
@@ -2079,7 +2079,7 @@
             "x": 67,
             "y": 32
           },
-          "textColor": "green",
+          "textColor": "#00ff26",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
@@ -2113,7 +2113,7 @@
             "x": 68,
             "y": 5
           },
-          "textColor": "green",
+          "textColor": "#00ff26",
           "direction": "NE",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
@@ -2936,7 +2936,7 @@
             "x": 52,
             "y": 14
           },
-          "textColor": "yellow",
+          "textColor": "#ffbe00",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
@@ -2951,7 +2951,7 @@
             "x": 52,
             "y": 16
           },
-          "textColor": "red",
+          "textColor": "#ff0000",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
@@ -3324,7 +3324,7 @@
             "x": 33,
             "y": 30
           },
-          "textColor": "red",
+          "textColor": "#ff0000",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-78aa6la2",
@@ -3339,7 +3339,7 @@
             "x": 33,
             "y": 32
           },
-          "textColor": "yellow",
+          "textColor": "#ffbe00",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-78aa6la2",
@@ -3785,7 +3785,7 @@
             "x": 53,
             "y": 17
           },
-          "textColor": "yellow",
+          "textColor": "#ffbe00",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-r1tq8f4s",
@@ -3800,7 +3800,7 @@
             "x": 53,
             "y": 19
           },
-          "textColor": "red",
+          "textColor": "#ff0000",
           "direction": "E",
           "pairedWith": {
             "viewId": "view-r1tq8f4s",
@@ -4031,7 +4031,7 @@
             "x": 7,
             "y": 19
           },
-          "textColor": "red",
+          "textColor": "#ff0000",
           "direction": "W",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
@@ -4046,7 +4046,7 @@
             "x": 7,
             "y": 17
           },
-          "textColor": "yellow",
+          "textColor": "#ffbe00",
           "direction": "W",
           "pairedWith": {
             "viewId": "view-vjzaj3un",
@@ -4080,32 +4080,29 @@
   ],
   "arrangements": [
     {
-      "id": "arrangement-default",
-      "name": "Full layout",
-      "panels": [
+      "id": "arrangement-qhbfnop2",
+      "name": "Sissach + Inselburg",
+      "frames": [
         {
-          "viewId": "view-vjzaj3un",
-          "x": -41,
-          "y": 9,
-          "scale": 1,
-          "rotation": 0
-        },
-        {
-          "viewId": "view-r1tq8f4s",
-          "x": 14,
-          "y": -91,
-          "scale": 1,
-          "rotation": 0
-        },
-        {
+          "id": "frame-18b1lcwt",
           "viewId": "view-78aa6la2",
-          "x": 29,
-          "y": 17,
-          "scale": 1,
-          "rotation": 270
+          "x": -2,
+          "y": 26,
+          "width": 53,
+          "height": 14,
+          "rotation": 0
+        },
+        {
+          "id": "frame-5j5cyqpj",
+          "viewId": "view-r1tq8f4s",
+          "x": -2,
+          "y": -2,
+          "width": 60,
+          "height": 28,
+          "rotation": 0
         }
       ],
-      "showConnectorLines": true
+      "lines": []
     }
   ],
   "areas": [
