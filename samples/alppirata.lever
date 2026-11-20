@@ -1036,7 +1036,7 @@
             "addresses": [
               3
             ],
-            "invert": true
+            "invert": false
           }
         },
         {
@@ -1321,7 +1321,7 @@
             "addresses": [
               10
             ],
-            "invert": false
+            "invert": true
           }
         },
         {
@@ -1357,7 +1357,7 @@
             "addresses": [
               28
             ],
-            "invert": false
+            "invert": true
           }
         },
         {
