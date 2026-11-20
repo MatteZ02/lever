@@ -152,7 +152,7 @@ stays red under the green route.
 signals go to stop before any turnout moves. Routes that only meet end to end (one ends at a
 signal, the next starts there) do not conflict. One exception: two routes that **cross inside a
 double slip** (or a crossing or single slip) without sharing a leg, with the slip in the same
-position, can both be set. The preview warns that trains on them would meet there, and **Set
+position, or straight across the middle of a scissors crossover, can both be set. The preview warns that trains on them would meet there, and **Set
 route** asks once more (**Set anyway** / **Back**).
 
 **Save…** keeps a route by name, with its route points; saved routes are listed in the panel, and
@@ -201,6 +201,9 @@ starts again, it reopens its windows where they were.
 | **Buffer stop**, **Station exit**                                  | Click the end of a track. A station exit marks where the drawn layout ends (a line to another station or not drawn).                                                |
 | **Route point**, **Uncoupler / accessory**, **Text**, **Platform** | Click to place.                                                                                                                                                     |
 | **Select** (V)                                                     | Click to select, Shift+click to add, drag to move, drag on empty space to select an area. A selected track shows its corners; drag a corner to move it.             |
+
+A **scissors crossover** is drawn as four turnouts whose diverging legs meet in the middle (an
+X). Lever treats the middle as a crossing: routes go straight across it, never turn there.
 
 Other keys while editing: **R** rotate, **Delete** delete, **Ctrl+C / Ctrl+X / Ctrl+V** copy, cut,
 paste (copies get no addresses), **Ctrl+Z / Ctrl+Y** undo, redo, **Ctrl+A** select all, **F** show

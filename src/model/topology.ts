@@ -6,6 +6,11 @@
 // signals, virtual points, connectors, buffer stops. Track edges run between
 // nodes along the drawn track; a turnout contributes one internal edge per
 // passage (tip↔leg), labelled with the positions that open it.
+//
+// A node where the legs meet in straight, opposite pairs and nothing else
+// (e.g. the middle of a scissors crossover drawn with four turnouts whose
+// diverging legs meet) is a crossing without an element: trains only go
+// straight across it (crossingNode).
 import {allConnectors, partnerOf} from './connectors';
 import {DiagramElement, StationConnector, Track, Turnout} from './elements';
 import {
@@ -14,6 +19,7 @@ import {
   expandPolyline,
   geometricLength,
   GridPoint,
+  opposite,
   pointKey,
 } from './geometry';
 import {turnoutGeometry, turnoutPorts} from './ports';
@@ -59,6 +65,9 @@ export type TurnoutEdge = {
   // Positions that open this passage; empty = always open (crossing).
   positions: string[];
   diverging: boolean;
+  // Direction of travel when entering the turnout at `from` / at `to`.
+  fromDirection: Direction;
+  toDirection: Direction;
   length: number;
 };
 
@@ -263,6 +272,8 @@ const turnoutEdges = (
       toPort: transition.to,
       positions: transition.positions,
       diverging: transition.diverging,
+      fromDirection: opposite(from.direction),
+      toDirection: opposite(to.direction),
       length:
         geometricLength(from.at, turnout.at) +
         geometricLength(turnout.at, to.at),
@@ -301,6 +312,68 @@ export const trackDirectionsAt = (
     }
     return directions;
   });
+
+// Direction of travel when leaving `node` into `edge` (undefined for links,
+// which have no direction).
+export const leavingDirectionAt = (
+  edge: TopologyEdge,
+  node: NodeId,
+): Direction | undefined =>
+  edge.kind === 'link'
+    ? undefined
+    : edge.from === node
+      ? edge.fromDirection
+      : edge.to === node
+        ? edge.toDirection
+        : undefined;
+
+// The legs at a node: one per track end, one per turnout (its passages all
+// leave the node the same way), with the direction into each.
+const legsAt = (
+  topology: Topology,
+  node: NodeId,
+): (Direction | undefined)[] => {
+  const legs: (Direction | undefined)[] = [];
+  const turnouts = new Set<string>();
+  for (const edge of edgesAtNode(topology, node)) {
+    if (edge.kind === 'turnout') {
+      if (!turnouts.has(edge.turnoutId)) {
+        turnouts.add(edge.turnoutId);
+        legs.push(leavingDirectionAt(edge, node));
+      }
+    } else if (edge.kind === 'track') {
+      if (edge.from === node) legs.push(edge.fromDirection);
+      if (edge.to === node) legs.push(edge.toDirection);
+    } else {
+      legs.push(undefined);
+    }
+  }
+  return legs;
+};
+
+const crossingCache = new WeakMap<Topology, Map<NodeId, boolean>>();
+
+// A crossing without an element: more than two legs, each leaving in its own
+// direction, every one with a leg straight opposite.
+export const crossingNode = (topology: Topology, node: NodeId): boolean => {
+  let cache = crossingCache.get(topology);
+  if (!cache) {
+    cache = new Map();
+    crossingCache.set(topology, cache);
+  }
+  const known = cache.get(node);
+  if (known !== undefined) {
+    return known;
+  }
+  const legs = legsAt(topology, node);
+  const directions = new Set(legs);
+  const result =
+    legs.length > 2 &&
+    directions.size === legs.length &&
+    legs.every((d) => d !== undefined && directions.has(opposite(d)));
+  cache.set(node, result);
+  return result;
+};
 
 // Number of distinct connections at a node, counting a turnout once (its
 // internal edges all meet the outside world at the same port).

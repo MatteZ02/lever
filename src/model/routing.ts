@@ -13,6 +13,8 @@ import {turnoutPorts} from './ports';
 import {AutomationLevel, Project, StationView} from './project';
 import {
   buildProjectTopology,
+  crossingNode,
+  leavingDirectionAt,
   NodeId,
   nodeId,
   Topology,
@@ -112,13 +114,22 @@ const sameTurnout = (a: TopologyEdge, b: TopologyEdge) =>
   a.kind === 'turnout' && b.kind === 'turnout' && a.turnoutId === b.turnoutId;
 
 // Where a route can go on after `d`: any other edge at its end, except
-// another passage of the same turnout (that would reverse inside it).
+// another passage of the same turnout (that would reverse inside it). At a
+// crossing without an element, only straight on.
 const successors = (topology: Topology, d: Directed): Directed[] => {
   const node = toNode(d);
   const result: Directed[] = [];
+  const arriving = leavingDirectionAt(d.edge, node);
+  const straightOn =
+    crossingNode(topology, node) && arriving !== undefined
+      ? opposite(arriving)
+      : undefined;
   for (const id of topology.edgesAt.get(node) ?? []) {
     const edge = topology.edgeById.get(id)!;
     if (edge.id === d.edge.id || sameTurnout(edge, d.edge)) {
+      continue;
+    }
+    if (straightOn && leavingDirectionAt(edge, node) !== straightOn) {
       continue;
     }
     if (edge.from === node) {

@@ -19,6 +19,7 @@ import {findSignalType} from './signalTypes';
 import {
   buildViewTopology,
   connectionCount,
+  crossingNode,
   edgeElementId,
   trackDirectionsAt,
 } from './topology';
@@ -212,7 +213,8 @@ const validateView = (context: Context, view: StationView) => {
         y: node.at.y,
       });
     }
-    if (count > 2) {
+    // A crossing without an element (legs in straight pairs) is fine.
+    if (count > 2 && !crossingNode(topology, node.id)) {
       add(context, 'warning', 'junctionWithoutTurnout', elementIds, view.id, {
         x: node.at.x,
         y: node.at.y,

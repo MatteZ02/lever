@@ -11,6 +11,7 @@ import {AutomationLevel, Project} from '../../model/project';
 import {routeConflict} from '../../model/routeConflicts';
 import {findRoutes} from '../../model/routing';
 import {buildProjectTopology} from '../../model/topology';
+import {validateProject} from '../../model/validation';
 import {Interlocking, InterlockingNotice} from '../Interlocking';
 
 const fakeClock = () => {
@@ -452,5 +453,64 @@ describe('routeConflict (pure)', () => {
         plan(layout(), 'S3', 'C2'),
       ),
     ).toBeUndefined();
+  });
+});
+
+// A scissors crossover drawn with four turnouts whose diverging legs meet
+// at (6, 1) (as in the club's stations): W1/E1 on top, W2/E2 below.
+const scissorsLayout = (): Project => {
+  const exit = (id: string, x: number, y: number, direction: 'E' | 'W') =>
+    ({
+      kind: 'connector',
+      id,
+      name: id,
+      at: {x, y},
+      direction,
+    }) as DiagramElement;
+  const base = projectWith(
+    exit('W1', 0, 0, 'W'),
+    track('w1', [0, 0], [4, 0]),
+    turnout('TA', [5, 0], {type: 'right', orientation: 'E', ...dcc(1)}),
+    turnout('TB', [7, 0], {type: 'left', orientation: 'W', ...dcc(2)}),
+    track('e1', [8, 0], [12, 0]),
+    exit('E1', 12, 0, 'E'),
+    exit('W2', 0, 2, 'W'),
+    track('w2', [0, 2], [4, 2]),
+    turnout('TC', [5, 2], {type: 'left', orientation: 'E', ...dcc(3)}),
+    turnout('TD', [7, 2], {type: 'right', orientation: 'W', ...dcc(4)}),
+    track('e2', [8, 2], [12, 2]),
+    exit('E2', 12, 2, 'E'),
+  );
+  return {...base, areas: base.areas.map((area) => ({...area, level: 2}))};
+};
+
+describe('scissors crossover drawn with four turnouts (user, 2026-11-20)', () => {
+  it('the middle, where the four legs meet, is a crossing, not a junction', () => {
+    const problems = validateProject(scissorsLayout()).map((p) => p.code);
+    expect(problems).not.toContain('junctionWithoutTurnout');
+  });
+
+  it('routes go straight across the middle, never turn there', () => {
+    const project = scissorsLayout();
+    const across = findRoutes(project, 'W1', 'E2');
+    expect(across.ok && across.routes[0].key).toBe('TA=diverging,TD=diverging');
+    // W1 to W2 would need a sharp turn in the middle.
+    expect(findRoutes(project, 'W1', 'W2')).toMatchObject({ok: false});
+  });
+
+  it('two routes crossing in the middle are a crossing to confirm', () => {
+    const project = scissorsLayout();
+    const steps = (from: string, to: string) => {
+      const search = findRoutes(project, from, to);
+      if (!search.ok) throw new Error(search.reason);
+      return search.routes[0].steps;
+    };
+    const conflict = routeConflict(
+      buildProjectTopology(project),
+      steps('W1', 'E2'),
+      steps('W2', 'E1'),
+    );
+    expect(conflict?.kind).toBe('crossing');
+    expect(conflict?.elementIds.sort()).toEqual(['TA', 'TB', 'TC', 'TD']);
   });
 });

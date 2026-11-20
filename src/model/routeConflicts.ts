@@ -6,10 +6,11 @@
 //
 // One exception: two routes that only cross each other inside a crossing
 // or slip (double slip straight/straight or curve/curve, a diamond), using
-// passages with no leg in common and the same position. Both can be set,
-// but trains on them would meet in the crossing, so the operator confirms
-// first ("crossing").
-import {edgeElementId, Topology} from './topology';
+// passages with no leg in common and the same position, or straight across
+// a crossing without an element (the middle of a scissors crossover). Both
+// can be set, but trains on them would meet in the crossing, so the
+// operator confirms first ("crossing").
+import {crossingNode, edgeElementId, NodeId, Topology} from './topology';
 
 export type RouteSteps = {edgeId: string; forward: boolean}[];
 
@@ -62,6 +63,19 @@ export const routeConflict = (
       }
     }
   }
+  // Both pass straight across the same crossing without an element: the
+  // elements meeting there name it.
+  const bNodes = passedNodes(topology, b);
+  for (const node of passedNodes(topology, a)) {
+    if (bNodes.has(node) && crossingNode(topology, node)) {
+      for (const {edgeId} of [...a, ...b]) {
+        const edge = topology.edgeById.get(edgeId);
+        if (edge && (edge.from === node || edge.to === node)) {
+          crossings.add(edgeElementId(edge));
+        }
+      }
+    }
+  }
   if (conflicts.size > 0) {
     return {kind: 'conflict', elementIds: [...conflicts]};
   }
@@ -69,6 +83,18 @@ export const routeConflict = (
     return {kind: 'crossing', elementIds: [...crossings]};
   }
   return undefined;
+};
+
+// Nodes a route passes through (not its start or end).
+const passedNodes = (topology: Topology, steps: RouteSteps): Set<NodeId> => {
+  const nodes = new Set<NodeId>();
+  steps.slice(0, -1).forEach(({edgeId, forward}) => {
+    const edge = topology.edgeById.get(edgeId);
+    if (edge) {
+      nodes.add(forward ? edge.to : edge.from);
+    }
+  });
+  return nodes;
 };
 
 // A new route against the routes already set, by route id.
