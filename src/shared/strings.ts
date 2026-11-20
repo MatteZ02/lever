@@ -354,6 +354,15 @@ export const strings = {
     migrated: (version: number) => `Updated from format ${version}`,
   },
 
+  colorPicker: {
+    none: 'None',
+    area: 'Saturation and brightness',
+    areaValue: (saturation: number, brightness: number) =>
+      `Saturation ${saturation} %, brightness ${brightness} %`,
+    hue: 'Hue',
+    hex: 'Hex',
+    presets: 'Colours',
+  },
   properties: {
     title: 'Properties',
     nothingSelected: 'Nothing selected.',
@@ -429,8 +438,8 @@ export const strings = {
       string
     >,
     textColor: 'Text colour',
-    textColors: {
-      default: 'Normal',
+    textColorDefault: 'Normal',
+    textColorPresets: {
       red: 'Red',
       orange: 'Orange',
       yellow: 'Yellow',

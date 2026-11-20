@@ -227,9 +227,11 @@ Select an element to see its properties on the right:
 - **Area**: every station is one automation area. Add areas (layout properties, **Automation
   areas**) for parts of a station or the line between stations, then choose the area for an
   element, or for several selected elements at once. Area borders are drawn while editing.
-- **Text and station exits**: **Text colour** (red, orange, yellow, green, blue, violet, grey, or
-  _Normal_), for example to mark the red and yellow main lines. Each colour has a shade for the
-  light and the dark theme.
+- **Text and station exits**: **Text colour**, for example to mark the red and yellow main lines.
+  Click the colour to open the picker: drag in the square (saturation and brightness) and on the
+  hue bar, type a hex value such as `#c62828`, or click one of the ready colours; _Normal_ goes
+  back to the usual label colour. If a colour would be hard to read on the diagram, Lever draws it
+  a little lighter (dark theme) or darker (light theme).
 
 Nothing selected: the station, the layout, the **central unit settings** and the **edit password**.
 

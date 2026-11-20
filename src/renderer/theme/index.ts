@@ -14,6 +14,18 @@ export {
   ROUTE_SETTING_ANIMATION_MS,
 } from './diagram';
 export {fontSizes, minTarget, radii, spacing, stopButtonSize};
+export {
+  COLOR_PRESETS,
+  diagramTextColor,
+  hexToHsv,
+  hsvToHex,
+  normalizeHex,
+  pickerAreaBackground,
+  pickerHueBackground,
+  pickerMarker,
+  pickerStartColor,
+} from './userColor';
+export type {Hsv} from './userColor';
 export type {ColorTokens};
 
 const cssName = (token: string) => `--color-${token}`;

@@ -20,7 +20,6 @@ import {
   GenericAccessory,
   Signal,
   StationConnector,
-  TEXT_COLORS,
   TextColor,
   Track,
   TURNOUT_TYPES,
@@ -32,6 +31,8 @@ import {turnoutPositions} from '../../../../model/ports';
 import {Block, newId, Project, StationView} from '../../../../model/project';
 import {allSignalTypes, findSignalType} from '../../../../model/signalTypes';
 import {strings} from '../../../../shared/strings';
+import {COLOR_PRESETS} from '../../../theme';
+import {ColorPicker} from '../../components/ColorPicker';
 import {useEngineStore} from '../../store/engineStore';
 import {edit, setHint, useProjectStore} from '../../store/projectStore';
 import {
@@ -749,7 +750,7 @@ const TestButtons = ({
   );
 };
 
-// Text colour of a label or exit name ('' = the usual colour).
+// Text colour of a label or exit name (undefined = the usual colour).
 const TextColorField = ({
   value,
   onCommit,
@@ -757,16 +758,14 @@ const TextColorField = ({
   value: TextColor | undefined;
   onCommit: (value: TextColor | undefined) => void;
 }) => (
-  <SelectField<TextColor | ''>
+  <ColorPicker
     label={strings.properties.textColor}
-    value={value ?? ''}
-    options={[
-      {value: '', label: strings.properties.textColors.default},
-      ...TEXT_COLORS.map((c) => ({
-        value: c,
-        label: strings.properties.textColors[c],
-      })),
-    ]}
-    onCommit={(next) => onCommit(next || undefined)}
+    value={value}
+    noneLabel={strings.properties.textColorDefault}
+    presets={COLOR_PRESETS.map((preset) => ({
+      color: preset.color,
+      name: strings.properties.textColorPresets[preset.name],
+    }))}
+    onCommit={onCommit}
   />
 );

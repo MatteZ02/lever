@@ -195,6 +195,7 @@ describe('project files', () => {
     expect(result).toEqual({ok: true, project});
   });
 
+  /* eslint-disable no-restricted-syntax -- colours as stored data */
   it('keeps the text colour of labels and exits, and none means the usual one', () => {
     const project = sidingLayout();
     project.views[0].elements.push(
@@ -205,7 +206,7 @@ describe('project files', () => {
         at: {x: 0, y: 4},
         text: 'Pun',
         size: 'normal',
-        textColor: 'red',
+        textColor: '#c62828',
       },
       {
         kind: 'connector',
@@ -213,7 +214,7 @@ describe('project files', () => {
         name: 'Kel',
         at: {x: 30, y: 0},
         direction: 'E',
-        textColor: 'yellow',
+        textColor: '#a67c00',
       },
       {
         kind: 'label',
@@ -227,11 +228,27 @@ describe('project files', () => {
     const result = loadProject(serializeProject(project));
     expect(result).toEqual({ok: true, project});
     const text = serializeProject(project);
-    expect(text).toMatch(/"textColor": ?"red"/);
+    expect(text).toMatch(/"textColor": ?"#c62828"/);
     expect(
-      loadProject(text.replace(/("textColor": ?)"red"/, '$1"pink"')),
+      loadProject(text.replace(/("textColor": ?)"#c62828"/, '$1"pink"')),
     ).toMatchObject({ok: false});
   });
+
+  it('reads the colour names of Lever 0.1.2 as their colours', () => {
+    const project = sidingLayout();
+    const text = serializeProject(project).replace(
+      '"elements": [',
+      '"elements": [{"kind": "label", "id": "L1", "name": "", "at": {"x": 0, "y": 4}, "text": "Pun", "size": "normal", "textColor": "red"},',
+    );
+    const result = loadProject(text);
+    expect(result).toMatchObject({ok: true});
+    const label = result.ok
+      ? result.project.views[0].elements.find((e) => e.id === 'L1')
+      : undefined;
+    expect(label).toMatchObject({textColor: '#c62828'});
+  });
+
+  /* eslint-enable no-restricted-syntax */
 
   it('rejects other files and newer versions', () => {
     expect(loadProject('nope')).toMatchObject({

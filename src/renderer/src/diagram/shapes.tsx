@@ -28,7 +28,7 @@ import {
 import {turnoutGeometry, turnoutPorts} from '../../../model/ports';
 import {AspectIcon} from '../../../model/signalTypes';
 import {LiveStatus} from '../../../shared/liveState';
-import {color, diagramDash, diagramStroke} from '../../theme';
+import {color, diagramDash, diagramStroke, diagramTextColor} from '../../theme';
 import {useScreenDirection, useUpright} from './upright';
 
 // --- live state (Phase 3 fills these in) -----------------------------------
@@ -55,17 +55,8 @@ export type ElementDisplay = {
 const HIT_WIDTH = 0.7;
 
 // The colour of a label or exit name.
-const TEXT_FILL: Record<TextColor, string> = {
-  red: color.labelRed,
-  orange: color.labelOrange,
-  yellow: color.labelYellow,
-  green: color.labelGreen,
-  blue: color.labelBlue,
-  violet: color.labelViolet,
-  grey: color.labelGrey,
-};
 const textFill = (textColor: TextColor | undefined) =>
-  textColor ? TEXT_FILL[textColor] : color.diagramLabel;
+  textColor ? diagramTextColor(textColor) : color.diagramLabel;
 const unit = (direction: Direction) => {
   const v = vector(direction);
   const length = Math.hypot(v.x, v.y);

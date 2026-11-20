@@ -9,19 +9,30 @@ import {z} from 'zod';
 import {feedbackInputRefSchema} from '../shared/feedback';
 import {directionSchema, gridPointSchema} from './geometry';
 
-// Colours an operator may give to text (labels, exit names), e.g. to mark
-// the red and yellow main lines. Names, not values: the theme gives each a
-// light and a dark shade (renderer/theme/colors.ts, label* tokens).
-export const TEXT_COLORS = [
-  'red',
-  'orange',
-  'yellow',
-  'green',
-  'blue',
-  'violet',
-  'grey',
-] as const;
-export const textColorSchema = z.enum(TEXT_COLORS);
+// Colour an operator gives to text (labels, exit names), e.g. to mark the
+// red and yellow main lines: '#rrggbb'. The theme draws it lighter or darker
+// where needed to stay readable (renderer/theme/userColor.ts).
+//
+// Files from Lever 0.1.2 store a colour name instead; it reads as the shade
+// that release drew in the light theme. These are data, not UI colours.
+/* eslint-disable no-restricted-syntax */
+const NAMED_TEXT_COLORS: Record<string, string> = {
+  red: '#c62828',
+  orange: '#c77c00',
+  yellow: '#a67c00',
+  green: '#237a30',
+  blue: '#1f4fa8',
+  violet: '#7046c4',
+  grey: '#77777a',
+};
+/* eslint-enable no-restricted-syntax */
+export const textColorSchema = z.preprocess(
+  (value) =>
+    typeof value === 'string'
+      ? (NAMED_TEXT_COLORS[value] ?? value.toLowerCase())
+      : value,
+  z.string().regex(/^#[0-9a-f]{6}$/),
+);
 export type TextColor = z.infer<typeof textColorSchema>;
 
 export const idSchema = z.string().min(1).max(64);

@@ -67,14 +67,6 @@ export type ColorTokens = {
   areaLevel3: string;
   areaLevel4: string;
   diagramLabel: string;
-  // Text colours chosen for labels and exit names (TextColor).
-  labelRed: string;
-  labelOrange: string;
-  labelYellow: string;
-  labelGreen: string;
-  labelBlue: string;
-  labelViolet: string;
-  labelGrey: string;
   trainNumberBackground: string;
   trainNumberText: string;
 
@@ -143,13 +135,6 @@ export const lightColors: ColorTokens = {
   areaLevel3: palette.violet600,
   areaLevel4: palette.cyan700,
   diagramLabel: palette.grey700,
-  labelRed: palette.red700,
-  labelOrange: palette.amber700,
-  labelYellow: palette.yellow700,
-  labelGreen: palette.green700,
-  labelBlue: palette.blue700,
-  labelViolet: palette.violet600,
-  labelGrey: palette.grey500,
   trainNumberBackground: palette.grey900,
   trainNumberText: palette.white,
 
@@ -216,13 +201,6 @@ export const darkColors: ColorTokens = {
   areaLevel3: palette.violet300,
   areaLevel4: palette.cyan300,
   diagramLabel: palette.grey300,
-  labelRed: palette.red300,
-  labelOrange: palette.amber500,
-  labelYellow: palette.yellow300,
-  labelGreen: palette.green300,
-  labelBlue: palette.blue300,
-  labelViolet: palette.violet300,
-  labelGrey: palette.grey500,
   trainNumberBackground: palette.grey800,
   trainNumberText: palette.grey50,
 
