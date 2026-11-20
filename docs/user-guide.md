@@ -45,7 +45,8 @@ one action cannot be given to another. They work in every window, but not while 
 field. The number keys **1–9** open the tabs from left to right (views first, then stations); tabs
 beyond the ninth have no number key.
 
-Stations appear as tabs. **+ Add station** creates a new one; its name and default automation level
+Stations appear as tabs. While editing, drag a tab to put it somewhere else (stations among
+stations, views among views). **+ Add station** creates a new one; its name and default automation level
 are set in the properties when nothing is selected.
 
 ## Operating (Level 1)

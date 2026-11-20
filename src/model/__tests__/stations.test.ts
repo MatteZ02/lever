@@ -20,7 +20,7 @@ import {
   transformBounds,
 } from '../arrangement';
 import {pairConnectors, partnerOf, unpairConnector} from '../connectors';
-import {deleteElements} from '../editing';
+import {deleteElements, moveLayoutView, moveStation, moveTo} from '../editing';
 import {DiagramElement, StationConnector} from '../elements';
 import {loadProject, serializeProject} from '../migrations';
 import {Project} from '../project';
@@ -299,5 +299,35 @@ describe('layout views (FULL-2, FULL-5)', () => {
       {frameId: arrangement.frames[0].id, connectorId: 'A-east'},
       {frameId: frameB.id, connectorId: 'B-west'},
     ]);
+  });
+});
+
+describe('tab order', () => {
+  it('moves an item to a place, the others keeping their order', () => {
+    const items = ['a', 'b', 'c', 'd'].map((id) => ({id}));
+    const ids = (list: {id: string}[]) => list.map((item) => item.id);
+    expect(ids(moveTo(items, 'a', 2))).toEqual(['b', 'c', 'a', 'd']);
+    expect(ids(moveTo(items, 'd', 0))).toEqual(['d', 'a', 'b', 'c']);
+    expect(ids(moveTo(items, 'b', 99))).toEqual(['a', 'c', 'd', 'b']);
+    // Nothing to do: the same list, so no undo step is made.
+    expect(moveTo(items, 'b', 1)).toBe(items);
+    expect(moveTo(items, 'x', 0)).toBe(items);
+  });
+
+  it('given stations and views, reorders each list on its own', () => {
+    const project: Project = {
+      ...twoStations(),
+      arrangements: [
+        {id: 'V1', name: 'V1', frames: [], lines: []},
+        {id: 'V2', name: 'V2', frames: [], lines: []},
+      ],
+    };
+    const stations = moveStation(project, 'B', 0);
+    expect(stations.views.map((v) => v.id)).toEqual(['B', 'A']);
+    expect(stations.arrangements).toBe(project.arrangements);
+    const views = moveLayoutView(project, 'V2', 0);
+    expect(views.arrangements.map((a) => a.id)).toEqual(['V2', 'V1']);
+    expect(views.views).toBe(project.views);
+    expect(moveStation(project, 'A', 0)).toBe(project);
   });
 });

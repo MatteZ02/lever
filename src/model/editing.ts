@@ -407,3 +407,40 @@ export const placeReplacing = (
     ? insertTurnout(cleaned, viewId, element)
     : addElements(cleaned, viewId, [element]);
 };
+
+// The item moved to `toIndex` (clamped), the others keeping their order.
+// The same list if nothing changes.
+export const moveTo = <T extends {id: string}>(
+  items: T[],
+  id: string,
+  toIndex: number,
+): T[] => {
+  const from = items.findIndex((item) => item.id === id);
+  const to = Math.max(0, Math.min(items.length - 1, toIndex));
+  if (from < 0 || from === to) {
+    return items;
+  }
+  const rest = items.filter((item) => item.id !== id);
+  return [...rest.slice(0, to), items[from], ...rest.slice(to)];
+};
+
+// Tab order: stations and layout views are shown in their list order.
+export const moveStation = (
+  project: Project,
+  viewId: string,
+  toIndex: number,
+): Project => {
+  const views = moveTo(project.views, viewId, toIndex);
+  return views === project.views ? project : {...project, views};
+};
+
+export const moveLayoutView = (
+  project: Project,
+  arrangementId: string,
+  toIndex: number,
+): Project => {
+  const arrangements = moveTo(project.arrangements, arrangementId, toIndex);
+  return arrangements === project.arrangements
+    ? project
+    : {...project, arrangements};
+};

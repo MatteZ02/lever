@@ -1190,3 +1190,35 @@ span.level-badge {
   overflow-wrap: anywhere;
   hyphens: auto;
 }
+
+/* Edit mode: tabs can be dragged to a new place (ViewTabs.tsx). */
+.view-tab--movable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.view-tab--dragging {
+  cursor: grabbing;
+  opacity: 0.55;
+}
+
+.view-tab--drop {
+  outline: 2px dashed var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Edit mode: tabs can be dragged to a new place (ViewTabs.tsx). */
+.view-tab--movable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.view-tab--dragging {
+  cursor: grabbing;
+  opacity: 0.55;
+}
+
+.view-tab--drop {
+  outline: 2px dashed var(--color-accent);
+  outline-offset: 2px;
+}
