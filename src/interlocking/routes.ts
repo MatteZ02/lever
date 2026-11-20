@@ -25,6 +25,14 @@ export type RouteNotice =
   | {code: 'routeSet'; routeId: string}
   | {code: 'routeFailed'; routeId: string; elementId: string}
   | {code: 'routeBroken'; routeId: string; elementId: string}
+  // Cancelled because a new route conflicts with it (`elementId`: its
+  // start, `toElementId`: its end).
+  | {
+      code: 'routeCancelled';
+      routeId: string;
+      elementId: string;
+      toElementId: string;
+    }
   | {
       code: 'routeUndone';
       routeId: string;
@@ -77,6 +85,7 @@ export class RouteManager {
         via: route.plan.via,
         state: route.state,
         segments: route.plan.segments,
+        steps: route.plan.steps,
         turnouts: route.plan.turnouts.map(({turnoutId, position, manual}) => ({
           turnoutId,
           position,
@@ -166,6 +175,32 @@ export class RouteManager {
       this.routes.delete(routeId);
       this.deps.changed();
     }
+  }
+
+  // The path of every route, for the conflict check of a new one.
+  paths(): {id: string; steps: RoutePlan['steps']}[] {
+    return [...this.routes.values()].map((route) => ({
+      id: route.id,
+      steps: route.plan.steps,
+    }));
+  }
+
+  // A new route conflicts with this one: it is dropped at once, set or not,
+  // its signals to stop first (before the new route moves any turnout).
+  cancelForConflict(routeId: string): void {
+    const route = this.routes.get(routeId);
+    if (!route) {
+      return;
+    }
+    this.signalsToStop(route);
+    this.routes.delete(routeId);
+    this.deps.notice({
+      code: 'routeCancelled',
+      routeId,
+      elementId: route.plan.from,
+      toElementId: route.plan.to,
+    });
+    this.deps.changed();
   }
 
   // RTE-6: the route's signals return to stop; turnouts stay.

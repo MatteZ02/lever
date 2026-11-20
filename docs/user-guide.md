@@ -146,6 +146,14 @@ is shown **broken** (amber). A turnout that does not move makes the route **fail
 drops it. Level 2 does not lock turnouts or check occupancy (that is Level 3): occupied track
 stays red under the green route.
 
+**Conflicting routes.** A new route that shares track or a turnout with one of your routes
+**cancels** that route: the preview names it, and when you set the new route the old one's
+signals go to stop before any turnout moves. Routes that only meet end to end (one ends at a
+signal, the next starts there) do not conflict. One exception: two routes that **cross inside a
+double slip** (or a crossing or single slip) without sharing a leg, with the slip in the same
+position, can both be set. The preview warns that trains on them would meet there, and **Set
+route** asks once more (**Set anyway** / **Back**).
+
 **Save…** keeps a route by name, with its route points; saved routes are listed in the panel, and
 clicking the same start and end uses the saved one.
 

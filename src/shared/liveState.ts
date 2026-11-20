@@ -83,6 +83,8 @@ export const routeLiveSchema = z.object({
   segments: z.array(
     z.object({viewId: z.string(), points: z.array(gridPointSchema)}),
   ),
+  // The path (topology edges), for the conflict check in the preview.
+  steps: z.array(z.object({edgeId: z.string(), forward: z.boolean()})),
   turnouts: z.array(
     z.object({
       turnoutId: z.string(),

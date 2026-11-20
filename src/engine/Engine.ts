@@ -350,6 +350,7 @@ export class Engine {
           command.to,
           command.via,
           command.key,
+          command.allowCrossing,
         );
         break;
       case 'cancelRoute':
@@ -534,6 +535,7 @@ export class Engine {
         ...('blockId' in notice ? {blockId: notice.blockId} : {}),
         ...('reason' in notice ? {reason: notice.reason} : {}),
         ...('routeId' in notice ? {routeId: notice.routeId} : {}),
+        ...('toElementId' in notice ? {toElementId: notice.toElementId} : {}),
         ...('skipped' in notice ? {skipped: notice.skipped} : {}),
         ...('manualBack' in notice ? {manualBack: notice.manualBack} : {}),
       },

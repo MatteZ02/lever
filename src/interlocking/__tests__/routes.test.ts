@@ -4,8 +4,13 @@
 import {describe, expect, it} from 'vitest';
 import {AccessoryJob} from '../../connection/AccessoryQueue';
 import {projectWith, track, turnout} from '../../model/__tests__/testLayouts';
-import {DiagramElement, Signal} from '../../model/elements';
+import {DiagramElement, Signal, Turnout} from '../../model/elements';
+import {step} from '../../model/geometry';
+import {turnoutPorts} from '../../model/ports';
 import {AutomationLevel, Project} from '../../model/project';
+import {routeConflict} from '../../model/routeConflicts';
+import {findRoutes} from '../../model/routing';
+import {buildProjectTopology} from '../../model/topology';
 import {Interlocking, InterlockingNotice} from '../Interlocking';
 
 const fakeClock = () => {
@@ -324,5 +329,129 @@ describe('mixed Level 1 and Level 2 areas (MIX-4, MIX-6, MIX-8)', () => {
       code: 'routeRefused',
       reason: 'levelNotAvailable',
     });
+  });
+});
+
+// A double slip D (address 5) with an exit at each leg: Ca1 – Ca2 and
+// Cb1 – Cb2 are the straight lines, Ca1 – Cb2 and Cb1 – Ca2 the curves.
+const slipLayout = (): Project => {
+  const slip = turnout('D', [10, 10], {
+    type: 'doubleSlip',
+    orientation: 'E',
+    ...dcc(5),
+  });
+  const legs = turnoutPorts(slip as Turnout).flatMap((port) => {
+    const end = step(port.at, port.direction, 3);
+    return [
+      track(`t-${port.name}`, [port.at.x, port.at.y], [end.x, end.y]),
+      {
+        kind: 'connector',
+        id: `C${port.name}`,
+        name: '',
+        at: end,
+        direction: port.direction,
+      } as DiagramElement,
+    ];
+  });
+  const base = projectWith(slip, ...legs);
+  return {...base, areas: base.areas.map((area) => ({...area, level: 2}))};
+};
+
+describe('conflicting routes (user, 2026-11-20)', () => {
+  it('given a set route, a new route sharing its track cancels it, signals to stop first', () => {
+    const {interlocking, jobs, notices, reportJobs, signalOutputs} =
+      setup(layout());
+    interlocking.setRoute('S1', 'S4', []);
+    reportJobs();
+    const first = Object.keys(interlocking.state().routes)[0];
+    jobs.splice(0);
+
+    interlocking.setRoute('S1', 'S3', []);
+    const routes = Object.values(interlocking.state().routes);
+    expect(routes.map((r) => r.to)).toEqual(['S3']);
+    expect(notices).toContainEqual({
+      code: 'routeCancelled',
+      routeId: first,
+      elementId: 'S1',
+      toElementId: 'S4',
+    });
+    // S1 to stop is queued before T1 is thrown back.
+    const order = jobs.flatMap((j) => (j.kind === 'switch' ? [j.tag] : []));
+    expect(order.indexOf('S1')).toBeLessThan(order.indexOf('T1'));
+    expect(signalOutputs(jobs)[0]).toBe('S1:0');
+  });
+
+  it('routes one after the other (end of one = start of the next) do not conflict', () => {
+    const {interlocking, notices, reportJobs} = setup(layout());
+    interlocking.setRoute('S1', 'S3', []);
+    reportJobs();
+    interlocking.setRoute('S3', 'C2', []);
+    reportJobs();
+    expect(Object.keys(interlocking.state().routes)).toHaveLength(2);
+    expect(notices.map((n) => n.code)).not.toContain('routeCancelled');
+  });
+
+  it.each([
+    ['straight', 'Ca1', 'Ca2', 'Cb1', 'Cb2'],
+    ['curves', 'Ca1', 'Cb2', 'Cb1', 'Ca2'],
+  ])(
+    'routes crossing in a double slip (%s) need confirming, then both stay',
+    (_, from1, to1, from2, to2) => {
+      const {interlocking, notices, reportJobs} = setup(slipLayout());
+      interlocking.setRoute(from1, to1, []);
+      reportJobs();
+      interlocking.setRoute(from2, to2, []);
+      expect(notices).toContainEqual({
+        code: 'routeRefused',
+        reason: 'crossing',
+      });
+      expect(Object.keys(interlocking.state().routes)).toHaveLength(1);
+
+      interlocking.setRoute(from2, to2, [], undefined, true);
+      reportJobs();
+      const routes = Object.values(interlocking.state().routes);
+      expect(routes.map((r) => r.state)).toEqual(['set', 'set']);
+      expect(notices.map((n) => n.code)).not.toContain('routeCancelled');
+    },
+  );
+
+  it('a route through the slip in the other position cancels the first, even if confirmed', () => {
+    const {interlocking, notices, reportJobs} = setup(slipLayout());
+    interlocking.setRoute('Ca1', 'Ca2', []);
+    reportJobs();
+    interlocking.setRoute('Cb1', 'Ca2', [], undefined, true);
+    const routes = Object.values(interlocking.state().routes);
+    expect(routes.map((r) => `${r.from}-${r.to}`)).toEqual(['Cb1-Ca2']);
+    expect(notices.map((n) => n.code)).toContain('routeCancelled');
+  });
+});
+
+describe('routeConflict (pure)', () => {
+  const plan = (project: Project, from: string, to: string) => {
+    const search = findRoutes(project, from, to);
+    if (!search.ok) throw new Error(search.reason);
+    return search.routes[0].steps;
+  };
+
+  it('tells crossings, conflicts and independent routes apart', () => {
+    const project = slipLayout();
+    const topology = buildProjectTopology(project);
+    const straightA = plan(project, 'Ca1', 'Ca2');
+    expect(
+      routeConflict(topology, straightA, plan(project, 'Cb1', 'Cb2')),
+    ).toEqual({kind: 'crossing', elementIds: ['D']});
+    expect(
+      routeConflict(topology, straightA, plan(project, 'Ca1', 'Cb2')),
+    ).toMatchObject({kind: 'conflict'});
+    expect(
+      routeConflict(topology, plan(project, 'Ca2', 'Ca1'), straightA),
+    ).toMatchObject({kind: 'conflict'});
+    expect(
+      routeConflict(
+        buildProjectTopology(layout()),
+        plan(layout(), 'S1', 'S3'),
+        plan(layout(), 'S3', 'C2'),
+      ),
+    ).toBeUndefined();
   });
 });

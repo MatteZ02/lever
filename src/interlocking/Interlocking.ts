@@ -27,6 +27,7 @@ import {
 import {turnoutPositions} from '../model/ports';
 import {Block, Project, StationView} from '../model/project';
 import {OutputReport, reconstructState} from '../model/reconstruct';
+import {routeConflicts} from '../model/routeConflicts';
 import {findRoutes} from '../model/routing';
 import {findSignalType, SignalType} from '../model/signalTypes';
 import {buildProjectTopology, Topology} from '../model/topology';
@@ -60,7 +61,12 @@ export type InterlockingNotice =
   // Level 1 area, or crosses an area at a level not built yet.
   | {
       code: 'routeRefused';
-      reason: 'noRoute' | 'changed' | 'needsLevel2' | 'levelNotAvailable';
+      reason:
+        | 'noRoute'
+        | 'changed'
+        | 'needsLevel2'
+        | 'levelNotAvailable'
+        | 'crossing';
     }
   | RouteNotice;
 
@@ -289,7 +295,15 @@ export class Interlocking {
 
   // RTE-4: finds the route again (the layout may have changed since the
   // operator's preview) and sets the one with `key`, or the first one.
-  setRoute(from: string, to: string, via: string[], key?: string): void {
+  // `allowCrossing`: the operator confirmed crossing another route in a
+  // crossing or slip.
+  setRoute(
+    from: string,
+    to: string,
+    via: string[],
+    key?: string,
+    allowCrossing = false,
+  ): void {
     const project = this.project;
     if (!project || !this.topology) {
       return;
@@ -322,6 +336,23 @@ export class Interlocking {
       this.deps.onNotice({code: 'routeRefused', reason: 'needsLevel2'});
       return;
     }
+    // Conflicting routes are cancelled; routes that only cross this one in
+    // a crossing or slip stay, once the operator has confirmed.
+    const conflicts = routeConflicts(
+      this.topology,
+      plan.steps,
+      this.routes.paths(),
+    );
+    if (
+      !allowCrossing &&
+      conflicts.some((conflict) => conflict.kind === 'crossing')
+    ) {
+      this.deps.onNotice({code: 'routeRefused', reason: 'crossing'});
+      return;
+    }
+    conflicts
+      .filter((conflict) => conflict.kind === 'conflict')
+      .forEach((conflict) => this.routes.cancelForConflict(conflict.routeId));
     this.routes.set(plan);
     this.flush();
   }

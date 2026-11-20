@@ -96,6 +96,8 @@ export const engineCommandSchema = z.discriminatedUnion('type', [
     to: z.string(),
     via: z.array(z.string()).max(20).default([]),
     key: z.string().max(10000).optional(),
+    // The operator confirmed crossing another route in a crossing or slip.
+    allowCrossing: z.boolean().default(false),
   }),
   z.object({v: version, type: z.literal('cancelRoute'), routeId: z.string()}),
   z.object({v: version, type: z.literal('releaseRoute'), routeId: z.string()}),
@@ -183,6 +185,8 @@ export const engineNoticeSchema = z.object({
     'routeSet',
     'routeFailed',
     'routeBroken',
+    // Cancelled because a new route conflicts with it.
+    'routeCancelled',
     'routeUndone',
   ]),
   time: z.number(),
@@ -190,6 +194,8 @@ export const engineNoticeSchema = z.object({
   blockId: z.string().optional(),
   reason: z.string().optional(),
   routeId: z.string().optional(),
+  // routeCancelled: the cancelled route's end (`elementId`: its start).
+  toElementId: z.string().optional(),
   // routeUndone: turnouts left alone (moved since), and manual turnouts to
   // put back by hand.
   skipped: z.array(z.string()).optional(),

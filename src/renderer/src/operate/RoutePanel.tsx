@@ -3,10 +3,12 @@
 // setting it (alternatives on a tie, manual turnouts, Level 1 parts), and
 // manage the routes this control station has set: confirm manual
 // turnouts, cancel, release, undo the last one.
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 import {levelOf} from '../../../model/areas';
 import {newId, Project} from '../../../model/project';
+import {routeConflicts} from '../../../model/routeConflicts';
 import {RoutePlan} from '../../../model/routing';
+import {buildProjectTopology} from '../../../model/topology';
 import {findElement, viewOfElement} from '../../../model/validation';
 import {RouteLive} from '../../../shared/liveState';
 import {strings} from '../../../shared/strings';
@@ -144,7 +146,11 @@ const RoutePreview = ({
 }) => {
   const pick = useRouteStore((state) => state.pick)!;
   const search = useRouteSearch(project, pick);
+  const routes = useEngineStore((state) => state.layout.routes);
+  const topology = useMemo(() => buildProjectTopology(project), [project]);
   const [saveName, setSaveName] = useState<string | null>(null);
+  // The route (by key) whose crossing the operator is asked to confirm.
+  const [confirming, setConfirming] = useState<string | null>(null);
   const name = (id: string) => describeElementId(project, id);
   const saved = project.routes.find((r) => r.id === pick.savedRouteId);
 
@@ -183,6 +189,56 @@ const RoutePreview = ({
   const higher = plan.areas.some((area) => area.level > 2);
   const manual = plan.turnouts.filter((t) => t.manual);
   const canSet = startLevel === 2 && !higher;
+  const conflicts = routeConflicts(
+    topology,
+    plan.steps,
+    Object.values(routes).map((route) => ({id: route.id, steps: route.steps})),
+  );
+  const routeName = (id: string) =>
+    routes[id] ? `${name(routes[id].from)} → ${name(routes[id].to)}` : id;
+  const cancels = conflicts.filter((c) => c.kind === 'conflict');
+  const crosses = conflicts.filter((c) => c.kind === 'crossing');
+  const setRoute = () => {
+    sendCommand({
+      type: 'setRoute',
+      from: pick.from!,
+      to: pick.to!,
+      via: pick.via,
+      key: plan.key,
+      allowCrossing: crosses.length > 0,
+    });
+    setConfirming(null);
+    stopPicking();
+  };
+  if (confirming === plan.key && crosses.length > 0) {
+    return (
+      <>
+        <p>
+          <strong>{text.crossQuestion}</strong>
+        </p>
+        <p className="route-warning">
+          {text.crosses(
+            crosses.map((c) => routeName(c.routeId)).join(', '),
+            [...new Set(crosses.flatMap((c) => c.elementIds))]
+              .map(name)
+              .join(', '),
+          )}
+        </p>
+        <div className="button-row">
+          <button type="button" className="button" onClick={setRoute}>
+            {text.crossConfirm}
+          </button>
+          <button
+            type="button"
+            className="button"
+            onClick={() => setConfirming(null)}
+          >
+            {text.crossBack}
+          </button>
+        </div>
+      </>
+    );
+  }
   return (
     <>
       <p>
@@ -239,21 +295,29 @@ const RoutePreview = ({
           )}
         </p>
       )}
+      {cancels.length > 0 && (
+        <p className="route-warning">
+          {text.cancels(cancels.map((c) => routeName(c.routeId)).join(', '))}
+        </p>
+      )}
+      {crosses.length > 0 && (
+        <p className="route-warning">
+          {text.crosses(
+            crosses.map((c) => routeName(c.routeId)).join(', '),
+            [...new Set(crosses.flatMap((c) => c.elementIds))]
+              .map(name)
+              .join(', '),
+          )}
+        </p>
+      )}
       <div className="button-row">
         <button
           type="button"
           className="button"
           disabled={!canSet}
-          onClick={() => {
-            sendCommand({
-              type: 'setRoute',
-              from: pick.from!,
-              to: pick.to!,
-              via: pick.via,
-              key: plan.key,
-            });
-            stopPicking();
-          }}
+          onClick={() =>
+            crosses.length > 0 ? setConfirming(plan.key) : setRoute()
+          }
         >
           {text.set}
         </button>

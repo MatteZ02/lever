@@ -206,6 +206,13 @@ export const strings = {
     manualList: (turnouts: string) =>
       `Throw by hand, then confirm: ${turnouts}.`,
     set: 'Set route',
+    cancels: (routes: string) =>
+      `Setting this route cancels ${routes} (they share track or turnouts).`,
+    crosses: (routes: string, at: string) =>
+      `This route crosses ${routes} in ${at}. Both can be set, but trains on them would meet there.`,
+    crossQuestion: 'Set this route although it crosses another route?',
+    crossConfirm: 'Set anyway',
+    crossBack: 'Back',
     save: 'Save…',
     saveName: 'Name',
     saveConfirm: 'Save route',
@@ -595,12 +602,16 @@ export const strings = {
           'Routes start in a Level 2 area. Change the area’s level under Levels.',
         levelNotAvailable:
           'This route crosses an area at a level that is not available yet.',
+        crossing:
+          'This route crosses another route. Show it again and confirm the crossing.',
       })[reason] ?? 'The route could not be set.',
     routeSet: 'Route set.',
     routeFailed: (turnout: string) =>
       `Route not set: ${turnout} did not move. Check it, then cancel the route or try again.`,
     routeBroken: (turnout: string) =>
       `Route broken: ${turnout} moved. Its signals were set to stop.`,
+    routeCancelled: (from: string, to: string) =>
+      `Route ${from} → ${to} cancelled: the new route conflicts with it. Its signals were set to stop.`,
     routeUndone: (skipped: string[], manualBack: string[]) =>
       [
         'Last route undone.',

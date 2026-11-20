@@ -43,6 +43,11 @@ const noticeText = (notice: EngineNotice): string => {
       return strings.notices.routeFailed(describe(notice.elementId));
     case 'routeBroken':
       return strings.notices.routeBroken(describe(notice.elementId));
+    case 'routeCancelled':
+      return strings.notices.routeCancelled(
+        describe(notice.elementId),
+        describe(notice.toElementId),
+      );
     case 'routeUndone':
       return strings.notices.routeUndone(
         (notice.skipped ?? []).map(describe),
