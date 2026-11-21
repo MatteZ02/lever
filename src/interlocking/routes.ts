@@ -7,8 +7,11 @@
 // recorded in the route's position when it is set, without asking; the
 // operator is told which ones to throw by hand (the "route set" notice and
 // the route panel). only then are its signals
-// set (RTE-5). A turnout of a set route that moves for any reason makes it
-// "broken": its signals go to stop at once (RTE-6c). Level 2 has no other
+// set (RTE-5). A turnout of a set route that moves makes it "broken": its
+// signals go to stop at once (RTE-6c). A move found by asking the central
+// unit (the position refresh, for central units that do not report other
+// programs' switching) releases the route instead: signals to stop and the
+// route gone, with a notice naming the turnout. Level 2 has no other
 // protection: nothing is locked and occupancy is not checked (RTE-7).
 // Level 3 will add checks and locks per area (MIX-4) around this module.
 import {Project} from '../model/project';
@@ -28,6 +31,8 @@ export type RouteNotice =
   | {code: 'routeSet'; routeId: string; manualThrow: ManualThrow[]}
   | {code: 'routeFailed'; routeId: string; elementId: string}
   | {code: 'routeBroken'; routeId: string; elementId: string}
+  // Released because asking the central unit showed `elementId` moved.
+  | {code: 'routeReleasedMoved'; routeId: string; elementId: string}
   // Cancelled because a new route conflicts with it (`elementId`: its
   // start, `toElementId`: its end).
   | {
@@ -50,6 +55,9 @@ export type ManualThrow = {turnoutId: string; position: string};
 export type RouteDeps = {
   project: () => Project | null;
   turnout: (id: string) => TurnoutLive | undefined;
+  // The turnout's latest change came from a reply to a query (position
+  // refresh), not from a report of the switching itself.
+  movedByQuery: (id: string) => boolean;
   setTurnout: (id: string, position: string) => void;
   setSignal: (id: string, aspectId: string) => void;
   // A manual turnout's position, recorded when a route needs it.
@@ -275,6 +283,17 @@ export class RouteManager {
       const moved = route.plan.turnouts.find(
         (t) => this.deps.turnout(t.turnoutId)?.position !== t.position,
       );
+      if (moved && this.deps.movedByQuery(moved.turnoutId)) {
+        // Found by asking: released at once, signals to stop first.
+        this.signalsToStop(route);
+        this.routes.delete(route.id);
+        this.deps.notice({
+          code: 'routeReleasedMoved',
+          routeId: route.id,
+          elementId: moved.turnoutId,
+        });
+        return true;
+      }
       if (moved) {
         // RTE-6c / MULTI-4: signals to stop at once, then tell the operator.
         route.state = 'broken';

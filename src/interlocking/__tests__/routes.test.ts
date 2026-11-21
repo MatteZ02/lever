@@ -226,6 +226,37 @@ describe('a set route that changes (RTE-6c, MULTI-4)', () => {
     );
   });
 
+  it('given the position refresh finds one of its turnouts moved, the route is released', () => {
+    const {interlocking, jobs, notices, reportJobs, signalOutputs} =
+      setup(layout());
+    interlocking.setRoute('S1', 'S4', []);
+    reportJobs();
+    jobs.splice(0);
+
+    // The answer to a query: T1 straight, where the route needs it diverging.
+    interlocking.accessoryReport(0, 'output1', true);
+    expect(interlocking.state().routes).toEqual({});
+    expect(signalOutputs(jobs)).toEqual(['S1:0']); // S1 to stop
+    expect(notices).toContainEqual(
+      expect.objectContaining({code: 'routeReleasedMoved', elementId: 'T1'}),
+    );
+  });
+
+  it('given the position refresh finds everything in place, the route stays set', () => {
+    const {interlocking, jobs, reportJobs, route} = setup(layout());
+    interlocking.setRoute('S1', 'S4', []);
+    reportJobs();
+    jobs.splice(0);
+    const t1 = interlocking.state().turnouts['T1'];
+
+    // Same answers as known (T1 diverging = output 2 here).
+    interlocking.accessoryReport(0, 'output2', true);
+    interlocking.accessoryReport(1, 'output1', true);
+    expect(route().state).toBe('set');
+    expect(interlocking.state().turnouts['T1']).toEqual(t1);
+    expect(jobs).toEqual([]);
+  });
+
   it('the same when this operator throws it (Level 2 does not lock)', () => {
     const {interlocking, reportJobs, route} = setup(layout());
     interlocking.setRoute('S1', 'S4', []);

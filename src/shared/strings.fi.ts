@@ -676,6 +676,8 @@ export const fi: Strings = {
       `Kulkutietä ei asetettu: ${turnout} ei kääntynyt. Tarkista se ja peru kulkutie tai yritä uudelleen.`,
     routeBroken: (turnout: string) =>
       `Kulkutie purkautui: ${turnout} kääntyi. Sen opastimet asetettiin seis-opasteelle.`,
+    routeReleasedMoved: (turnout: string) =>
+      `Kulkutie vapautettiin: ${turnout} havaittiin toisessa asennossa. Sen opastimet asetettiin seis-opasteelle.`,
     routeCancelled: (from: string, to: string) =>
       `Kulkutie ${from} → ${to} peruttiin: uusi kulkutie on ristiriidassa sen kanssa. Sen opastimet asetettiin seis-opasteelle.`,
     routeUndone: (skipped: string[], manualBack: string[]) =>

@@ -154,7 +154,10 @@ appears at the top right of the diagram, in every window.
 
 If a turnout of a set route moves, for whatever reason (another control station, a Throttle, the
 Roco app, a handset, or a click here), the route's signals go to **stop at once** and the route
-is shown **broken** (amber). A turnout that does not move makes the route **fail**; **Cancel**
+is shown **broken** (amber). If Lever only finds the move by asking the central unit (_Ask for
+turnout positions every (s)_, for switching the central unit does not report, e.g. from
+WinDigipet on the DR5000), the route is **released** instead: signals to stop, the route gone,
+and a notice names the turnout. A turnout that does not move makes the route **fail**; **Cancel**
 drops it. Level 2 does not lock turnouts or check occupancy (that is Level 3): occupied track
 stays red under the green route.
 

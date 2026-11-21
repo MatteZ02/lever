@@ -122,6 +122,8 @@ export class Interlocking {
   private feedback = new Map<string, FeedbackInputState>();
   // Elements seen switching in this session (any client).
   private seenSwitching = new Set<string>();
+  // Elements being updated from a query reply that showed a change.
+  private movedByQuery = new Set<string>();
   private pending = new Map<string, Pending>();
   private releaseTimers = new Map<string, () => void>();
 
@@ -144,6 +146,7 @@ export class Interlocking {
     this.routes = new RouteManager({
       project: () => this.project,
       turnout: (id) => this.live.turnouts[id],
+      movedByQuery: (id) => this.movedByQuery.has(id),
       setTurnout: (elementId, position) =>
         this.command({type: 'setTurnout', elementId, position}),
       setSignal: (elementId, aspectId) =>
@@ -404,7 +407,12 @@ export class Interlocking {
       if (!solicited || changed) {
         this.seenSwitching.add(id);
       }
+      // Routes release instead of breaking when a query found the move.
+      if (solicited && changed) {
+        this.movedByQuery.add(id);
+      }
       this.update(id);
+      this.movedByQuery.delete(id);
     }
     this.flush();
   }

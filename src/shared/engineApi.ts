@@ -179,6 +179,8 @@ export const engineNoticeSchema = z.object({
     'routeSet',
     'routeFailed',
     'routeBroken',
+    // Released: asking the central unit showed a turnout of it moved.
+    'routeReleasedMoved',
     // Cancelled because a new route conflicts with it.
     'routeCancelled',
     'routeUndone',

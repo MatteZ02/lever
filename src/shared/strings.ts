@@ -675,6 +675,8 @@ const en = {
       `Route not set: ${turnout} did not move. Check it, then cancel the route or try again.`,
     routeBroken: (turnout: string) =>
       `Route broken: ${turnout} moved. Its signals were set to stop.`,
+    routeReleasedMoved: (turnout: string) =>
+      `Route released: ${turnout} was found in another position. Its signals were set to stop.`,
     routeCancelled: (from: string, to: string) =>
       `Route ${from} → ${to} cancelled: the new route conflicts with it. Its signals were set to stop.`,
     routeUndone: (skipped: string[], manualBack: string[]) =>
