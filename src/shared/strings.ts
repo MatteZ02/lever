@@ -315,7 +315,7 @@ const en = {
     areas: 'Automation levels',
     areasShort: 'Levels',
     areasHelp:
-      'Level 1: switch turnouts and signals by hand. Level 2: also set routes (coming). Changing a level never moves a turnout or changes a signal.',
+      'Level 1: switch turnouts and signals by hand. Level 2: also set routes. Changing a level never moves a turnout or changes a signal.',
     stationDefault: 'whole station',
     levelLater: (level: number) => `Level ${level} (later)`,
     levelBadge: (level: number) => `Level ${level}`,

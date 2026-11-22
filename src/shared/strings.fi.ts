@@ -203,15 +203,15 @@ export const fi: Strings = {
     newRoute: 'Uusi kulkutie',
     undoLast: 'Kumoa viimeisin kulkutie',
     clickStart:
-      'Napsauta kulkutien alkukohtaa: opastinta, vaihdetta, kulkutiepistettä tai aseman liitäntää.',
+      'Napsauta kulkutien alkupistettä: opastinta, vaihdetta, kulkutiepistettä tai aseman liitäntää.',
     clickEnd: (start: string) =>
-      `Alku: ${start}. Napsauta kulkutien loppukohtaa tai kulkutiepistettä, jonka kautta kulkutie kulkee.`,
+      `Alkupiste: ${start}. Napsauta kulkutien loppupistettä tai kulkutiepistettä, jonka kautta kulkutie kulkee.`,
     notFound: {
       noPath:
         'Näiden kohtien välillä ei ole kulkutietä (opastimen ohi kuljetaan vain sen suuntaan).',
       notRoutePoint:
-        'Kulkutie alkaa ja päättyy opastimeen, vaihteeseen, kulkutiepisteeseen tai liitäntään.',
-      samePoint: 'Alku ja loppu ovat sama kohta.',
+        'Kulkutien alku- ja loppupiste on opastin, vaihde, kulkutiepiste tai aseman liitäntä.',
+      samePoint: 'Alku- ja loppupiste ovat sama kohta.',
     } as Record<string, string>,
     via: (points: string) => `kautta ${points}`,
     options: 'Yhtä hyvät kulkutiet',
@@ -225,10 +225,11 @@ export const fi: Strings = {
       'Kulkutie kulkee alueen kautta, jonka taso ei ole vielä käytettävissä.',
     level1Warning: (areas: string) =>
       `Osa kulkutiestä on tason 1 alueella (${areas}), jossa kulkutielogiikkaa tai suojausta ei ole tarkoitus olla. Siellä se asetetaan tavalliseen tapaan.`,
-    manualList: (turnouts: string) => `Ei kytketty, käännä käsin: ${turnouts}.`,
+    manualList: (turnouts: string) =>
+      `Käsivaihteet (ei kytketty), käännä käsin: ${turnouts}.`,
     set: 'Aseta kulkutie',
     cancels: (routes: string) =>
-      `Tämän kulkutien asettaminen peruu kulkutiet ${routes} (niillä on yhteistä raidetta tai vaihteita).`,
+      `Tämän kulkutien asettaminen purkaa kulkutiet ${routes} (niillä on yhteisiä raiteita tai vaihteita).`,
     crosses: (routes: string, at: string) =>
       `Kulkutie risteää kulkuteiden ${routes} kanssa kohdassa ${at}. Molemmat voi asettaa, mutta niillä kulkevat junat kohtaisivat siellä.`,
     crossQuestion: 'Asetetaanko kulkutie, vaikka se risteää toisen kanssa?',
@@ -245,14 +246,14 @@ export const fi: Strings = {
       set: 'Asetettu',
       failed: (turnout: string) => `Ei asetettu: ${turnout} ei kääntynyt`,
       broken: (turnout: string) =>
-        `Purkautunut: ${turnout} kääntyi; opastimet seis-opasteelle`,
+        `Valvonta menetetty: ${turnout} kääntyi; opastimet seis-opasteelle`,
     },
     manualToSet: (turnouts: string) => `Käännä käsin: ${turnouts}.`,
-    release: 'Vapauta',
-    cancelRoute: 'Peru',
-    fromHere: 'Kulkutie tästä',
+    release: 'Pura',
+    cancelRoute: 'Pura',
+    fromHere: 'Kulkutie alkaa tästä',
     endHere: 'Kulkutie päättyy tähän',
-    viaHere: 'Tämän kautta',
+    viaHere: 'Kulkutie tämän kautta',
     followExit: 'Siirry toiseen päähän',
   },
 
@@ -308,7 +309,7 @@ export const fi: Strings = {
     areas: 'Automaatiotasot',
     areasShort: 'Tasot',
     areasHelp:
-      'Taso 1: vaihteet ja opastimet käännetään käsin. Taso 2: lisäksi kulkutiet (tulossa). Tason vaihtaminen ei koskaan käännä vaihdetta eikä muuta opastetta.',
+      'Taso 1: vaihteet käännetään ja opastimet asetetaan yksitellen. Taso 2: lisäksi kulkutiet. Tason vaihtaminen ei koskaan käännä vaihdetta eikä muuta opastetta.',
     stationDefault: 'koko asema',
     levelLater: (level: number) => `Taso ${level} (myöhemmin)`,
     levelBadge: (level: number) => `Taso ${level}`,
@@ -330,11 +331,11 @@ export const fi: Strings = {
     tools: {
       select: 'Valitse',
       track: 'Raide',
-      turnoutLeft: 'Vaihde vasemmalle',
-      turnoutRight: 'Vaihde oikealle',
+      turnoutLeft: 'Vasen vaihde',
+      turnoutRight: 'Oikea vaihde',
       wye: 'Tasapuolinen vaihde',
       threeWay: 'Kolmitievaihde',
-      crossing: 'Risteys',
+      crossing: 'Raideristeys',
       singleSlip: 'Yksinkertainen raideristeysvaihde',
       doubleSlip: 'Kaksoisraideristeysvaihde',
       signal: 'Opastin',
@@ -359,7 +360,7 @@ export const fi: Strings = {
     fit: 'Sovita näkymään',
     testMode: 'Testaa lähtöjä',
     testModeHelp:
-      'Testitila: napsauta vaihdetta, opastinta tai lisälaitetta, niin sen asennot käydään läpi yksi kerrallaan. Komennot lähetetään radalle.',
+      'Testitila: napsauta vaihdetta, opastinta tai lisälaitetta, niin sen asennot tai opasteet käydään läpi yksi kerrallaan. Komennot lähetetään radalle.',
     addView: 'Lisää asema',
     deleteView: 'Poista tämä asema',
     confirmDeleteView: (name: string) =>
@@ -423,7 +424,7 @@ export const fi: Strings = {
     sideLeft: 'Vasen',
     sideRight: 'Oikea',
     control: 'Kytkentä',
-    controlManual: 'Ei kytketty (käännetään käsin)',
+    controlManual: 'Ei kytketty (käsivaihde, käännetään käsin)',
     controlDcc: 'DCC-lisälaiteosoitteet',
     controlExtended: 'Laajennettu lisälaite (laiteohjelmisto 1.40+)',
     address: (index: number) =>
@@ -443,7 +444,7 @@ export const fi: Strings = {
     testHint: 'Lähettää komennon radalle.',
     positionFeedback: 'Asennon takaisinilmaisu (valinnainen)',
     signalType: 'Opastintyyppi',
-    distantFor: 'Toistaa pääopastimen',
+    distantFor: 'Esiopastin pääopastimelle',
     none: 'Ei mitään',
     block: 'Raideosuus',
     newBlock: 'Uusi raideosuus',
@@ -552,7 +553,7 @@ export const fi: Strings = {
       `Takaisinilmaisutuloa ${p['input']} käyttää useampi kuin yksi raideosuus.`,
     invalidDistantSignal: () =>
       'Esiopastimen asetus ei vastaa mitään pääopastinta.',
-    manualTurnout: () => 'Vaihdetta ei ole kytketty (käännetään käsin).',
+    manualTurnout: () => 'Vaihdetta ei ole kytketty (käsivaihde).',
     trackWithoutFeedback: (p: Record<string, string | number>) =>
       `${p['count']} ${p['count'] === 1 ? 'raidepala' : 'raidepalaa'} ilman takaisinilmaisua.`,
     unpairedConnector: () =>
@@ -596,11 +597,11 @@ export const fi: Strings = {
   } as Record<string, string>,
 
   turnoutTypes: {
-    left: 'Vaihde, vasen',
-    right: 'Vaihde, oikea',
+    left: 'Vasen vaihde',
+    right: 'Oikea vaihde',
     wye: 'Tasapuolinen vaihde',
     threeWay: 'Kolmitievaihde',
-    crossing: 'Risteys',
+    crossing: 'Raideristeys',
     singleSlip: 'Yksinkertainen raideristeysvaihde',
     doubleSlip: 'Kaksoisraideristeysvaihde',
   } as Record<string, string>,
@@ -635,7 +636,7 @@ export const fi: Strings = {
     aspects: {
       stop: 'Seis',
       proceed: 'Aja',
-      reduced: 'Aja, alennettu nopeus',
+      reduced: 'Aja 35 km/h',
       expectStop: 'Odota seis',
       expectProceed: 'Odota aja',
       shuntStop: 'Seis',
@@ -648,7 +649,7 @@ export const fi: Strings = {
       'Keskusyksikön laiteohjelmisto on liian vanha laajennetuille lisälaitteille (vaatii version 1.40). Mitään ei lähetetty.',
     refused: (name: string, reason?: string) =>
       reason === 'signalNeedsRoute'
-        ? `${name}: tasolla 2 opastimet asetetaan kulkuteillä. Napsauta sitä ja valitse ”Kulkutie tästä”.`
+        ? `${name}: tasolla 2 opastimet asetetaan vain kulkuteiden mukana. Napsauta sitä ja valitse ”Kulkutie alkaa tästä”.`
         : `${name}: ei mahdollista tällä automaatiotasolla.`,
     incomplete: (name: string, reason: string) =>
       `${name}: ${(fi.test.incomplete as Record<string, string>)[reason] ?? reason}. Mitään ei lähetetty.`,
@@ -673,13 +674,13 @@ export const fi: Strings = {
         ? `Kulkutie asetettu. Käännä käsin: ${manual.join(', ')}.`
         : 'Kulkutie asetettu.',
     routeFailed: (turnout: string) =>
-      `Kulkutietä ei asetettu: ${turnout} ei kääntynyt. Tarkista se ja peru kulkutie tai yritä uudelleen.`,
+      `Kulkutietä ei asetettu: ${turnout} ei kääntynyt. Tarkista se ja pura kulkutie tai yritä uudelleen.`,
     routeBroken: (turnout: string) =>
-      `Kulkutie purkautui: ${turnout} kääntyi. Sen opastimet asetettiin seis-opasteelle.`,
+      `Kulkutien valvonta menetettiin: ${turnout} kääntyi. Sen opastimet palautettiin seis-opasteelle.`,
     routeReleasedMoved: (turnout: string) =>
-      `Kulkutie vapautettiin: ${turnout} havaittiin toisessa asennossa. Sen opastimet asetettiin seis-opasteelle.`,
+      `Kulkutie purettiin: ${turnout} havaittiin toisessa asennossa. Sen opastimet palautettiin seis-opasteelle.`,
     routeCancelled: (from: string, to: string) =>
-      `Kulkutie ${from} → ${to} peruttiin: uusi kulkutie on ristiriidassa sen kanssa. Sen opastimet asetettiin seis-opasteelle.`,
+      `Kulkutie ${from} → ${to} purettiin: uusi kulkutie on ristiriidassa sen kanssa. Sen opastimet palautettiin seis-opasteelle.`,
     routeUndone: (skipped: string[], manualBack: string[]) =>
       [
         'Viimeisin kulkutie kumottu.',
