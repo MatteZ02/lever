@@ -145,7 +145,7 @@ export const fi: Strings = {
     protocolLog: 'Protokollaloki (vianetsintään)',
     devTools: 'Kehittäjätyökalut',
     devToolsHelp:
-      'Näyttää yläpalkissa painikkeet Raidevirtapiirit, Lisälaitetesti ja Protokollaloki.',
+      'Näyttää yläpalkissa painikkeet Ilmaisimet, Lisälaitetesti ja Protokollaloki.',
     quickKeys: 'Pikanäppäimet',
     quickKeysHelp:
       'Toimivat kaikissa ikkunoissa, paitsi kun kirjoitat tekstikenttään ja kun Asetukset on auki (näytön STOP-painike toimii aina). Kirjaimet toimivat Shiftin kanssa tai ilman.',
@@ -226,7 +226,7 @@ export const fi: Strings = {
     level1Warning: (areas: string) =>
       `Osa kulkutiestä on tason 1 alueella (${areas}), jossa kulkutielogiikkaa tai suojausta ei ole tarkoitus olla. Siellä se asetetaan tavalliseen tapaan.`,
     manualList: (turnouts: string) =>
-      `Käsivaihteet (ei kytketty), käännä käsin: ${turnouts}.`,
+      `Keskittämättömät vaihteet, käännä käsin: ${turnouts}.`,
     set: 'Aseta kulkutie',
     cancels: (routes: string) =>
       `Tämän kulkutien asettaminen purkaa kulkutiet ${routes} (niillä on yhteisiä raiteita tai vaihteita).`,
@@ -246,7 +246,7 @@ export const fi: Strings = {
       set: 'Asetettu',
       failed: (turnout: string) => `Ei asetettu: ${turnout} ei kääntynyt`,
       broken: (turnout: string) =>
-        `Valvonta menetetty: ${turnout} kääntyi; opastimet seis-opasteelle`,
+        `Valvonta menetetty: ${turnout} kääntyi; opastimet Seis-opasteelle`,
     },
     manualToSet: (turnouts: string) => `Käännä käsin: ${turnouts}.`,
     release: 'Pura',
@@ -296,8 +296,8 @@ export const fi: Strings = {
     trainNumber: 'Junan numero tai nimi',
     setLabel: 'Näytä',
     clearLabel: 'Poista',
-    feedbackMonitor: 'Raidevirtapiirien seuranta',
-    feedbackShort: 'Raidevirtapiirit',
+    feedbackMonitor: 'Vapaanaolon valvonta',
+    feedbackShort: 'Ilmaisimet',
     noFeedbackSources:
       'Tälle radalle ei ole kytketty yhtään ilmaisinväylää (Muokkaa rataa → ei valintaa → Keskusyksikön asetukset).',
     feedbackSources: (list: string) => `Kuunnellaan: ${list}.`,
@@ -331,13 +331,13 @@ export const fi: Strings = {
     tools: {
       select: 'Valitse',
       track: 'Raide',
-      turnoutLeft: 'Vasen vaihde',
-      turnoutRight: 'Oikea vaihde',
+      turnoutLeft: 'Vasenkätinen vaihde',
+      turnoutRight: 'Oikeakätinen vaihde',
       wye: 'Tasapuolinen vaihde',
-      threeWay: 'Kolmisuuntavaihde',
+      threeWay: 'Kaksoisvaihde (kolmitie)',
       crossing: 'Raideristeys',
-      singleSlip: 'Yksinkertainen raideristeysvaihde',
-      doubleSlip: 'Kaksoisraideristeysvaihde',
+      singleSlip: 'Yksipuolinen risteysvaihde',
+      doubleSlip: 'Kaksipuolinen risteysvaihde',
       signal: 'Opastin',
       bufferStop: 'Raidepuskin',
       virtualPoint: 'Kulkutiepiste',
@@ -424,7 +424,7 @@ export const fi: Strings = {
     sideLeft: 'Vasen',
     sideRight: 'Oikea',
     control: 'Kytkentä',
-    controlManual: 'Ei kytketty (käsivaihde, käännetään käsin)',
+    controlManual: 'Keskittämätön (asetetaan paikallisesti käsin)',
     controlDcc: 'DCC-lisälaiteosoitteet',
     controlExtended: 'Laajennettu lisälaite (laiteohjelmisto 1.40+)',
     address: (index: number) =>
@@ -449,7 +449,7 @@ export const fi: Strings = {
     block: 'Raideosuus',
     newBlock: 'Uusi raideosuus',
     blockName: 'Raideosuuden nimi',
-    feedbackInputs: 'Raidevirtapiirin tulot',
+    feedbackInputs: 'Ilmaisimen tulot',
     addInput: 'Lisää tulo',
     removeInput: 'Poista',
     releaseDelay: 'Vapautumisviive (ms)',
@@ -527,7 +527,7 @@ export const fi: Strings = {
       'Linkitä tämä raja viivan toisessa päässä olevaan rajaan, toisella asemalla tai tällä samalla. Kulkutiet jatkuvat silloin sen läpi, ja ohjaustilassa rajan napsauttaminen avaa toisen pään.',
     restoreTurnouts: 'Palauta vaihteiden asennot käynnistettäessä',
     restoreTurnoutsHelp:
-      'Kun Lever avaa tämän radan, se kääntää jokaisen kytketyn vaihteen viimeksi vahvistettuun asentoon, yksi kerrallaan. Tiedossa ovat vain asennot, jotka tämä kone on nähnyt.',
+      'Kun Lever avaa tämän radan, se kääntää jokaisen keskitetyn vaihteen viimeksi vahvistettuun asentoon, yksi kerrallaan. Tiedossa ovat vain asennot, jotka tämä kone on nähnyt.',
   },
 
   validation: {
@@ -550,12 +550,12 @@ export const fi: Strings = {
     endMarkerNotAtTrackEnd: () =>
       'Raidepuskin tai liikennepaikan raja ei ole raiteen päässä.',
     feedbackInputConflict: (p: Record<string, string | number>) =>
-      `Raidevirtapiirin tuloa ${p['input']} käyttää useampi kuin yksi raideosuus.`,
+      `Ilmaisimen tuloa ${p['input']} käyttää useampi kuin yksi raideosuus.`,
     invalidDistantSignal: () =>
       'Esiopastimen asetus ei vastaa mitään pääopastinta.',
-    manualTurnout: () => 'Vaihdetta ei ole kytketty (käsivaihde).',
+    manualTurnout: () => 'Vaihde on keskittämätön (käännetään käsin).',
     trackWithoutFeedback: (p: Record<string, string | number>) =>
-      `${p['count']} ${p['count'] === 1 ? 'raidepala' : 'raidepalaa'} ilman raidevirtapiiriä.`,
+      `${p['count']} ${p['count'] === 1 ? 'raidepala' : 'raidepalaa'} ilman vapaanaolon valvontaa.`,
     unpairedConnector: () =>
       'Liikennepaikan rajaa ei ole linkitetty toiseen asemaan.',
     brokenConnectorPair: () =>
@@ -579,7 +579,7 @@ export const fi: Strings = {
     types: {
       accessory: 'Lisälaite',
       extended: 'Laajennettu',
-      feedback: 'Raidevirtapiiri',
+      feedback: 'Ilmaisin',
     },
   },
 
@@ -597,13 +597,13 @@ export const fi: Strings = {
   } as Record<string, string>,
 
   turnoutTypes: {
-    left: 'Vasen vaihde',
-    right: 'Oikea vaihde',
+    left: 'Vasenkätinen vaihde',
+    right: 'Oikeakätinen vaihde',
     wye: 'Tasapuolinen vaihde',
-    threeWay: 'Kolmisuuntavaihde',
+    threeWay: 'Kaksoisvaihde (kolmitie)',
     crossing: 'Raideristeys',
-    singleSlip: 'Yksinkertainen raideristeysvaihde',
-    doubleSlip: 'Kaksoisraideristeysvaihde',
+    singleSlip: 'Yksipuolinen risteysvaihde',
+    doubleSlip: 'Kaksipuolinen risteysvaihde',
   } as Record<string, string>,
 
   positions: {
@@ -615,7 +615,7 @@ export const fi: Strings = {
 
   test: {
     sent: 'lähetetty',
-    manual: 'ei kytketty: aseta käsin',
+    manual: 'keskittämätön: aseta käsin',
     on: 'päällä',
     off: 'pois',
     incomplete: {
@@ -636,7 +636,7 @@ export const fi: Strings = {
     aspects: {
       stop: 'Seis',
       proceed: 'Aja',
-      reduced: 'Aja 35 km/h',
+      reduced: 'Aja 35',
       expectStop: 'Odota seis',
       expectProceed: 'Odota aja',
       shuntStop: 'Seis',
@@ -656,7 +656,7 @@ export const fi: Strings = {
     failed: (name: string) =>
       `${name}: keskusyksikkö ei vahvistanut muutosta, ei myöskään toisella yrityksellä. Tarkista vaihde tai opastin.`,
     labelNeedsFeedback: (name: string) =>
-      `${name}: junan numeron voi näyttää vain raiteella, jolla on raidevirtapiiri.`,
+      `${name}: junan numeron voi näyttää vain raiteella, jolla on vapaanaolon valvonta.`,
     routeRefused: (reason: string) =>
       ({
         noRoute: 'Näiden kohtien välillä ei ole kulkutietä.',
@@ -676,11 +676,11 @@ export const fi: Strings = {
     routeFailed: (turnout: string) =>
       `Kulkutietä ei asetettu: ${turnout} ei kääntynyt. Tarkista se ja pura kulkutie tai yritä uudelleen.`,
     routeBroken: (turnout: string) =>
-      `Kulkutien valvonta menetettiin: ${turnout} kääntyi. Sen opastimet palautettiin seis-opasteelle.`,
+      `Kulkutien valvonta menetettiin: ${turnout} kääntyi. Sen opastimet palautettiin Seis-opasteelle.`,
     routeReleasedMoved: (turnout: string) =>
-      `Kulkutie purettiin: ${turnout} havaittiin toisessa asennossa. Sen opastimet palautettiin seis-opasteelle.`,
+      `Kulkutie purettiin: ${turnout} havaittiin toisessa asennossa. Sen opastimet palautettiin Seis-opasteelle.`,
     routeCancelled: (from: string, to: string) =>
-      `Kulkutie ${from} → ${to} purettiin: uusi kulkutie on ristiriidassa sen kanssa. Sen opastimet palautettiin seis-opasteelle.`,
+      `Kulkutie ${from} → ${to} purettiin: uusi kulkutie on ristiriidassa sen kanssa. Sen opastimet palautettiin Seis-opasteelle.`,
     routeUndone: (skipped: string[], manualBack: string[]) =>
       [
         'Viimeisin kulkutie kumottu.',
@@ -698,7 +698,7 @@ export const fi: Strings = {
 
   // Developer tools: test accessories and feedback without a layout.
   developer: {
-    title: 'Lisälaitteiden ja raidevirtapiirien testi',
+    title: 'Lisälaitteiden ja ilmaisimien testi',
     short: 'Lisälaitetesti',
     turnoutNumber: 'Vaihteen numero (kuten Rocon sovelluksessa)',
     output1: 'Lähtö 1',
@@ -713,8 +713,8 @@ export const fi: Strings = {
     accessoriesHeading: 'Havaitut lisälaitteet',
     noAccessories:
       'Ei vielä yhtään. Käännä jokin tästä tai toisesta sovelluksesta.',
-    feedbackHeading: 'Raidevirtapiirit',
-    noFeedback: 'Raidevirtapiirien tuloja ei ole ilmoitettu.',
+    feedbackHeading: 'Ilmaisimet',
+    noFeedback: 'Ilmaisimien tuloja ei ole ilmoitettu.',
     feedbackSources: {
       rbus: 'R-Bus',
       loconet: 'LocoNet-ilmaisimet',
@@ -749,6 +749,6 @@ export const fi: Strings = {
           return key;
       }
     },
-    locos: (addresses: number[]) => `Veturit: ${addresses.join(', ')}`,
+    locos: (addresses: number[]) => `Kalustoyksiköt: ${addresses.join(', ')}`,
   },
 };
