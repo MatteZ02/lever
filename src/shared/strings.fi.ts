@@ -145,7 +145,7 @@ export const fi: Strings = {
     protocolLog: 'Protokollaloki (vianetsintään)',
     devTools: 'Kehittäjätyökalut',
     devToolsHelp:
-      'Näyttää yläpalkissa Takaisinilmaisun, Lisälaitetestin ja Protokollalokin.',
+      'Näyttää yläpalkissa painikkeet Raidevirtapiirit, Lisälaitetesti ja Protokollaloki.',
     quickKeys: 'Pikanäppäimet',
     quickKeysHelp:
       'Toimivat kaikissa ikkunoissa, paitsi kun kirjoitat tekstikenttään ja kun Asetukset on auki (näytön STOP-painike toimii aina). Kirjaimet toimivat Shiftin kanssa tai ilman.',
@@ -203,14 +203,14 @@ export const fi: Strings = {
     newRoute: 'Uusi kulkutie',
     undoLast: 'Kumoa viimeisin kulkutie',
     clickStart:
-      'Napsauta kulkutien alkupistettä: opastinta, vaihdetta, kulkutiepistettä tai aseman liitäntää.',
+      'Napsauta kulkutien alkupistettä: opastinta, vaihdetta, kulkutiepistettä tai liikennepaikan rajaa.',
     clickEnd: (start: string) =>
       `Alkupiste: ${start}. Napsauta kulkutien loppupistettä tai kulkutiepistettä, jonka kautta kulkutie kulkee.`,
     notFound: {
       noPath:
         'Näiden kohtien välillä ei ole kulkutietä (opastimen ohi kuljetaan vain sen suuntaan).',
       notRoutePoint:
-        'Kulkutien alku- ja loppupiste on opastin, vaihde, kulkutiepiste tai aseman liitäntä.',
+        'Kulkutien alku- ja loppupiste on opastin, vaihde, kulkutiepiste tai liikennepaikan raja.',
       samePoint: 'Alku- ja loppupiste ovat sama kohta.',
     } as Record<string, string>,
     via: (points: string) => `kautta ${points}`,
@@ -275,7 +275,7 @@ export const fi: Strings = {
       'Siirrä kehystä vetämällä sitä tai sen otsikkoa, muuta kokoa vetämällä kulmasta. Avaa asema kaksoisnapsauttamalla sen otsikkoa.',
     frameHelp: 'Piirrä kehys vetämällä pohjalla. Asema sovitetaan sen sisään.',
     lineHelp:
-      'Lisää pisteitä napsauttamalla; napsautus aseman liitännän lähellä kiinnittää viivan siihen. Lopeta liitäntään, napsauttamalla viimeistä pistettä uudelleen tai Enterillä. Backspace poistaa viimeisen pisteen.',
+      'Lisää pisteitä napsauttamalla; napsautus liikennepaikan rajan lähellä kiinnittää viivan siihen. Lopeta rajaan, napsauttamalla viimeistä pistettä uudelleen tai Enterillä. Backspace poistaa viimeisen pisteen.',
     station: 'Asema',
     rotation: (degrees: number) => `Kierto: ${degrees}°`,
     rotateLeft: 'Kierrä vasemmalle',
@@ -296,14 +296,14 @@ export const fi: Strings = {
     trainNumber: 'Junan numero tai nimi',
     setLabel: 'Näytä',
     clearLabel: 'Poista',
-    feedbackMonitor: 'Takaisinilmaisujen seuranta',
-    feedbackShort: 'Takaisinilmaisu',
+    feedbackMonitor: 'Raidevirtapiirien seuranta',
+    feedbackShort: 'Raidevirtapiirit',
     noFeedbackSources:
-      'Tälle radalle ei ole kytketty yhtään takaisinilmaisuväylää (Muokkaa rataa → ei valintaa → Keskusyksikön asetukset).',
+      'Tälle radalle ei ole kytketty yhtään ilmaisinväylää (Muokkaa rataa → ei valintaa → Keskusyksikön asetukset).',
     feedbackSources: (list: string) => `Kuunnellaan: ${list}.`,
     input: 'Tulo',
     state: 'Tila',
-    usedBy: 'Käyttäjä',
+    usedBy: 'Käytössä',
     notReported: 'Ei vielä ilmoitettu',
     notUsed: '—',
     areas: 'Automaatiotasot',
@@ -334,14 +334,14 @@ export const fi: Strings = {
       turnoutLeft: 'Vasen vaihde',
       turnoutRight: 'Oikea vaihde',
       wye: 'Tasapuolinen vaihde',
-      threeWay: 'Kolmitievaihde',
+      threeWay: 'Kolmisuuntavaihde',
       crossing: 'Raideristeys',
       singleSlip: 'Yksinkertainen raideristeysvaihde',
       doubleSlip: 'Kaksoisraideristeysvaihde',
       signal: 'Opastin',
       bufferStop: 'Raidepuskin',
       virtualPoint: 'Kulkutiepiste',
-      connector: 'Aseman liitäntä',
+      connector: 'Liikennepaikan raja',
       accessory: 'Irrotusraide / lisälaite',
       label: 'Teksti',
       platform: 'Laituri',
@@ -449,7 +449,7 @@ export const fi: Strings = {
     block: 'Raideosuus',
     newBlock: 'Uusi raideosuus',
     blockName: 'Raideosuuden nimi',
-    feedbackInputs: 'Takaisinilmaisutulot',
+    feedbackInputs: 'Raidevirtapiirin tulot',
     addInput: 'Lisää tulo',
     removeInput: 'Poista',
     releaseDelay: 'Vapautumisviive (ms)',
@@ -515,16 +515,16 @@ export const fi: Strings = {
     positionRefresh: 'Kysy vaihteiden asentoja (s välein)',
     positionRefreshHelp:
       '0 = pois. Keskusyksiköille, jotka eivät ilmoita muiden ohjelmien kääntämiä vaihteita (DR5000: WinDigipet USB:n kautta). Lever kysyy silloin näytöllä olevan aseman vaihteiden asennot näin usein ja heti, kun teet jotain.',
-    feedbackSources: 'Käytetyt takaisinilmaisuväylät',
+    feedbackSources: 'Käytetyt ilmaisinväylät',
     blockReleaseDelay: 'Raideosuuden vapautumisviiveen oletus (ms)',
     autoSignals: 'Aseta opastimet kulkuteiden varrella automaattisesti',
     pairedWith: 'Johtaa kohteeseen',
     notPaired: 'Ei linkitetty (viivaa ei piirretty)',
     unnamedExitAt: (arrow: string, x: number, y: number) =>
-      `liitäntä ${arrow} kohdassa ${x}, ${y}`,
+      `raja ${arrow} kohdassa ${x}, ${y}`,
     linkedElsewhere: 'linkitetty muualle',
     pairingHelp:
-      'Linkitä tämä liitäntä viivan toisessa päässä olevaan liitäntään, toisella asemalla tai tällä samalla. Kulkutiet jatkuvat silloin sen läpi, ja ohjaustilassa liitännän napsauttaminen avaa toisen pään.',
+      'Linkitä tämä raja viivan toisessa päässä olevaan rajaan, toisella asemalla tai tällä samalla. Kulkutiet jatkuvat silloin sen läpi, ja ohjaustilassa rajan napsauttaminen avaa toisen pään.',
     restoreTurnouts: 'Palauta vaihteiden asennot käynnistettäessä',
     restoreTurnoutsHelp:
       'Kun Lever avaa tämän radan, se kääntää jokaisen kytketyn vaihteen viimeksi vahvistettuun asentoon, yksi kerrallaan. Tiedossa ovat vain asennot, jotka tämä kone on nähnyt.',
@@ -543,23 +543,23 @@ export const fi: Strings = {
     addressOutOfRange: () =>
       'Osoite on sallitun alueen ulkopuolella (tarkista osoitteen siirtymä).',
     openTrackEnd: () =>
-      'Avoin raiteen pää (lisää raidepuskin, aseman liitäntä tai lisää raidetta).',
+      'Avoin raiteen pää (lisää raidepuskin, liikennepaikan raja tai lisää raidetta).',
     junctionWithoutTurnout: () => 'Raiteet kohtaavat ilman vaihdetta.',
     trackThroughTurnout: () => 'Raide kulkee vaihteen keskeltä.',
     overlappingTrack: () => 'Kaksi raidetta on päällekkäin.',
     endMarkerNotAtTrackEnd: () =>
-      'Raidepuskin tai aseman liitäntä ei ole raiteen päässä.',
+      'Raidepuskin tai liikennepaikan raja ei ole raiteen päässä.',
     feedbackInputConflict: (p: Record<string, string | number>) =>
-      `Takaisinilmaisutuloa ${p['input']} käyttää useampi kuin yksi raideosuus.`,
+      `Raidevirtapiirin tuloa ${p['input']} käyttää useampi kuin yksi raideosuus.`,
     invalidDistantSignal: () =>
       'Esiopastimen asetus ei vastaa mitään pääopastinta.',
     manualTurnout: () => 'Vaihdetta ei ole kytketty (käsivaihde).',
     trackWithoutFeedback: (p: Record<string, string | number>) =>
-      `${p['count']} ${p['count'] === 1 ? 'raidepala' : 'raidepalaa'} ilman takaisinilmaisua.`,
+      `${p['count']} ${p['count'] === 1 ? 'raidepala' : 'raidepalaa'} ilman raidevirtapiiriä.`,
     unpairedConnector: () =>
-      'Aseman liitäntää ei ole linkitetty toiseen asemaan.',
+      'Liikennepaikan rajaa ei ole linkitetty toiseen asemaan.',
     brokenConnectorPair: () =>
-      'Aseman liitäntä on linkitetty liitäntään, joka on poistettu tai linkitetty muualle. Valitse sen pari uudelleen.',
+      'Liikennepaikan raja on linkitetty rajaan, joka on poistettu tai linkitetty muualle. Valitse sen pari uudelleen.',
     tracksCrossWithoutConnection: () =>
       'Raiteet risteävät ilman yhteyttä (ylikulku).',
   },
@@ -579,7 +579,7 @@ export const fi: Strings = {
     types: {
       accessory: 'Lisälaite',
       extended: 'Laajennettu',
-      feedback: 'Takaisinilmaisu',
+      feedback: 'Raidevirtapiiri',
     },
   },
 
@@ -589,7 +589,7 @@ export const fi: Strings = {
     signal: 'Opastin',
     bufferStop: 'Raidepuskin',
     virtualPoint: 'Kulkutiepiste',
-    connector: 'Aseman liitäntä',
+    connector: 'Liikennepaikan raja',
     accessory: 'Lisälaite',
     label: 'Teksti',
     platform: 'Laituri',
@@ -600,7 +600,7 @@ export const fi: Strings = {
     left: 'Vasen vaihde',
     right: 'Oikea vaihde',
     wye: 'Tasapuolinen vaihde',
-    threeWay: 'Kolmitievaihde',
+    threeWay: 'Kolmisuuntavaihde',
     crossing: 'Raideristeys',
     singleSlip: 'Yksinkertainen raideristeysvaihde',
     doubleSlip: 'Kaksoisraideristeysvaihde',
@@ -656,7 +656,7 @@ export const fi: Strings = {
     failed: (name: string) =>
       `${name}: keskusyksikkö ei vahvistanut muutosta, ei myöskään toisella yrityksellä. Tarkista vaihde tai opastin.`,
     labelNeedsFeedback: (name: string) =>
-      `${name}: junan numeron voi näyttää vain raiteella, jolla on takaisinilmaisu.`,
+      `${name}: junan numeron voi näyttää vain raiteella, jolla on raidevirtapiiri.`,
     routeRefused: (reason: string) =>
       ({
         noRoute: 'Näiden kohtien välillä ei ole kulkutietä.',
@@ -698,7 +698,7 @@ export const fi: Strings = {
 
   // Developer tools: test accessories and feedback without a layout.
   developer: {
-    title: 'Lisälaitteiden ja takaisinilmaisun testi',
+    title: 'Lisälaitteiden ja raidevirtapiirien testi',
     short: 'Lisälaitetesti',
     turnoutNumber: 'Vaihteen numero (kuten Rocon sovelluksessa)',
     output1: 'Lähtö 1',
@@ -713,8 +713,8 @@ export const fi: Strings = {
     accessoriesHeading: 'Havaitut lisälaitteet',
     noAccessories:
       'Ei vielä yhtään. Käännä jokin tästä tai toisesta sovelluksesta.',
-    feedbackHeading: 'Takaisinilmaisu',
-    noFeedback: 'Takaisinilmaisutuloja ei ole ilmoitettu.',
+    feedbackHeading: 'Raidevirtapiirit',
+    noFeedback: 'Raidevirtapiirien tuloja ei ole ilmoitettu.',
     feedbackSources: {
       rbus: 'R-Bus',
       loconet: 'LocoNet-ilmaisimet',
