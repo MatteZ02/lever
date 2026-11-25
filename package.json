@@ -1,7 +1,7 @@
 {
   "name": "lever",
   "productName": "Lever",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Control station (interlocking) for model railways on a Z21-compatible central unit",
   "main": "out/main/index.js",
   "private": true,
