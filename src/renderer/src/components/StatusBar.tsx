@@ -19,8 +19,13 @@ const trackStatusColor: Record<TrackStatusValue, string> = {
 export const ConnectionIndicator = () => {
   const connection = useEngineStore((state) => state.connection);
   const deviceInfo = useEngineStore((state) => state.deviceInfo);
-  const dotColor =
-    connection.state === 'connected'
+  // Interrupted: still connected and usable, but the central unit has not
+  // answered for a moment.
+  const interrupted =
+    connection.state === 'connected' && connection.interrupted;
+  const dotColor = interrupted
+    ? color.connectionBusy
+    : connection.state === 'connected'
       ? color.connectionOk
       : connection.state === 'disconnected'
         ? color.connectionDown
@@ -34,13 +39,15 @@ export const ConnectionIndicator = () => {
   return (
     <div className="connection" role="status" aria-live="polite">
       <span
-        className={`connection-dot connection-dot--${connection.state}`}
+        className={`connection-dot connection-dot--${interrupted ? 'interrupted' : connection.state}`}
         style={{backgroundColor: dotColor}}
         aria-hidden
       />
       <div>
         <div className="connection-state">
-          {strings.connection[connection.state]}
+          {interrupted
+            ? strings.connection.interrupted
+            : strings.connection[connection.state]}
         </div>
         <div className="connection-detail">
           {connection.host}

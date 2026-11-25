@@ -153,12 +153,19 @@ appears at the top right of the diagram, in every window.
    **Settings → Quick keys** (never Ctrl+Z).
 
 If a turnout of a set route moves, for whatever reason (another control station, a Throttle, the
-Roco app, a handset, or a click here), the route's signals go to **stop at once** and the route
-is shown **broken** (amber). If Lever only finds the move by asking the central unit (_Ask for
-turnout positions every (s)_, for switching the central unit does not report, e.g. from
-WinDigipet on the DR5000), the route is **released** instead: signals to stop, the route gone,
-and a notice names the turnout. A turnout that does not move makes the route **fail**; **Cancel**
-drops it. Level 2 does not lock turnouts or check occupancy (that is Level 3): occupied track
+Roco app, a handset, WinDigipet, or a click here), the route's signals go to **stop at once** and
+the route is **released**; a notice names the turnout. This also holds when Lever finds the move
+by asking the central unit (_Ask for turnout positions every (s)_, or after the connection was
+back).
+
+While Lever cannot confirm a set route's turnouts, the route is shown **not confirmed** (amber),
+with its signals left as they are: the connection is interrupted (top left: _Connection
+interrupted, asking again…_) or was lost and is being made again. When the central unit answers
+again, Lever asks for every turnout's position: a route whose turnouts are all where it needs them
+is **set** again (green), and one with a turnout elsewhere is released. **Release** works on a
+route that is not confirmed too.
+
+A turnout that does not move makes the route **fail**; **Cancel** drops it. Level 2 does not lock turnouts or check occupancy (that is Level 3): occupied track
 stays red under the green route.
 
 **Conflicting routes.** A new route that shares track or a turnout with one of your routes

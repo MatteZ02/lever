@@ -357,10 +357,14 @@ As built (Phases 3 and 5):
 - `src/model/routeSignals.ts`: all signal aspect rules for a route (RTE-5) in one place.
 - `src/interlocking/routes.ts` (`RouteManager`, owned by the `Interlocking`): routes of this
   instance only (MULTI-6). The engine finds the route again from the points sent by a window and
-  the chosen alternative's key. States: setting → set; failed; broken. Manual turnouts are recorded
-  in the route's position when it is set (no confirmation) and listed in the `routeSet` notice. Every
-  turnout change reaches it at once; a set route whose turnout moves sets its signals to stop
-  before anything else (RTE-6c). Release, cancel, undo with history (RTE-6b). A route must start
+  the chosen alternative's key. States: setting → set ⇄ unconfirmed; failed. Manual turnouts are
+  recorded in the route's position when it is set (no confirmation) and listed in the `routeSet`
+  notice. Every turnout change reaches it at once; a set route whose turnout moves sets its signals
+  to stop before anything else and is released (RTE-6c, notice `routeReleasedMoved`). While a
+  turnout's position cannot be relied on (connection interrupted, not reported since the
+  interruption, or unknown after a connection loss) the route is `unconfirmed`, signals left as
+  they are; the engine asks every position again when the connection is back, and the route is set
+  again or released. Release, cancel, undo with history (RTE-6b). A route must start
   in a Level 2 area; Level 1 parts are allowed (the window warns first, MIX-4); higher levels
   are refused until built. Level 3 will add checks and locks per segment around this module.
 

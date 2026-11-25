@@ -104,6 +104,7 @@ const en = {
     connecting: 'Connecting…',
     connected: 'Connected',
     reconnecting: 'Connection lost, retrying…',
+    interrupted: 'Connection interrupted, asking again…',
     centralUnit: 'Central unit',
     address: 'IP address',
     port: 'Port',
@@ -252,7 +253,7 @@ const en = {
       setting: 'Setting… (turnouts moving)',
       set: 'Set',
       failed: (turnout: string) => `Not set: ${turnout} did not move`,
-      broken: (turnout: string) => `Broken: ${turnout} moved; signals at stop`,
+      unconfirmed: 'Not confirmed: waiting for the central unit',
     },
     manualToSet: (turnouts: string) => `Throw by hand: ${turnouts}.`,
     release: 'Release',
@@ -520,6 +521,9 @@ const en = {
     positionRefresh: 'Ask for turnout positions every (s)',
     positionRefreshHelp:
       '0 = off. For central units that do not report turnouts switched by other programs (DR5000: WinDigipet over USB). Lever then asks for the positions of the station on screen this often, and at once when you act.',
+    statusRefresh: 'Ask for central unit status every (s)',
+    statusRefreshHelp:
+      '0 = only every 25 s. Shows STOP, track power and short circuits caused by other devices at once on central units that do not report them (DR5000), and notices a broken connection sooner.',
     feedbackSources: 'Feedback buses used',
     blockReleaseDelay: 'Default block release delay (ms)',
     autoSignals: 'Set signals along routes automatically',
@@ -673,10 +677,8 @@ const en = {
         : 'Route set.',
     routeFailed: (turnout: string) =>
       `Route not set: ${turnout} did not move. Check it, then cancel the route or try again.`,
-    routeBroken: (turnout: string) =>
-      `Route broken: ${turnout} moved. Its signals were set to stop.`,
     routeReleasedMoved: (turnout: string) =>
-      `Route released: ${turnout} was found in another position. Its signals were set to stop.`,
+      `Route released: ${turnout} moved. Its signals were set to stop.`,
     routeCancelled: (from: string, to: string) =>
       `Route ${from} → ${to} cancelled: the new route conflicts with it. Its signals were set to stop.`,
     routeUndone: (skipped: string[], manualBack: string[]) =>

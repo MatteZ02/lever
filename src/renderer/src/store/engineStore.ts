@@ -28,7 +28,12 @@ const NOTICE_LIMIT = 5;
 type EngineState = {
   // False until the first snapshot arrives from the engine.
   ready: boolean;
-  connection: {state: ConnectionStateValue; host: string; port: number};
+  connection: {
+    state: ConnectionStateValue;
+    interrupted: boolean;
+    host: string;
+    port: number;
+  };
   trackStatus: TrackStatusValue;
   deviceInfo: DeviceInfoValue;
   protocolLog: boolean;
@@ -48,7 +53,7 @@ type EngineState = {
 
 export const useEngineStore = create<EngineState>()((set) => ({
   ready: false,
-  connection: {state: 'disconnected', host: '', port: 0},
+  connection: {state: 'disconnected', interrupted: false, host: '', port: 0},
   trackStatus: 'unknown',
   deviceInfo: {},
   protocolLog: false,
@@ -107,7 +112,12 @@ const handleEvent = (data: unknown): void => {
     }
     case 'connection':
       useEngineStore.setState({
-        connection: {state: event.state, host: event.host, port: event.port},
+        connection: {
+          state: event.state,
+          interrupted: event.interrupted,
+          host: event.host,
+          port: event.port,
+        },
       });
       break;
     case 'trackStatus':

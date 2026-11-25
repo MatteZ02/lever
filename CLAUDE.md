@@ -110,7 +110,7 @@ src/model/              PURE: project.ts (schema v2, .lever), migrations.ts, ele
                         editing.ts (pure edit ops), placement.ts.
 src/interlocking/       PURE: Interlocking.ts (Level 1 live state: positions/aspects from outputs,
                         confirmation timeout + one retry, blocks with release delay, train
-                        labels, ACC-4 restore), routes.ts (Level 2 routes: set, broken,
+                        labels, ACC-4 restore), routes.ts (Level 2 routes: set, unconfirmed,
                         release, undo), levels.ts (per-level command checks),
                         accessoryState.ts (commanded vs reported).
 src/shared/             PURE: engine API (Zod, versioned), settings schema, feedback types,
@@ -160,7 +160,13 @@ with 45° legs (turnout legs are one grid step).
 - Broadcast flags: `0x00000001` plus only the configured feedback sources. **Never `0x00010000`.**
   Re-send flags after every (re)connect.
 - All accessory commands go through one rate-limited queue (LOAD-2), `Q=0`, activate → pulse →
-  deactivate → gap. Startup queries go through it too. No polling loops; keepalive after ~25 s idle.
+  deactivate → gap. Startup queries go through it too. No polling loops, except the status poll
+  (`statusRefreshMs`, default 1 s, one `LAN_X_GET_STATUS`; the DR5000 broadcasts no STOP/short)
+  and the optional position refresh. Keepalive after ~25 s idle.
+- A lost reply is not a lost connection: unanswered for 2 s = _interrupted_ (shown, controls
+  stay usable, state kept); only 30 s of silence = lost (state cleared, reconnect). Set routes
+  are `unconfirmed` meanwhile and set again from the re-asked positions; a moved turnout
+  releases a route (no "broken" state).
 - Optional requests (HWINFO, GET_CODE, …) time out with a fallback; features needing newer firmware
   (extended accessories: FW 1.40) are behind version checks. The test z21 start runs FW 1.33.
 - Always split received datagrams into all datasets.

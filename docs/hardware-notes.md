@@ -122,12 +122,15 @@ If a difference cannot be expressed with these, the place to change behaviour is
 - [x] **No track status broadcasts to other clients either:** a passive client (flag `0x1`) got no
       `BC_TRACK_POWER_OFF/ON`, `BC_STOPPED` or `BC_TRACK_SHORT_CIRCUIT` while power went off and
       on from elsewhere; the change showed only in replies to `LAN_X_GET_STATUS` (`0x06` = power
-      off + short circuit, later `0x00`). Lever therefore asks for the status on user actions when
-      the last request is over 2 s old (`STATUS_REFRESH_MIN_AGE_MS`), besides the keepalive.
+      off + short circuit, later `0x00`). Lever therefore asks for the status at a fixed interval
+      (_Ask for central unit status every (s)_, `statusRefreshMs`, default 1 s), and on user
+      actions when the last request is over 2 s old (`STATUS_REFRESH_MIN_AGE_MS`). Before this
+      setting, STOP and short circuits from other devices showed only with the 25 s keepalive.
       `0x06` was a plain power-off reported with the short-circuit bit (see above).
 - [x] **Replies go to the wrong client under simultaneous requests:** two clients sending the
       same request within ~1 ms both got their replies at the **later** sender; the other got
-      nothing. Requests 50 ms apart were answered correctly. Lever recovers by reconnecting, but
+      nothing. Requests 50 ms apart were answered correctly. A lost status reply only marks the
+      connection _interrupted_ for a moment (no reconnect, nothing cleared), but
       with several Throttles a confirmation can be lost (→ retry → _failed_). The stock live test
       also times out on connect for this reason (both engines connect at the same moment).
 - [x] **Broadcast flags are global, not per client:** every client reads back the flags the

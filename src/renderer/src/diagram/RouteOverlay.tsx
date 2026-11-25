@@ -1,6 +1,6 @@
 // Routes on the diagram of one view (LOOK-2, LOOK-3): set routes as green
 // dashes over the track (over red where it is occupied, so both show), a
-// route being set with moving dashes, a broken or failed route with
+// route being set with moving dashes, an unconfirmed or failed route with
 // dash-dot amber, and the operator's preview with accent dashes. The picked
 // start, via points and end are ringed.
 import {Project} from '../../../model/project';
@@ -20,7 +20,7 @@ const styleFor = (state: RouteLive['state'] | 'preview') => {
         dash: diagramDash.routeSetting,
         className: 'route-setting',
       };
-    case 'broken':
+    case 'unconfirmed':
     case 'failed':
       return {stroke: color.trackRouteBroken, dash: diagramDash.routeBroken};
     case 'preview':

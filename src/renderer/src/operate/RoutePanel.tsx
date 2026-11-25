@@ -393,16 +393,14 @@ const ActiveRoute = ({
   const state =
     route.state === 'failed' && route.failedTurnoutId
       ? text.states.failed(name(route.failedTurnoutId))
-      : route.state === 'broken' && route.brokenTurnoutId
-        ? text.states.broken(name(route.brokenTurnoutId))
-        : text.states[route.state as 'setting' | 'set'];
+      : text.states[route.state as 'setting' | 'set' | 'unconfirmed'];
   return (
     <div className="route-row">
       <strong>
         {name(route.from)} → {name(route.to)}
       </strong>
       <span className="small">{state}</span>
-      {route.manualToSet.length > 0 && route.state !== 'broken' && (
+      {route.manualToSet.length > 0 && (
         <span className="small">
           {text.manualToSet(
             route.manualToSet
@@ -414,7 +412,7 @@ const ActiveRoute = ({
           )}
         </span>
       )}
-      {route.state === 'set' || route.state === 'broken' ? (
+      {route.state === 'set' || route.state === 'unconfirmed' ? (
         <button
           type="button"
           className="button button--small"

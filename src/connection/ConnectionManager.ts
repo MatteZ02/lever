@@ -37,17 +37,29 @@ export const DEVICE_INFO_TIMEOUT_MS = 2000;
 // The Z21 drops clients after 60 s of silence (§1.1). Send LAN_X_GET_STATUS
 // when nothing has been sent, or nothing received, for this long.
 export const KEEPALIVE_IDLE_MS = 25000;
-export const KEEPALIVE_CHECK_INTERVAL_MS = 5000;
+// How often the connection's health is checked (probe, status poll).
+export const HEALTH_CHECK_INTERVAL_MS = 500;
+// The track status can also be asked at a fixed interval (setStatusPoll):
+// the DR5000 sends no STOP, power or short-circuit changes made by other
+// devices, so without it they would show only with the next keepalive.
+// Never more often than this.
+export const MIN_STATUS_POLL_MS = 500;
+// A status request (keepalive, poll) unanswered for this long: the connection
+// is "interrupted". It stays connected and usable (UDP loses packets, more so
+// over WiFi), the request is sent again this often, and the first datagram
+// received ends the interruption.
+export const PROBE_TIMEOUT_MS = 2000;
 // On a user action, the track status is asked again if the last request is
 // at least this old. Some central units (the DR5000, FW 1.29) do not send
 // track power, STOP or short-circuit changes made by other devices to Lever,
 // so without this they would show up only with the next keepalive.
 export const STATUS_REFRESH_MIN_AGE_MS = 2000;
-// Nothing received for this long (one keepalive went unanswered): connection
-// is lost.
-export const CONNECTION_LOST_AFTER_MS = 35000;
+// Nothing received for this long, although asked every PROBE_TIMEOUT_MS: the
+// connection is lost. Lever logs off and connects again, and everything the
+// central unit reported is asked again.
+export const CONNECTION_LOST_AFTER_MS = 30000;
 // Delay before each reconnect attempt; the last value repeats.
-export const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000, 20000, 30000];
+export const RECONNECT_DELAYS_MS = [1000, 2000, 3000, 5000];
 
 export type ConnectionState =
   'disconnected' | 'connecting' | 'connected' | 'reconnecting';
@@ -68,6 +80,8 @@ export type ProtocolLogEntry = {
 
 export type ConnectionEvents = {
   state: ConnectionState;
+  // Connected, but recent requests went unanswered (see PROBE_TIMEOUT_MS).
+  interrupted: boolean;
   trackStatus: TrackStatus;
   deviceInfo: DeviceInfo;
   systemState: SystemState;
@@ -124,12 +138,16 @@ export class ConnectionManager {
   private connectTimer: ReturnType<typeof setTimeout> | null = null;
   private deviceInfoTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  private keepaliveTimer: ReturnType<typeof setInterval> | null = null;
+  private healthTimer: ReturnType<typeof setInterval> | null = null;
 
   private lastSentAt = 0;
   private lastReceivedAt = 0;
-  private lastKeepaliveAt = 0;
   private lastStatusRequestAt = 0;
+  // When the status request still waiting for an answer was sent (any
+  // datagram received counts as the answer); null if none is waiting.
+  private probeSentAt: number | null = null;
+  private interrupted = false;
+  private statusPollMs = 0;
 
   private deviceInfo: DeviceInfo = {};
   private trackStatus: TrackStatus = 'unknown';
@@ -177,6 +195,17 @@ export class ConnectionManager {
 
   getState(): ConnectionState {
     return this.state;
+  }
+
+  isInterrupted(): boolean {
+    return this.interrupted;
+  }
+
+  // Asks for the track status this often while connected; 0 = only the
+  // keepalive (a central unit that broadcasts changes needs nothing more).
+  setStatusPoll(intervalMs: number): void {
+    this.statusPollMs =
+      intervalMs > 0 ? Math.max(MIN_STATUS_POLL_MS, intervalMs) : 0;
   }
 
   getTrackStatus(): TrackStatus {
@@ -234,8 +263,9 @@ export class ConnectionManager {
   }
 
   requestStatus(): void {
-    this.lastStatusRequestAt = Date.now();
-    this.send([lanXGetStatus()]);
+    if (this.state === 'connected') {
+      this.sendProbe(Date.now());
+    }
   }
 
   // Asks for the track status if the last request is older than
@@ -306,6 +336,7 @@ export class ConnectionManager {
     // again on every login (§2.16): first ask which flags are set, then add
     // Lever's to them (see othersFlags).
     this.lastStatusRequestAt = Date.now();
+    this.probeSentAt = null;
     this.othersFlags = 0;
     this.awaitingFlags = true;
     this.sendNow([lanGetBroadcastFlags(), lanXGetStatus()]);
@@ -318,18 +349,7 @@ export class ConnectionManager {
 
   private onConnected(): void {
     this.clearTimer('connectTimer');
-    // The central unit answers; if the flags request is not answered soon,
-    // set Lever's own flags.
-    if (this.awaitingFlags) {
-      this.flagsTimer = setTimeout(() => {
-        this.flagsTimer = null;
-        if (this.awaitingFlags) {
-          this.awaitingFlags = false;
-          this.log('info', 'No reply to the broadcast flags request');
-          this.sendNow([lanSetBroadcastFlags(this.flagsToSet())]);
-        }
-      }, FLAGS_REPLY_TIMEOUT_MS);
-    }
+    this.startFlagsTimer();
     this.reconnectAttempt = 0;
     this.setState('connected');
 
@@ -341,13 +361,15 @@ export class ConnectionManager {
       }
     }, DEVICE_INFO_TIMEOUT_MS);
 
-    this.lastKeepaliveAt = Date.now();
-    this.keepaliveTimer = setInterval(() => {
-      this.checkKeepalive();
-    }, KEEPALIVE_CHECK_INTERVAL_MS);
+    this.healthTimer = setInterval(() => {
+      this.checkHealth();
+    }, HEALTH_CHECK_INTERVAL_MS);
   }
 
-  private checkKeepalive(): void {
+  // Keepalive, status poll and connection health, all with one request:
+  // LAN_X_GET_STATUS. A lost answer only interrupts the connection; it is
+  // lost when nothing at all comes back for CONNECTION_LOST_AFTER_MS.
+  private checkHealth(): void {
     const now = Date.now();
     if (now - this.lastReceivedAt >= CONNECTION_LOST_AFTER_MS) {
       this.log('info', 'Connection lost');
@@ -355,15 +377,62 @@ export class ConnectionManager {
       this.scheduleReconnect();
       return;
     }
-    const sendIdle = now - this.lastSentAt >= KEEPALIVE_IDLE_MS;
-    const receiveIdle =
-      now - this.lastReceivedAt >= KEEPALIVE_IDLE_MS &&
-      now - this.lastKeepaliveAt >= KEEPALIVE_IDLE_MS;
-    if (sendIdle || receiveIdle) {
-      this.lastKeepaliveAt = now;
-      this.lastStatusRequestAt = now;
-      this.sendNow([lanXGetStatus()]);
+    if (this.probeSentAt !== null) {
+      if (now - this.probeSentAt >= PROBE_TIMEOUT_MS) {
+        if (!this.interrupted) {
+          this.log('info', 'No reply; connection interrupted');
+        }
+        this.setInterrupted(true);
+        this.probeSentAt = null;
+        this.sendProbe(now);
+      }
+      return;
     }
+    const pollDue =
+      this.statusPollMs > 0 &&
+      now - this.lastStatusRequestAt >= this.statusPollMs;
+    const sendIdle = now - this.lastSentAt >= KEEPALIVE_IDLE_MS;
+    const receiveIdle = now - this.lastReceivedAt >= KEEPALIVE_IDLE_MS;
+    if (pollDue || sendIdle || receiveIdle) {
+      this.sendProbe(now);
+    }
+  }
+
+  // A status request; it also tells whether the central unit still answers.
+  private sendProbe(now: number): void {
+    this.lastStatusRequestAt = now;
+    this.probeSentAt ??= now;
+    this.sendNow([lanXGetStatus()]);
+  }
+
+  // The central unit answers; if the flags request is not answered soon,
+  // set Lever's own flags.
+  private startFlagsTimer(): void {
+    this.clearTimer('flagsTimer');
+    if (!this.awaitingFlags) {
+      return;
+    }
+    this.flagsTimer = setTimeout(() => {
+      this.flagsTimer = null;
+      if (this.awaitingFlags) {
+        this.awaitingFlags = false;
+        this.log('info', 'No reply to the broadcast flags request');
+        this.sendNow([lanSetBroadcastFlags(this.flagsToSet())]);
+      }
+    }, FLAGS_REPLY_TIMEOUT_MS);
+  }
+
+  private setInterrupted(interrupted: boolean): void {
+    if (interrupted === this.interrupted) {
+      return;
+    }
+    this.interrupted = interrupted;
+    // What the central unit reported last may be out of date.
+    if (interrupted && this.trackStatus !== 'unknown') {
+      this.trackStatus = 'unknown';
+      this.events.emit('trackStatus', 'unknown');
+    }
+    this.events.emit('interrupted', interrupted);
   }
 
   private scheduleReconnect(): void {
@@ -389,9 +458,10 @@ export class ConnectionManager {
     this.clearTimer('deviceInfoTimer');
     this.clearTimer('flagsTimer');
     this.awaitingFlags = false;
-    if (this.keepaliveTimer !== null) {
-      clearInterval(this.keepaliveTimer);
-      this.keepaliveTimer = null;
+    this.probeSentAt = null;
+    if (this.healthTimer !== null) {
+      clearInterval(this.healthTimer);
+      this.healthTimer = null;
     }
 
     if (this.transport) {
@@ -426,8 +496,20 @@ export class ConnectionManager {
       const types = messages.map((message) => message.type).join(', ');
       this.log('in', `${toHex(data)}  (${types})`);
     }
+    this.probeSentAt = null;
     if (this.state !== 'connected') {
       this.onConnected();
+    } else if (this.interrupted) {
+      this.log('info', 'Connection resumed');
+      // The central unit may have dropped Lever meanwhile (§1.1): the flags
+      // are set again as at login, and the status the interruption hid is
+      // asked for.
+      this.awaitingFlags = true;
+      this.sendNow([lanGetBroadcastFlags(), lanXGetStatus()]);
+      this.startFlagsTimer();
+      this.lastStatusRequestAt = Date.now();
+      this.probeSentAt = this.lastStatusRequestAt;
+      this.setInterrupted(false);
     }
     messages.forEach((message) => {
       this.handleMessage(message);
@@ -512,6 +594,9 @@ export class ConnectionManager {
   private setState(state: ConnectionState): void {
     if (state !== this.state) {
       this.state = state;
+      if (state !== 'connected') {
+        this.setInterrupted(false);
+      }
       if (state !== 'connected' && this.trackStatus !== 'unknown') {
         this.trackStatus = 'unknown';
         this.events.emit('trackStatus', 'unknown');

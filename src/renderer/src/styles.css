@@ -70,7 +70,8 @@ body {
 
 /* Shape cue in addition to colour: hollow while not connected. */
 .connection-dot--connecting,
-.connection-dot--reconnecting {
+.connection-dot--reconnecting,
+.connection-dot--interrupted {
   border: 3px solid var(--color-surface);
   outline: 2px solid var(--color-connectionBusy);
 }

@@ -10,6 +10,8 @@ import {
   DEVICE_INFO_TIMEOUT_MS,
   FLAGS_REPLY_TIMEOUT_MS,
   KEEPALIVE_IDLE_MS,
+  MIN_STATUS_POLL_MS,
+  PROBE_TIMEOUT_MS,
   RECONNECT_DELAYS_MS,
   STATUS_REFRESH_MIN_AGE_MS,
 } from '../ConnectionManager';
@@ -42,10 +44,12 @@ const setup = (
   });
   const states: ConnectionState[] = [];
   const trackStatuses: TrackStatus[] = [];
+  const interruptions: boolean[] = [];
   manager.on('state', (state) => states.push(state));
   manager.on('trackStatus', (status) => trackStatuses.push(status));
+  manager.on('interrupted', (interrupted) => interruptions.push(interrupted));
   const current = () => transports[transports.length - 1];
-  return {manager, transports, current, states, trackStatuses};
+  return {manager, transports, current, states, trackStatuses, interruptions};
 };
 
 // Lets the async socket open complete.
@@ -291,22 +295,63 @@ describe('keepalive and connection loss', () => {
     current().receive(HWINFO_FW_143);
     vi.advanceTimersByTime(KEEPALIVE_IDLE_MS - 1000);
     expect(current().takeSent()).toEqual([]);
-    vi.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(1000);
     expect(current().takeSent()).toEqual([GET_STATUS]);
   });
 
   it('probes even while sending, if nothing is received', async () => {
     const {manager, current} = await connected();
-    // Send something every second for 30 s without any reply.
-    for (let second = 1; second <= 30; second++) {
+    current().receive(HWINFO_FW_143);
+    current().takeSent();
+    // Send something every second without any reply.
+    for (let second = 1; second <= KEEPALIVE_IDLE_MS / 1000; second++) {
       manager.requestSystemState();
       vi.advanceTimersByTime(1000);
     }
-    expect(
-      current()
-        .takeSent()
-        .filter((s) => s === GET_STATUS),
-    ).toHaveLength(1);
+    expect(current().takeSent()).toContain(GET_STATUS);
+  });
+
+  it('given one unanswered request, the connection is interrupted but stays usable', async () => {
+    const {manager, current, interruptions, trackStatuses} = await connected();
+    current().receive(HWINFO_FW_143);
+    vi.advanceTimersByTime(KEEPALIVE_IDLE_MS);
+    expect(current().takeSent()).toEqual([GET_STATUS]);
+
+    vi.advanceTimersByTime(PROBE_TIMEOUT_MS);
+    expect(manager.isInterrupted()).toBe(true);
+    expect(interruptions).toEqual([true]);
+    expect(manager.getState()).toBe('connected');
+    // Last reported status may be out of date.
+    expect(trackStatuses.at(-1)).toBe('unknown');
+    // Asked again, and commands still go out.
+    expect(current().takeSent()).toEqual([GET_STATUS]);
+    manager.emergencyStop();
+    expect(current().takeSent()).toEqual(['06 00 40 00 80 80']);
+  });
+
+  it('asks again every PROBE_TIMEOUT_MS while interrupted', async () => {
+    const {current} = await connected();
+    current().receive(HWINFO_FW_143);
+    vi.advanceTimersByTime(KEEPALIVE_IDLE_MS);
+    current().takeSent();
+    vi.advanceTimersByTime(PROBE_TIMEOUT_MS * 2);
+    expect(current().takeSent()).toEqual([GET_STATUS, GET_STATUS]);
+  });
+
+  it('when a reply comes, the interruption ends; flags and status are asked again', async () => {
+    const {manager, current, interruptions, trackStatuses} = await connected();
+    current().receive(HWINFO_FW_143);
+    vi.advanceTimersByTime(KEEPALIVE_IDLE_MS + PROBE_TIMEOUT_MS);
+    current().takeSent();
+
+    current().receive(STATUS_NORMAL);
+    expect(manager.isInterrupted()).toBe(false);
+    expect(interruptions).toEqual([true, false]);
+    expect(trackStatuses.at(-1)).toBe('normal');
+    // LAN_GET_BROADCASTFLAGS + LAN_X_GET_STATUS, as at login.
+    expect(current().takeSent()).toEqual([LOGIN]);
+    current().receive(FLAGS_NONE);
+    expect(current().takeSent()).toEqual([SET_FLAGS_1]);
   });
 
   it('reconnects with logoff when nothing is received', async () => {
@@ -328,6 +373,39 @@ describe('keepalive and connection loss', () => {
       current().receive(STATUS_NORMAL);
     }
     expect(manager.getState()).toBe('connected');
+  });
+});
+
+describe('status poll', () => {
+  it('given a poll interval, the status is asked that often while answered', async () => {
+    const {manager, current} = await connected();
+    current().receive(HWINFO_FW_143);
+    manager.setStatusPoll(1000);
+    current().takeSent();
+    for (let i = 0; i < 3; i++) {
+      vi.advanceTimersByTime(1000);
+      expect(current().takeSent()).toEqual([GET_STATUS]);
+      current().receive(STATUS_NORMAL);
+    }
+  });
+
+  it('given another device stopped the layout, the stop shows with the next poll', async () => {
+    const {manager, current, trackStatuses} = await connected();
+    manager.setStatusPoll(1000);
+    vi.advanceTimersByTime(1000);
+    current().receive('08 00 40 00 62 22 01 41'); // status: emergency stop
+    expect(trackStatuses.at(-1)).toBe('emergencyStop');
+  });
+
+  it('never polls faster than the minimum', async () => {
+    const {manager, current} = await connected();
+    current().receive(HWINFO_FW_143);
+    manager.setStatusPoll(10);
+    current().takeSent();
+    vi.advanceTimersByTime(MIN_STATUS_POLL_MS - 1);
+    expect(current().takeSent()).toEqual([]);
+    vi.advanceTimersByTime(1);
+    expect(current().takeSent()).toEqual([GET_STATUS]);
   });
 });
 

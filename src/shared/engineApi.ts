@@ -178,8 +178,8 @@ export const engineNoticeSchema = z.object({
     'routeRefused',
     'routeSet',
     'routeFailed',
-    'routeBroken',
-    // Released: asking the central unit showed a turnout of it moved.
+    // Released: a turnout of the set route moved (reported or found by
+    // asking the central unit).
     'routeReleasedMoved',
     // Cancelled because a new route conflicts with it.
     'routeCancelled',
@@ -206,6 +206,8 @@ export type EngineNotice = z.infer<typeof engineNoticeSchema>;
 export const engineSnapshotSchema = z.object({
   connection: z.object({
     state: connectionStateSchema,
+    // Connected, but the central unit has not answered for a moment.
+    interrupted: z.boolean(),
     host: z.string(),
     port: z.number(),
   }),
@@ -234,6 +236,8 @@ export const engineEventSchema = z.discriminatedUnion('type', [
     v: version,
     type: z.literal('connection'),
     state: connectionStateSchema,
+    // Connected, but the central unit has not answered for a moment.
+    interrupted: z.boolean(),
     host: z.string(),
     port: z.number(),
   }),

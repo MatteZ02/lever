@@ -7,11 +7,14 @@
 // recorded in the route's position when it is set, without asking; the
 // operator is told which ones to throw by hand (the "route set" notice and
 // the route panel). only then are its signals
-// set (RTE-5). A turnout of a set route that moves makes it "broken": its
-// signals go to stop at once (RTE-6c). A move found by asking the central
-// unit (the position refresh, for central units that do not report other
-// programs' switching) releases the route instead: signals to stop and the
-// route gone, with a notice naming the turnout. Level 2 has no other
+// set (RTE-5). A turnout of a set route that moves releases the route: its
+// signals go to stop at once (RTE-6c) and the route is gone, with a notice
+// naming the turnout. This holds however the move became known: reported
+// as it happened, or found by asking the central unit (position refresh, or
+// the positions asked again after a reconnect). A set route whose turnouts
+// cannot be confirmed for a moment (connection interrupted or lost, position
+// unknown) is "unconfirmed": kept, with its signals as they are, and set
+// again once every turnout is reported in place. Level 2 has no other
 // protection: nothing is locked and occupancy is not checked (RTE-7).
 // Level 3 will add checks and locks per area (MIX-4) around this module.
 import {Project} from '../model/project';
@@ -30,8 +33,7 @@ export type RouteNotice =
   // `manualThrow`: manual turnouts to throw by hand for this route.
   | {code: 'routeSet'; routeId: string; manualThrow: ManualThrow[]}
   | {code: 'routeFailed'; routeId: string; elementId: string}
-  | {code: 'routeBroken'; routeId: string; elementId: string}
-  // Released because asking the central unit showed `elementId` moved.
+  // Released because `elementId` moved.
   | {code: 'routeReleasedMoved'; routeId: string; elementId: string}
   // Cancelled because a new route conflicts with it (`elementId`: its
   // start, `toElementId`: its end).
@@ -55,9 +57,9 @@ export type ManualThrow = {turnoutId: string; position: string};
 export type RouteDeps = {
   project: () => Project | null;
   turnout: (id: string) => TurnoutLive | undefined;
-  // The turnout's latest change came from a reply to a query (position
-  // refresh), not from a report of the switching itself.
-  movedByQuery: (id: string) => boolean;
+  // The turnout's position cannot be relied on right now (connection
+  // interrupted, not reported since, or unknown).
+  unconfirmed: (id: string) => boolean;
   setTurnout: (id: string, position: string) => void;
   setSignal: (id: string, aspectId: string) => void;
   // A manual turnout's position, recorded when a route needs it.
@@ -78,7 +80,6 @@ type Route = {
   // Manual turnouts not already where the route needs them.
   manualThrow: ManualThrow[];
   failedTurnoutId?: string;
-  brokenTurnoutId?: string;
 };
 
 export class RouteManager {
@@ -110,9 +111,6 @@ export class RouteManager {
         areas: route.plan.areas,
         ...(route.failedTurnoutId
           ? {failedTurnoutId: route.failedTurnoutId}
-          : {}),
-        ...(route.brokenTurnoutId
-          ? {brokenTurnoutId: route.brokenTurnoutId}
           : {}),
       };
     }
@@ -181,7 +179,7 @@ export class RouteManager {
   // RTE-8: a route not yet set is dropped; its turnouts stay where they are.
   cancel(routeId: string): void {
     const route = this.routes.get(routeId);
-    if (route && route.state !== 'set') {
+    if (route && route.state !== 'set' && route.state !== 'unconfirmed') {
       this.routes.delete(routeId);
       this.deps.changed();
     }
@@ -264,8 +262,9 @@ export class RouteManager {
     this.deps.changed();
   }
 
-  // Elements no longer in the project break the routes that use them.
-  layoutChanged(): void {
+  // Every route again: after an edit (elements no longer in the project), or
+  // when the connection is interrupted or back.
+  recheck(): void {
     let changed = false;
     for (const route of this.routes.values()) {
       changed = this.evaluate(route) || changed;
@@ -279,12 +278,15 @@ export class RouteManager {
   private evaluate(route: Route): boolean {
     const before = route.state;
     const addressed = route.plan.turnouts.filter((t) => !t.manual);
-    if (route.state === 'set') {
-      const moved = route.plan.turnouts.find(
-        (t) => this.deps.turnout(t.turnoutId)?.position !== t.position,
-      );
-      if (moved && this.deps.movedByQuery(moved.turnoutId)) {
-        // Found by asking: released at once, signals to stop first.
+    if (route.state === 'set' || route.state === 'unconfirmed') {
+      // An unknown position is not a move: it waits for the next report.
+      const moved = route.plan.turnouts.find((t) => {
+        const position = this.deps.turnout(t.turnoutId)?.position;
+        return position !== undefined && position !== t.position;
+      });
+      if (moved) {
+        // RTE-6c / MULTI-4: signals to stop at once, the route released,
+        // then the operator is told.
         this.signalsToStop(route);
         this.routes.delete(route.id);
         this.deps.notice({
@@ -294,17 +296,9 @@ export class RouteManager {
         });
         return true;
       }
-      if (moved) {
-        // RTE-6c / MULTI-4: signals to stop at once, then tell the operator.
-        route.state = 'broken';
-        route.brokenTurnoutId = moved.turnoutId;
-        this.signalsToStop(route);
-        this.deps.notice({
-          code: 'routeBroken',
-          routeId: route.id,
-          elementId: moved.turnoutId,
-        });
-      }
+      route.state = addressed.some((t) => this.deps.unconfirmed(t.turnoutId))
+        ? 'unconfirmed'
+        : 'set';
       return route.state !== before;
     }
     if (route.state !== 'setting') {
@@ -329,7 +323,7 @@ export class RouteManager {
       return (
         live?.position === t.position &&
         live.commanded === undefined &&
-        live.status !== 'unknown'
+        !this.deps.unconfirmed(t.turnoutId)
       );
     });
     if (!inPlace) {

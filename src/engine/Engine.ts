@@ -126,8 +126,17 @@ export class Engine {
     });
 
     connection.on('state', (state) => {
-      this.broadcast({type: 'connection', state, ...connection.getAddress()});
+      this.broadcastConnection();
       this.onConnectionState(state === 'connected');
+    });
+    connection.on('interrupted', (interrupted) => {
+      this.broadcastConnection();
+      this.interlocking.setInterrupted(interrupted);
+      if (!interrupted) {
+        // Reports may have been lost meanwhile: ask every position again,
+        // so set routes are confirmed (or released if a turnout moved).
+        this.queryAll();
+      }
     });
     connection.on('trackStatus', (status) => {
       this.broadcast({type: 'trackStatus', status});
@@ -235,6 +244,7 @@ export class Engine {
     this.interlocking.load(project);
     this.setAccessoryGap(project.settings.centralUnit.accessoryGapMs);
     this.setFeedbackSources(project.settings.centralUnit.feedbackSources);
+    this.connection.setStatusPoll(project.settings.centralUnit.statusRefreshMs);
     const refreshMs = project.settings.centralUnit.positionRefreshMs;
     this.setPositionRefresh(
       refreshMs > 0 ? Math.max(MIN_POSITION_REFRESH_MS, refreshMs) : 0,
@@ -274,6 +284,7 @@ export class Engine {
     return {
       connection: {
         state: this.connection.getState(),
+        interrupted: this.connection.isInterrupted(),
         ...this.connection.getAddress(),
       },
       trackStatus: this.connection.getTrackStatus(),
@@ -406,11 +417,7 @@ export class Engine {
       return;
     }
     this.startPositionRefresh();
-    // Startup state, rate-limited through the queue, never as a burst
-    // (LOAD-3): every accessory of the layout, and any touched by hand.
-    [...new Set([...this.interlocking.addresses(), ...this.knownAccessories])]
-      .sort((a, b) => a - b)
-      .forEach((fAdr) => this.query(fAdr));
+    this.queryAll();
     feedbackStartupQueries(this.feedbackSources).forEach((job) =>
       this.enqueue(job),
     );
@@ -419,6 +426,23 @@ export class Engine {
       this.pendingRestore = null;
       this.interlocking.restoreTurnouts(positions);
     }
+  }
+
+  // Startup state, rate-limited through the queue, never as a burst
+  // (LOAD-3): every accessory of the layout, and any touched by hand.
+  private queryAll(): void {
+    [...new Set([...this.interlocking.addresses(), ...this.knownAccessories])]
+      .sort((a, b) => a - b)
+      .forEach((fAdr) => this.query(fAdr));
+  }
+
+  private broadcastConnection(): void {
+    this.broadcast({
+      type: 'connection',
+      state: this.connection.getState(),
+      interrupted: this.connection.isInterrupted(),
+      ...this.connection.getAddress(),
+    });
   }
 
   // Positions the central unit confirmed are the last known ones (ACC-4).

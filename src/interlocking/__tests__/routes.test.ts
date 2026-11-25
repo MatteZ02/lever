@@ -210,7 +210,7 @@ describe('setting a route (RTE-4, RTE-5)', () => {
 });
 
 describe('a set route that changes (RTE-6c, MULTI-4)', () => {
-  it('when another client throws one of its turnouts, its signals go to stop and it is broken', () => {
+  it('when another client throws one of its turnouts, its signals go to stop and it is released', () => {
     const {interlocking, jobs, notices, reportJobs, route, signalOutputs} =
       setup(layout());
     interlocking.setRoute('S1', 'S4', []);
@@ -219,10 +219,10 @@ describe('a set route that changes (RTE-6c, MULTI-4)', () => {
     jobs.splice(0);
 
     interlocking.accessoryReport(0, 'output1', false); // T1 back to straight
-    expect(route()).toMatchObject({state: 'broken', brokenTurnoutId: 'T1'});
+    expect(interlocking.state().routes).toEqual({});
     expect(signalOutputs(jobs)).toEqual(['S1:0']); // S1 to stop
     expect(notices).toContainEqual(
-      expect.objectContaining({code: 'routeBroken', elementId: 'T1'}),
+      expect.objectContaining({code: 'routeReleasedMoved', elementId: 'T1'}),
     );
   });
 
@@ -258,7 +258,7 @@ describe('a set route that changes (RTE-6c, MULTI-4)', () => {
   });
 
   it('the same when this operator throws it (Level 2 does not lock)', () => {
-    const {interlocking, reportJobs, route} = setup(layout());
+    const {interlocking, reportJobs} = setup(layout());
     interlocking.setRoute('S1', 'S4', []);
     reportJobs();
     interlocking.command({
@@ -267,7 +267,75 @@ describe('a set route that changes (RTE-6c, MULTI-4)', () => {
       position: 'straight',
     });
     reportJobs();
-    expect(route().state).toBe('broken');
+    expect(interlocking.state().routes).toEqual({});
+  });
+});
+
+describe('a set route while the connection is unreliable', () => {
+  const setRoute = () => {
+    const context = setup(layout());
+    context.interlocking.setRoute('S1', 'S4', []);
+    context.reportJobs();
+    context.jobs.splice(0);
+    return context;
+  };
+
+  it('given an interruption, the route is unconfirmed and its signals stay', () => {
+    const {interlocking, jobs, notices, route} = setRoute();
+    interlocking.setInterrupted(true);
+    expect(route().state).toBe('unconfirmed');
+    expect(jobs).toEqual([]);
+    expect(notices.map((n) => n.code)).not.toContain('routeReleasedMoved');
+  });
+
+  it('when the connection is back, it is set again once its turnouts are reported in place', () => {
+    const {interlocking, jobs, route} = setRoute();
+    interlocking.setInterrupted(true);
+    interlocking.setInterrupted(false);
+    // Not reported since the interruption: still unconfirmed.
+    expect(route().state).toBe('unconfirmed');
+    interlocking.accessoryReport(0, 'output2', true); // T1 still diverging
+    expect(route().state).toBe('set');
+    expect(jobs).toEqual([]);
+  });
+
+  it('when the connection is back and a turnout was moved meanwhile, the route is released', () => {
+    const {interlocking, jobs, notices, signalOutputs} = setRoute();
+    interlocking.setInterrupted(true);
+    interlocking.setInterrupted(false);
+    interlocking.accessoryReport(0, 'output1', true); // T1 now straight
+    expect(interlocking.state().routes).toEqual({});
+    expect(signalOutputs(jobs)).toEqual(['S1:0']);
+    expect(notices).toContainEqual(
+      expect.objectContaining({code: 'routeReleasedMoved', elementId: 'T1'}),
+    );
+  });
+
+  it('given the connection was lost, the route waits for the start-up reports and is restored', () => {
+    const {interlocking, jobs, route} = setRoute();
+    interlocking.connectionLost();
+    expect(route().state).toBe('unconfirmed');
+    // After reconnecting, every position is asked again.
+    interlocking.accessoryReport(0, 'output2', true);
+    interlocking.accessoryReport(1, 'output1', true);
+    expect(route().state).toBe('set');
+    expect(jobs).toEqual([]);
+  });
+
+  it('given the connection was lost, a turnout found elsewhere after reconnecting releases the route', () => {
+    const {interlocking, route} = setRoute();
+    interlocking.connectionLost();
+    expect(route().state).toBe('unconfirmed');
+    interlocking.accessoryReport(0, 'output1', true);
+    expect(interlocking.state().routes).toEqual({});
+  });
+
+  it('an unconfirmed route can be released by the operator', () => {
+    const {interlocking, jobs, route, signalOutputs} = setRoute();
+    interlocking.setInterrupted(true);
+    interlocking.releaseRoute(route().id);
+    expect(interlocking.state().routes).toEqual({});
+    expect(signalOutputs(jobs)).toEqual(['S1:0']);
   });
 });
 
@@ -302,10 +370,15 @@ describe('releasing and undoing (RTE-6, RTE-6b)', () => {
     );
     reportJobs();
 
-    // Set again; then someone else moves T1 before the undo.
+    // Set again; then T1 is commanded elsewhere before the undo (not yet
+    // reported: a reported move would have released the route).
     interlocking.setRoute('S1', 'S4', []);
     reportJobs();
-    interlocking.accessoryReport(0, 'output1', false);
+    interlocking.command({
+      type: 'setTurnout',
+      elementId: 'T1',
+      position: 'straight',
+    });
     jobs.splice(0);
     interlocking.undoRoute();
     expect(jobs.filter((j) => j.kind === 'switch' && j.tag === 'T1')).toEqual(
@@ -338,9 +411,9 @@ describe('mixed Level 1 and Level 2 areas (MIX-4, MIX-6, MIX-8)', () => {
     ]);
     reportJobs();
     expect(route().state).toBe('set');
-    // A turnout in the Level 1 part breaks the route too (RTE-6c).
+    // A turnout in the Level 1 part releases the route too (RTE-6c).
     interlocking.accessoryReport(1, 'output1', false);
-    expect(route().state).toBe('broken');
+    expect(interlocking.state().routes).toEqual({});
   });
 
   it('lowering the station to Level 1 while a route is set moves nothing (MIX-6)', () => {

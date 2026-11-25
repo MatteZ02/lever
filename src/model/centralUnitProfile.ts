@@ -35,6 +35,11 @@ export const centralUnitProfileSchema = z.object({
   // and at once on an operator's action when they are a few seconds old.
   // 0 = off: a Z21 reports changes itself.
   positionRefreshMs: z.number().int().min(0).max(600000).default(0),
+  // The DR5000 does not tell Lever about STOP, track power or a short
+  // circuit caused by other devices; Lever asks for the track status this
+  // often (it also notices a lost connection sooner). 0 = only the
+  // keepalive, enough for a Z21, which reports them itself.
+  statusRefreshMs: z.number().int().min(0).max(60000).default(1000),
   // Feedback buses the layout uses (LOAD-1, BLK-1).
   feedbackSources: z.array(feedbackSourceSchema).default([]),
 });

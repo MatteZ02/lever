@@ -77,8 +77,10 @@ export const routeLiveSchema = z.object({
   to: z.string(),
   via: z.array(z.string()),
   // setting: turnouts moving; set: in place, signals set; failed: a turnout
-  // did not move; broken: a turnout moved after it was set (signals to stop).
-  state: z.enum(['setting', 'set', 'failed', 'broken']),
+  // did not move; unconfirmed: was set, but its turnouts cannot be confirmed
+  // right now (connection interrupted or lost; waits for the reports). A
+  // turnout that moves after the route was set releases the route.
+  state: z.enum(['setting', 'set', 'failed', 'unconfirmed']),
   segments: z.array(
     z.object({viewId: z.string(), points: z.array(gridPointSchema)}),
   ),
@@ -101,7 +103,6 @@ export const routeLiveSchema = z.object({
     }),
   ),
   failedTurnoutId: z.string().optional(),
-  brokenTurnoutId: z.string().optional(),
 });
 export type RouteLive = z.infer<typeof routeLiveSchema>;
 

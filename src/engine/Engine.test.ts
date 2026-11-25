@@ -2,6 +2,7 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {
   CONNECTION_LOST_AFTER_MS,
   ConnectionManager,
+  PROBE_TIMEOUT_MS,
   RECONNECT_DELAYS_MS,
 } from '../connection/ConnectionManager';
 import {FakeTransport} from '../connection/testUtils/fakeTransport';
@@ -82,7 +83,12 @@ describe('Engine', () => {
         v: ENGINE_API_VERSION,
         type: 'snapshot',
         snapshot: {
-          connection: {state: 'connected', host: '192.168.0.111', port: 21105},
+          connection: {
+            state: 'connected',
+            interrupted: false,
+            host: '192.168.0.111',
+            port: 21105,
+          },
           trackStatus: 'normal',
           deviceInfo: {},
           protocolLog: false,
@@ -307,6 +313,24 @@ describe('position refresh (positionRefreshMs)', () => {
     const thrown = sent.indexOf('09 00 40 00 53 00 02 88 D9');
     expect(thrown).toBeGreaterThanOrEqual(0);
     expect(sent.indexOf(GET_INFO_5)).toBeGreaterThan(thrown);
+  });
+
+  it('given an interrupted connection, when it is back, every position is asked again', async () => {
+    const {transport, window} = await started(0);
+    // The status poll (default 1 s) goes unanswered.
+    await vi.advanceTimersByTimeAsync(PROBE_TIMEOUT_MS + 1000);
+    expect(window.ofType('connection').at(-1)).toMatchObject({
+      state: 'connected',
+      interrupted: true,
+    });
+    transport().takeSent();
+
+    transport().receive(STATUS_NORMAL);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(window.ofType('connection').at(-1)).toMatchObject({
+      interrupted: false,
+    });
+    expect(transport().takeSent()).toContain(GET_INFO_5);
   });
 
   it('given no window shows the station, its turnouts are not asked for', async () => {

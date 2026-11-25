@@ -96,6 +96,7 @@ export const fi: Strings = {
     connecting: 'Yhdistetään…',
     connected: 'Yhdistetty',
     reconnecting: 'Yhteys katkesi, yritetään uudelleen…',
+    interrupted: 'Yhteydessä katko, kysytään uudelleen…',
     centralUnit: 'Keskusyksikkö',
     address: 'IP-osoite',
     port: 'Portti',
@@ -245,8 +246,7 @@ export const fi: Strings = {
       setting: 'Asetetaan… (vaihteet kääntyvät)',
       set: 'Asetettu',
       failed: (turnout: string) => `Ei asetettu: ${turnout} ei kääntynyt`,
-      broken: (turnout: string) =>
-        `Valvonta menetetty: ${turnout} kääntyi; opastimet Seis-opasteelle`,
+      unconfirmed: 'Ei varmistettu: odotetaan keskusyksikköä',
     },
     manualToSet: (turnouts: string) => `Käännä käsin: ${turnouts}.`,
     release: 'Pura',
@@ -515,6 +515,9 @@ export const fi: Strings = {
     positionRefresh: 'Kysy vaihteiden asentoja (s välein)',
     positionRefreshHelp:
       '0 = pois. Keskusyksiköille, jotka eivät ilmoita muiden ohjelmien kääntämiä vaihteita (DR5000: WinDigipet USB:n kautta). Lever kysyy silloin näytöllä olevan aseman vaihteiden asennot näin usein ja heti, kun teet jotain.',
+    statusRefresh: 'Kysy keskusyksikön tilaa (s välein)',
+    statusRefreshHelp:
+      '0 = vain 25 s välein. Näyttää muiden laitteiden aiheuttaman hätäpysäytyksen, ajovirran katkaisun ja oikosulun heti keskusyksiköissä, jotka eivät ilmoita niistä itse (DR5000), ja huomaa yhteyskatkon nopeammin.',
     feedbackSources: 'Käytetyt ilmaisinväylät',
     blockReleaseDelay: 'Raideosuuden vapautumisviiveen oletus (ms)',
     autoSignals: 'Aseta opastimet kulkuteiden varrella automaattisesti',
@@ -675,10 +678,8 @@ export const fi: Strings = {
         : 'Kulkutie asetettu.',
     routeFailed: (turnout: string) =>
       `Kulkutietä ei asetettu: ${turnout} ei kääntynyt. Tarkista se ja pura kulkutie tai yritä uudelleen.`,
-    routeBroken: (turnout: string) =>
-      `Kulkutien valvonta menetettiin: ${turnout} kääntyi. Sen opastimet palautettiin Seis-opasteelle.`,
     routeReleasedMoved: (turnout: string) =>
-      `Kulkutie purettiin: ${turnout} havaittiin toisessa asennossa. Sen opastimet palautettiin Seis-opasteelle.`,
+      `Kulkutie purettiin: ${turnout} kääntyi. Sen opastimet palautettiin Seis-opasteelle.`,
     routeCancelled: (from: string, to: string) =>
       `Kulkutie ${from} → ${to} purettiin: uusi kulkutie on ristiriidassa sen kanssa. Sen opastimet palautettiin Seis-opasteelle.`,
     routeUndone: (skipped: string[], manualBack: string[]) =>
