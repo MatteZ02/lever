@@ -1,0 +1,19 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "part",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234581,
+  "ts": 1764331234567,
+  "body": {
+    "msgId": "miit9hcl",
+    "index": 0,
+    "count": 2,
+    "type": "lineStatus",
+    "data": "{\"lineId\":\"line-pun\",\"passages\":[{\"station\":{\"viewId\":\"view-olten\",\"name\":\"olten\"},\"entry\":{\"exitId\":\"connector-w1\",\"name\":\"Päärata Pun\"},\"leadsTo\":{\"kind\":\"exit\",\"exitId\":\"connector-e1\",\"name\":\"H 1\"},\"alongLine\":true,\"turnouts\":[{\"id\":\"turnout-21\",\"name\":\"21\",\"position\":\"straight\",\"certainty\":\"confirmed\"},{\"id\":\"turnout-15\",\"name\":\"15\",\"position\":\"diverging\",\"certainty\":\"reported\"},{\"id\":\"turnout-32\",\"name\":\"32\",\"position\":\"straight\",\"certainty\":\"moving\"}],\"signals\":[{\"id\":\"signal-803\",\"name\":\"803\",\"aspect\":\"proceed\",\"label\":\"Proceed\"}],\"routes\":[{\"id\":\"route-1\",\"state\":\"set\",\"fromName\":\"Päärata Pun\",\"toName\":\"Track 3\"}],\"level\":2},{\"station\":{\"viewId\":\"view-olten\",\"name\":\"olten\"},\"entry\":{\"exitId\":\"connector-e1\",\"name\":\"H 1\"},\"leadsTo\":{\"kind\":\"track\",\"name\":\"Track 4\"},\"alongLine\":false,\"turnouts\":"
+  }
+}

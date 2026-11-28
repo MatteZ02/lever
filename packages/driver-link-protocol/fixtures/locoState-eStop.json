@@ -1,0 +1,24 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "locoState",
+  "id": "thr-mihdtmo7-5mx7o6cbe3",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234571,
+  "ts": 1764331234567,
+  "body": {
+    "states": [
+      {
+        "address": 3,
+        "speedSteps": 128,
+        "step": 0,
+        "eStop": true,
+        "forward": true,
+        "confirmed": true
+      }
+    ]
+  }
+}

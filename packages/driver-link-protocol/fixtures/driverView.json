@@ -1,0 +1,40 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "driverView",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234583,
+  "ts": 1764331234567,
+  "body": {
+    "address": 3,
+    "train": {
+      "id": "train-k3f9",
+      "blockName": "Track 3",
+      "stationName": "olten",
+      "directionKnown": true
+    },
+    "freeAhead": 2,
+    "endsBy": "signalAtStop",
+    "signalAhead": {
+      "name": "803",
+      "aspect": "stop",
+      "label": "Stop"
+    },
+    "routeAhead": {
+      "state": "setting",
+      "toName": "Päärata Pun"
+    },
+    "nearestOccupied": {
+      "blocksAhead": 4,
+      "address": 44
+    },
+    "level": 3,
+    "hold": "signalAtStop",
+    "controlled": true,
+    "stale": false
+  }
+}

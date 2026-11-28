@@ -1,0 +1,37 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "strip",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234579,
+  "ts": 1764331234567,
+  "body": {
+    "address": 3,
+    "addresses": [
+      3
+    ],
+    "locoName": "Re 4/4 II",
+    "driverName": "Aino",
+    "deviceId": "thr-mihdtmo7-5mx7o6cbe3",
+    "line": {
+      "lineId": "line-pun"
+    },
+    "lineSetBy": "driver",
+    "lineSetAt": 1764331204567,
+    "source": "phone",
+    "state": {
+      "speedSteps": 128,
+      "step": 64,
+      "eStop": false,
+      "forward": true,
+      "confirmed": true,
+      "from": "phone"
+    },
+    "lastHeardAt": 1764331233567,
+    "phoneSilent": false
+  }
+}

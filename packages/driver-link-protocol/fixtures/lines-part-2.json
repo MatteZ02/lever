@@ -1,0 +1,19 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "part",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234590,
+  "ts": 1764331234567,
+  "body": {
+    "msgId": "miit9hcu",
+    "index": 1,
+    "count": 10,
+    "type": "lines",
+    "data": "true,\"directions\":[{\"id\":\"d0a\",\"name\":\"Pohjoiseen\"},{\"id\":\"d0b\",\"name\":\"Etelään\"}],\"directionRequired\":false},{\"id\":\"line-1\",\"name\":\"Linja 1 – pohjoinen "
+  }
+}

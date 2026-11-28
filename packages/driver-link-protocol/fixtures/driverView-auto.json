@@ -1,0 +1,31 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "driverView",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234584,
+  "ts": 1764331234567,
+  "body": {
+    "address": 44,
+    "train": {
+      "id": "train-a1",
+      "blockName": "Track 2",
+      "stationName": "Sissach",
+      "directionKnown": true
+    },
+    "freeAhead": 5,
+    "endsBy": "limit",
+    "level": 4,
+    "controlled": true,
+    "auto": {
+      "state": "waiting",
+      "reason": "occupied",
+      "nextStopName": "Track 1"
+    },
+    "stale": true
+  }
+}

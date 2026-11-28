@@ -1,0 +1,19 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "part",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234581,
+  "ts": 1764331234567,
+  "body": {
+    "msgId": "miit9hcl",
+    "index": 1,
+    "count": 2,
+    "type": "lineStatus",
+    "data": "[{\"id\":\"turnout-14\",\"name\":\"14\",\"certainty\":\"unknown\"}],\"signals\":[],\"routes\":[],\"level\":2},{\"station\":{\"viewId\":\"view-sissach\",\"name\":\"Sissach\"},\"entry\":{\"exitId\":\"connector-s1\",\"name\":\"SS_201\"},\"leadsTo\":{\"kind\":\"against\",\"turnoutId\":\"turnout-309\",\"name\":\"309\"},\"alongLine\":false,\"turnouts\":[{\"id\":\"turnout-309\",\"name\":\"309\",\"position\":\"diverging\",\"certainty\":\"manual\"}],\"signals\":[],\"routes\":[],\"level\":1},{\"station\":{\"viewId\":\"view-sissach\",\"name\":\"Sissach\"},\"entry\":{\"exitId\":\"connector-s2\",\"name\":\"SS_202\"},\"leadsTo\":{\"kind\":\"unknown\",\"turnoutId\":\"turnout-310\",\"name\":\"310\"},\"alongLine\":false,\"turnouts\":[{\"id\":\"turnout-310\",\"name\":\"310\",\"certainty\":\"unknown\"}],\"signals\":[],\"routes\":[],\"level\":1}],\"stale\":false}"
+  }
+}

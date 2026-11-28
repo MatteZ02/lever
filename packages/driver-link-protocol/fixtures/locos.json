@@ -1,0 +1,55 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "locos",
+  "id": "thr-mihdtmo7-5mx7o6cbe3",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234569,
+  "ts": 1764331234567,
+  "body": {
+    "locos": [
+      {
+        "address": 3,
+        "name": "Re 4/4 II",
+        "speedSteps": 128,
+        "maxSpeedKmh": 140,
+        "acceleration": 5,
+        "braking": 6
+      },
+      {
+        "address": 44,
+        "name": "Ae 6/6",
+        "speedSteps": 28,
+        "maxSpeedKmh": 125,
+        "acceleration": 3.5,
+        "braking": 4
+      },
+      {
+        "address": 45,
+        "name": "Ae 6/6 (2)",
+        "speedSteps": 28,
+        "maxSpeedKmh": 125,
+        "acceleration": 3.5,
+        "braking": 4
+      }
+    ],
+    "consists": [
+      {
+        "lead": 44,
+        "members": [
+          {
+            "address": 44,
+            "reversed": false
+          },
+          {
+            "address": 45,
+            "reversed": true
+          }
+        ]
+      }
+    ]
+  }
+}

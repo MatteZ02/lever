@@ -1,0 +1,61 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "hello",
+  "id": "thr-mihdtmo7-5mx7o6cbe3",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234567,
+  "ts": 1764331234567,
+  "body": {
+    "device": {
+      "id": "thr-mihdtmo7-5mx7o6cbe3",
+      "driverName": "Aino",
+      "app": "throttle",
+      "appVersion": "0.3.0"
+    },
+    "capabilities": [
+      "locoInfo",
+      "locoState",
+      "functions",
+      "lines",
+      "lineChoice",
+      "strips",
+      "operatorEdits",
+      "lineStatus",
+      "driverView",
+      "conflicts",
+      "notices",
+      "chunking"
+    ],
+    "share": {
+      "locoInfo": true,
+      "locoState": true,
+      "functions": true
+    },
+    "linesVersion": "4d453c752b30c963",
+    "throttles": [
+      {
+        "slot": 0,
+        "addresses": [
+          3
+        ],
+        "kind": "loco",
+        "line": {
+          "lineId": "line-pun"
+        }
+      },
+      {
+        "slot": 1,
+        "addresses": [
+          44,
+          45
+        ],
+        "kind": "consist"
+      }
+    ],
+    "locosDigest": "a2e866c2e3a618a0"
+  }
+}

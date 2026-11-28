@@ -1,0 +1,28 @@
+{
+  "p": "lever-link",
+  "v": [1, 3],
+  "t": "lineStatus",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331300001,
+  "body": {
+    "lineId": "line-pun",
+    "stale": false,
+    "speedLimitKmh": 60,
+    "passages": [
+      {
+        "station": {"viewId": "view-olten", "name": "olten", "platform": "3"},
+        "entry": {"exitId": "connector-w1", "name": "Päärata Pun"},
+        "leadsTo": {"kind": "turntable", "turntableId": "tt-1"},
+        "alongLine": false,
+        "turnouts": [
+          {"id": "turnout-21", "name": "21", "position": "straight", "certainty": "estimated"},
+          {"id": "turnout-15", "name": "15", "position": "diverging", "certainty": "confirmed", "lockedBy": "route-1"}
+        ],
+        "signals": [{"id": "signal-803", "name": "803", "aspect": "flashingProceed"}],
+        "routes": [{"id": "route-1", "state": "locked", "fromName": "Päärata Pun", "toName": "Track 3"}],
+        "level": 2
+      }
+    ]
+  }
+}

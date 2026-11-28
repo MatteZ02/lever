@@ -1,0 +1,53 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "lineStatus",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234582,
+  "ts": 1764331234567,
+  "body": {
+    "lineId": "line-branch",
+    "directionId": "dir-down",
+    "passages": [
+      {
+        "station": {
+          "viewId": "view-insel",
+          "name": "inselburg-dettingen"
+        },
+        "entry": {
+          "exitId": "connector-i1",
+          "name": "INS_801"
+        },
+        "leadsTo": {
+          "kind": "exit",
+          "exitId": "connector-i2",
+          "name": "INS_802"
+        },
+        "alongLine": true,
+        "turnouts": [
+          {
+            "id": "turnout-201",
+            "name": "201",
+            "position": "straight",
+            "certainty": "confirmed"
+          }
+        ],
+        "signals": [],
+        "routes": [
+          {
+            "id": "route-2",
+            "state": "unconfirmed",
+            "fromName": "INS_801",
+            "toName": "INS_802"
+          }
+        ],
+        "level": 2
+      }
+    ],
+    "stale": true
+  }
+}

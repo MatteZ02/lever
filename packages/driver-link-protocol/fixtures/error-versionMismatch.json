@@ -1,0 +1,15 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "error",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234588,
+  "ts": 1764331234567,
+  "body": {
+    "code": "versionMismatch"
+  }
+}

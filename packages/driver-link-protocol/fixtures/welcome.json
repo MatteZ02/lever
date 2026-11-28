@@ -1,0 +1,39 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "welcome",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234577,
+  "ts": 1764331234567,
+  "body": {
+    "lever": {
+      "instanceId": "lvr-mi4iuyo7-79m345ruoa",
+      "appVersion": "0.4.0"
+    },
+    "project": {
+      "id": "prj-mhq8gg07-2y8a86xs5w",
+      "name": "Club layout"
+    },
+    "capabilities": [
+      "locoInfo",
+      "locoState",
+      "functions",
+      "lines",
+      "lineChoice",
+      "strips",
+      "operatorEdits",
+      "lineStatus",
+      "driverView",
+      "conflicts",
+      "notices",
+      "chunking"
+    ],
+    "linesVersion": "4d453c752b30c963",
+    "locosDigestSeen": "a2e866c2e3a618a0",
+    "centralUnit": "connected"
+  }
+}

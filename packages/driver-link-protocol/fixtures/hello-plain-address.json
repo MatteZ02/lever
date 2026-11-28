@@ -1,0 +1,38 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "hello",
+  "id": "thr-miir4bk7-800bjet6i8",
+  "seq": 1764331234568,
+  "ts": 1764331234567,
+  "body": {
+    "device": {
+      "id": "thr-miir4bk7-800bjet6i8",
+      "app": "throttle",
+      "appVersion": "0.3.0"
+    },
+    "capabilities": [
+      "locoState",
+      "lineChoice",
+      "lineStatus",
+      "notices"
+    ],
+    "share": {
+      "locoInfo": false,
+      "locoState": true,
+      "functions": false
+    },
+    "throttles": [
+      {
+        "slot": 0,
+        "addresses": [
+          7
+        ],
+        "kind": "address"
+      }
+    ]
+  }
+}
