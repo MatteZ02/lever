@@ -33,7 +33,7 @@ app), which must keep working without Lever.
 | 5     | Level 2 routing, mixed-level tests                                    | done; scenario tests incl. mixed Level 1/2; end-to-end with the fake Z21 (set, signals, broken by an external switch); awaiting user review on the layout                  |
 | 6     | Packaging, documentation (fi/en)                                      | done: release build checked (installer + portable zip, unsigned); README, install guides fi/en (Finnish to be reviewed by the user), user guide; not published             |
 | 7     | Levels 3 and 4: trains, protection, automatic driving, loco list      | built after real operation; scenario tests and UI automation, **not tried on the layout**; MULTI-7 area ownership not built                                                |
-| 8     | Driver link (`docs/driver-link.md`): ids, lines, strips, link service | branch `feat/driver-link`; Phase 0 plan awaiting approval                                                                                                                  |
+| 8     | Driver link (`docs/driver-link.md`): ids, lines, strips, link service | branch `feat/driver-link`; plan approved; protocol package and fixtures done (`492929d`); next: project ids, compatibility, look-ahead |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
 screenshots (`Z21_control_station_*.PNG`: olten, inselburg-dettingen, Sissach), the JuliaData
