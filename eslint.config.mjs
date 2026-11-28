@@ -14,6 +14,19 @@ import tseslint from 'typescript-eslint';
 const COLOR_LITERAL =
   '/^\\s*(#[0-9a-fA-F]{3,8}\\s*$|(rgb|rgba|hsl|hsla|oklch|oklab)\\s*\\()/';
 
+const COLOR_SYNTAX = [
+  {
+    selector: `Literal[value=${COLOR_LITERAL}]`,
+    message:
+      'Hard-coded colour. Use a semantic token from the theme (see src/renderer/theme).',
+  },
+  {
+    selector: `TemplateElement[value.raw=${COLOR_LITERAL}]`,
+    message:
+      'Hard-coded colour. Use a semantic token from the theme (see src/renderer/theme).',
+  },
+];
+
 export default tseslint.config(
   {ignores: ['node_modules/', 'out/', 'dist/', 'release-builds/', 'coverage/']},
   js.configs.recommended,
@@ -64,9 +77,12 @@ export default tseslint.config(
     },
   },
   {
-    // The z21 protocol package must stay usable from React Native and Node:
+    // The protocol packages must stay usable from React Native and Node:
     // no platform imports (REU-2).
-    files: ['packages/z21-protocol/src/**/*.ts'],
+    files: [
+      'packages/z21-protocol/src/**/*.ts',
+      'packages/driver-link-protocol/src/**/*.ts',
+    ],
     ignores: ['**/__tests__/**'],
     rules: {
       'no-restricted-imports': [
@@ -82,7 +98,7 @@ export default tseslint.config(
                 'react-dom',
               ],
               message:
-                'The protocol package must not depend on a platform (see COPIED_FROM.md).',
+                'The protocol packages must not depend on a platform (see COPIED_FROM.md, README.md).',
             },
           ],
         },
@@ -115,17 +131,39 @@ export default tseslint.config(
     files: ['**/*.ts', '**/*.tsx'],
     ignores: ['src/renderer/theme/**'],
     rules: {
+      'no-restricted-syntax': ['error', ...COLOR_SYNTAX],
+    },
+  },
+  {
+    // The driver link package runs in plain Node with type stripping
+    // (scripts/link-probe.mjs) and in React Native: only erasable
+    // TypeScript, and type-only imports marked as such.
+    files: ['packages/driver-link-protocol/src/**/*.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {fixStyle: 'separate-type-imports'},
+      ],
       'no-restricted-syntax': [
         'error',
+        ...COLOR_SYNTAX,
         {
-          selector: `Literal[value=${COLOR_LITERAL}]`,
-          message:
-            'Hard-coded colour. Use a semantic token from the theme (see src/renderer/theme).',
+          selector: 'TSEnumDeclaration',
+          message: 'No enums: Node cannot strip them. Use a const array.',
         },
         {
-          selector: `TemplateElement[value.raw=${COLOR_LITERAL}]`,
+          selector: 'TSParameterProperty',
+          message: 'No parameter properties: Node cannot strip them.',
+        },
+        {
+          selector: 'TSModuleDeclaration',
+          message: 'No namespaces: Node cannot strip them.',
+        },
+        {
+          selector:
+            'ImportDeclaration[source.value=/^[.]/]:not([source.value=/[.](ts|json)$/])',
           message:
-            'Hard-coded colour. Use a semantic token from the theme (see src/renderer/theme).',
+            'Relative imports carry their .ts extension (Node type stripping).',
         },
       ],
     },

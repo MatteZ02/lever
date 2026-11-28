@@ -1,0 +1,16 @@
+{
+  "name": "@lever/driver-link-protocol",
+  "version": "1.0.0",
+  "description": "Lever ↔ Throttle driver link (docs/driver-link.md): message schemas, encoding, chunking, reliability helpers. Pure TypeScript, no Node, Electron, React or React Native imports.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "p": "lever-link",
+  "v": [
+    1,
+    0
+  ],
+  "t": "lines",
+  "id": "lvr-mi4iuyo7-79m345ruoa",
+  "ses": "ses-miit871j-1ggvfov4g0",
+  "seq": 1764331234578,
+  "ts": 1764331234567,
+  "body": {
+    "version": "4d453c752b30c963",
+    "lines": [
+      {
+        "id": "line-pun",
+        "name": "Punainen",
+        "shortName": "Pun",
+        "color": "#d0312d",
+        "loop": true,
+        "directional": false,
+        "directions": [],
+        "directionRequired": false
+      },
+      {
+        "id": "line-kel",
+        "name": "Keltainen",
+        "shortName": "Kel",
+        "color": "#e8b500",
+        "loop": true,
+        "directional": false,
+        "directions": [],
+        "directionRequired": false
+      },
+      {
+        "id": "line-branch",
+        "name": "Branch line",
+        "shortName": "Br",
+        "color": "#2e7d32",
+        "loop": false,
+        "directional": true,
+        "directions": [
+          {
+            "id": "dir-up",
+            "name": "To olten"
+          },
+          {
+            "id": "dir-down",
+            "name": "To Sissach"
+          }
+        ],
+        "directionRequired": true
+      }
+    ]
+  }
+}
