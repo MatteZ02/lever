@@ -131,11 +131,11 @@ export class Engine {
     });
     connection.on('interrupted', (interrupted) => {
       this.broadcastConnection();
-      this.interlocking.setInterrupted(interrupted);
       if (!interrupted) {
-        // Reports may have been lost meanwhile: ask every position again,
-        // so set routes are confirmed (or released if a turnout moved).
-        this.queryAll();
+        // Reports may have been lost meanwhile: ask every position again, in
+        // the background (never ahead of the operator's commands). A set
+        // route stays set unless a turnout is found moved.
+        this.queryAll(true);
       }
     });
     connection.on('trackStatus', (status) => {
@@ -430,10 +430,10 @@ export class Engine {
 
   // Startup state, rate-limited through the queue, never as a burst
   // (LOAD-3): every accessory of the layout, and any touched by hand.
-  private queryAll(): void {
+  private queryAll(background = false): void {
     [...new Set([...this.interlocking.addresses(), ...this.knownAccessories])]
       .sort((a, b) => a - b)
-      .forEach((fAdr) => this.query(fAdr));
+      .forEach((fAdr) => this.query(fAdr, background));
   }
 
   private broadcastConnection(): void {
@@ -541,9 +541,9 @@ export class Engine {
     }
   }
 
-  private query(fAdr: number): void {
+  private query(fAdr: number, background = false): void {
     this.awaitingReply.add(fAdr);
-    this.enqueue(turnoutQuery(fAdr));
+    this.enqueue(turnoutQuery(fAdr, background));
   }
 
   private notice(notice: InterlockingNotice): void {

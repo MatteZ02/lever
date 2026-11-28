@@ -12,6 +12,7 @@ import {
   KEEPALIVE_IDLE_MS,
   MIN_STATUS_POLL_MS,
   PROBE_TIMEOUT_MS,
+  PROBES_BEFORE_INTERRUPTED,
   RECONNECT_DELAYS_MS,
   STATUS_REFRESH_MIN_AGE_MS,
 } from '../ConnectionManager';
@@ -311,20 +312,36 @@ describe('keepalive and connection loss', () => {
     expect(current().takeSent()).toContain(GET_STATUS);
   });
 
-  it('given one unanswered request, the connection is interrupted but stays usable', async () => {
+  it('given one unanswered request, it is asked again and nothing is shown', async () => {
     const {manager, current, interruptions, trackStatuses} = await connected();
     current().receive(HWINFO_FW_143);
     vi.advanceTimersByTime(KEEPALIVE_IDLE_MS);
     expect(current().takeSent()).toEqual([GET_STATUS]);
 
     vi.advanceTimersByTime(PROBE_TIMEOUT_MS);
+    expect(current().takeSent()).toEqual([GET_STATUS]);
+    expect(manager.isInterrupted()).toBe(false);
+    expect(interruptions).toEqual([]);
+    current().receive(STATUS_NORMAL);
+    vi.advanceTimersByTime(PROBE_TIMEOUT_MS);
+    expect(interruptions).toEqual([]);
+    expect(trackStatuses.at(-1)).toBe('normal');
+  });
+
+  it('given two unanswered requests in a row, the connection is interrupted but stays usable', async () => {
+    const {manager, current, interruptions, trackStatuses} = await connected();
+    current().receive(HWINFO_FW_143);
+    vi.advanceTimersByTime(KEEPALIVE_IDLE_MS);
+    current().takeSent();
+
+    vi.advanceTimersByTime(PROBE_TIMEOUT_MS * PROBES_BEFORE_INTERRUPTED);
     expect(manager.isInterrupted()).toBe(true);
     expect(interruptions).toEqual([true]);
     expect(manager.getState()).toBe('connected');
     // Last reported status may be out of date.
     expect(trackStatuses.at(-1)).toBe('unknown');
     // Asked again, and commands still go out.
-    expect(current().takeSent()).toEqual([GET_STATUS]);
+    expect(current().takeSent()).toEqual([GET_STATUS, GET_STATUS]);
     manager.emergencyStop();
     expect(current().takeSent()).toEqual(['06 00 40 00 80 80']);
   });
@@ -334,6 +351,7 @@ describe('keepalive and connection loss', () => {
     current().receive(HWINFO_FW_143);
     vi.advanceTimersByTime(KEEPALIVE_IDLE_MS);
     current().takeSent();
+    // Lost after CONNECTION_LOST_AFTER_MS, so only two rounds fit here.
     vi.advanceTimersByTime(PROBE_TIMEOUT_MS * 2);
     expect(current().takeSent()).toEqual([GET_STATUS, GET_STATUS]);
   });
@@ -341,7 +359,9 @@ describe('keepalive and connection loss', () => {
   it('when a reply comes, the interruption ends; flags and status are asked again', async () => {
     const {manager, current, interruptions, trackStatuses} = await connected();
     current().receive(HWINFO_FW_143);
-    vi.advanceTimersByTime(KEEPALIVE_IDLE_MS + PROBE_TIMEOUT_MS);
+    vi.advanceTimersByTime(
+      KEEPALIVE_IDLE_MS + PROBE_TIMEOUT_MS * PROBES_BEFORE_INTERRUPTED,
+    );
     current().takeSent();
 
     current().receive(STATUS_NORMAL);

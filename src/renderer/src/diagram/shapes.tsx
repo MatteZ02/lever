@@ -37,6 +37,9 @@ export type TurnoutDisplay = {
   // Undefined: position unknown.
   position?: string;
   status: LiveStatus;
+  // Commanded by this station, waiting for the central unit: drawn blinking
+  // in this position. If it fails, the reported position is drawn again.
+  commanded?: string;
 };
 
 export type ElementDisplay = {
@@ -245,6 +248,21 @@ const TurnoutShape = ({
   const setLegs = ports.filter(
     (port) => port.name !== 'tip' && activePorts.has(port.name),
   );
+  // Waiting for a commanded position: the points blink in it.
+  const target = waiting ? display?.commanded : undefined;
+  const pointsDisplay =
+    target && display ? {...display, position: target} : display;
+  const pointsLegs = target
+    ? ports.filter(
+        (port) =>
+          port.name !== 'tip' &&
+          geometry.transitions.some(
+            (transition) =>
+              transition.positions.includes(target) &&
+              (transition.from === port.name || transition.to === port.name),
+          ),
+      )
+    : setLegs;
 
   return (
     <g>
@@ -278,17 +296,17 @@ const TurnoutShape = ({
       {/* Dotted while commanded, fine dashes when only reported. */}
       {switchable && (
         <>
-          <g>
+          <g className={target ? 'turnout-waiting' : undefined}>
             {isSlip ? (
               <SlipPaths
                 turnout={turnout}
-                display={display}
+                display={pointsDisplay}
                 setStroke={pointsStroke}
                 unsetStroke={unsetStroke}
                 onlySet
               />
             ) : (
-              setLegs.map((port) => (
+              pointsLegs.map((port) => (
                 <line
                   key={port.name}
                   x1={centre.x}

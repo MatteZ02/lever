@@ -15,7 +15,7 @@ import {
   Signal,
   StationConnector,
 } from '../../../model/elements';
-import {nextTurnoutPosition} from '../../../model/ports';
+import {nextTurnoutPosition, turnoutGeometry} from '../../../model/ports';
 import {Project} from '../../../model/project';
 import {isRoutePoint} from '../../../model/routing';
 import {findSignalType} from '../../../model/signalTypes';
@@ -117,6 +117,38 @@ export const useOperateActions = (
     }
   };
 
+  // Elements a click does something to now (for the operating-mode hit
+  // test, hitTest.ts): while a route is being made, only route points.
+  const clickable = (element: DiagramElement): boolean => {
+    if (useRouteStore.getState().pick) {
+      return isRoutePoint(element);
+    }
+    switch (element.kind) {
+      case 'turnout':
+        return (
+          turnoutGeometry(element.type, element.orientation).positions.length >
+          0
+        );
+      case 'signal':
+      case 'accessory':
+        return true;
+      case 'track':
+        return (
+          element.blockId !== undefined &&
+          layout.blocks[element.blockId]?.hasFeedback === true
+        );
+      case 'connector':
+        return (
+          routesFrom(project, element) ||
+          (element.pairedWith !== undefined && onConnector !== undefined)
+        );
+      case 'virtualPoint':
+        return routesFrom(project, element);
+      default:
+        return false;
+    }
+  };
+
   // Call on every pointer release that was not a drag.
   const click = (
     element: DiagramElement | undefined,
@@ -206,7 +238,7 @@ export const useOperateActions = (
     </>
   );
 
-  return {click, popups, layout};
+  return {click, clickable, popups, layout};
 };
 
 // SIG-3: choose one of the signal's aspects. Large buttons; closes with

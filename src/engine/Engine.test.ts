@@ -3,6 +3,7 @@ import {
   CONNECTION_LOST_AFTER_MS,
   ConnectionManager,
   PROBE_TIMEOUT_MS,
+  PROBES_BEFORE_INTERRUPTED,
   RECONNECT_DELAYS_MS,
 } from '../connection/ConnectionManager';
 import {FakeTransport} from '../connection/testUtils/fakeTransport';
@@ -318,7 +319,9 @@ describe('position refresh (positionRefreshMs)', () => {
   it('given an interrupted connection, when it is back, every position is asked again', async () => {
     const {transport, window} = await started(0);
     // The status poll (default 1 s) goes unanswered.
-    await vi.advanceTimersByTimeAsync(PROBE_TIMEOUT_MS + 1000);
+    await vi.advanceTimersByTimeAsync(
+      PROBE_TIMEOUT_MS * PROBES_BEFORE_INTERRUPTED + 1000,
+    );
     expect(window.ofType('connection').at(-1)).toMatchObject({
       state: 'connected',
       interrupted: true,
@@ -331,6 +334,19 @@ describe('position refresh (positionRefreshMs)', () => {
       interrupted: false,
     });
     expect(transport().takeSent()).toContain(GET_INFO_5);
+  });
+
+  it('given positions being asked again, an operator throw goes first', async () => {
+    const {transport, window} = await started(0);
+    await vi.advanceTimersByTimeAsync(
+      PROBE_TIMEOUT_MS * PROBES_BEFORE_INTERRUPTED + 1000,
+    );
+    transport().receive(STATUS_NORMAL);
+    transport().takeSent();
+    window.send({type: 'switchAccessory', fAdr: 2, output: 0});
+    // At most one background query (50 ms) ahead of it.
+    await vi.advanceTimersByTimeAsync(50);
+    expect(transport().takeSent()).toContain('09 00 40 00 53 00 02 88 D9');
   });
 
   it('given no window shows the station, its turnouts are not asked for', async () => {

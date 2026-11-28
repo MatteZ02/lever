@@ -177,11 +177,13 @@ export class AccessoryQueue {
     if (this.busy || !this.connected) {
       return;
     }
-    // Commands first; background queries only when nothing else waits.
-    const index = this.pending.findIndex(
-      (candidate) => !isBackground(candidate.job),
-    );
-    const [entry] = this.pending.splice(index >= 0 ? index : 0, 1);
+    // Switching first (an operator waits for it), then queries, background
+    // queries only when nothing else waits. A long round of start-up or
+    // refresh queries never holds up a turnout.
+    const index = [isCommand, isForegroundQuery]
+      .map((wanted) => this.pending.findIndex((entry) => wanted(entry.job)))
+      .find((found) => found >= 0);
+    const [entry] = this.pending.splice(index ?? 0, 1);
     if (!entry) {
       return;
     }
@@ -251,6 +253,11 @@ export class AccessoryQueue {
 
 const isBackground = (job: AccessoryJob): boolean =>
   job.kind === 'query' && job.background === true;
+
+const isCommand = (job: AccessoryJob): boolean => job.kind !== 'query';
+
+const isForegroundQuery = (job: AccessoryJob): boolean =>
+  job.kind === 'query' && job.background !== true;
 
 const sameTarget = (a: AccessoryJob, b: AccessoryJob): boolean => {
   if (a.kind === 'switch' && b.kind === 'switch') {

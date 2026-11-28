@@ -280,29 +280,16 @@ describe('a set route while the connection is unreliable', () => {
     return context;
   };
 
-  it('given an interruption, the route is unconfirmed and its signals stay', () => {
-    const {interlocking, jobs, notices, route} = setRoute();
-    interlocking.setInterrupted(true);
-    expect(route().state).toBe('unconfirmed');
-    expect(jobs).toEqual([]);
-    expect(notices.map((n) => n.code)).not.toContain('routeReleasedMoved');
-  });
-
-  it('when the connection is back, it is set again once its turnouts are reported in place', () => {
+  it('given positions asked again with every turnout in place, the route stays set', () => {
     const {interlocking, jobs, route} = setRoute();
-    interlocking.setInterrupted(true);
-    interlocking.setInterrupted(false);
-    // Not reported since the interruption: still unconfirmed.
-    expect(route().state).toBe('unconfirmed');
     interlocking.accessoryReport(0, 'output2', true); // T1 still diverging
+    interlocking.accessoryReport(1, 'output1', true);
     expect(route().state).toBe('set');
     expect(jobs).toEqual([]);
   });
 
-  it('when the connection is back and a turnout was moved meanwhile, the route is released', () => {
+  it('given positions asked again and a turnout moved meanwhile, the route is released', () => {
     const {interlocking, jobs, notices, signalOutputs} = setRoute();
-    interlocking.setInterrupted(true);
-    interlocking.setInterrupted(false);
     interlocking.accessoryReport(0, 'output1', true); // T1 now straight
     expect(interlocking.state().routes).toEqual({});
     expect(signalOutputs(jobs)).toEqual(['S1:0']);
@@ -332,7 +319,8 @@ describe('a set route while the connection is unreliable', () => {
 
   it('an unconfirmed route can be released by the operator', () => {
     const {interlocking, jobs, route, signalOutputs} = setRoute();
-    interlocking.setInterrupted(true);
+    interlocking.connectionLost();
+    jobs.splice(0);
     interlocking.releaseRoute(route().id);
     expect(interlocking.state().routes).toEqual({});
     expect(signalOutputs(jobs)).toEqual(['S1:0']);

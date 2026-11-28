@@ -360,11 +360,10 @@ As built (Phases 3 and 5):
   the chosen alternative's key. States: setting → set ⇄ unconfirmed; failed. Manual turnouts are
   recorded in the route's position when it is set (no confirmation) and listed in the `routeSet`
   notice. Every turnout change reaches it at once; a set route whose turnout moves sets its signals
-  to stop before anything else and is released (RTE-6c, notice `routeReleasedMoved`). While a
-  turnout's position cannot be relied on (connection interrupted, not reported since the
-  interruption, or unknown after a connection loss) the route is `unconfirmed`, signals left as
-  they are; the engine asks every position again when the connection is back, and the route is set
-  again or released. Release, cancel, undo with history (RTE-6b). A route must start
+  to stop before anything else and is released (RTE-6c, notice `routeReleasedMoved`). A
+  connection interruption leaves it set (the engine asks every position again afterwards, in the
+  background); while a turnout's position is unknown (after a connection loss) the route is
+  `unconfirmed`, signals left as they are, and is set again or released once reported. Release, cancel, undo with history (RTE-6b). A route must start
   in a Level 2 area; Level 1 parts are allowed (the window warns first, MIX-4); higher levels
   are refused until built. Level 3 will add checks and locks per segment around this module.
 

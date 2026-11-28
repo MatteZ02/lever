@@ -75,9 +75,11 @@ Turn on **Settings → Protocol log**. `>>` is sent, `<<` is received, `--` is a
 - Lever counts as **connected only after the first reply**.
 - The status (`07 00 40 00 21 24 05`) is asked every _Ask for central unit status every (s)_
   (project setting, default 1 s; the DR5000 reports no STOP, power or short-circuit changes made by
-  other devices), and at least every 25 s as the keepalive. Unanswered for 2 s: the connection is
-  shown **interrupted** (still usable) and the request repeats every 2 s; the first reply ends it,
-  and Lever then asks the broadcast flags, the status and every position again. Nothing received
+  other devices), and at least every 25 s as the keepalive. Unanswered for 2 s: asked again; two
+  in a row unanswered: the connection is shown **interrupted** (still usable, set routes stay set)
+  and the request repeats every 2 s; the first reply ends it, and Lever then asks the broadcast
+  flags, the status and (as background queries) every position again. Switching commands always go
+  ahead of queries in the accessory queue. Nothing received
   for 30 s: **connection lost**, logoff and reconnect after 1, 2, 3, then every 5 s.
 - On quit, Lever sends `04 00 30 00` (logoff) before closing.
 - Switching an accessory: activate (e.g. `09 00 40 00 53 00 04 89 DE`), then after the pulse

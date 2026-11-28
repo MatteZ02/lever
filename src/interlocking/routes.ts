@@ -11,10 +11,11 @@
 // signals go to stop at once (RTE-6c) and the route is gone, with a notice
 // naming the turnout. This holds however the move became known: reported
 // as it happened, or found by asking the central unit (position refresh, or
-// the positions asked again after a reconnect). A set route whose turnouts
-// cannot be confirmed for a moment (connection interrupted or lost, position
-// unknown) is "unconfirmed": kept, with its signals as they are, and set
-// again once every turnout is reported in place. Level 2 has no other
+// the positions asked again after an interruption or reconnect). A missed
+// reply changes nothing: the route stays set until a turnout is reported
+// moved. Only a turnout whose position is unknown (after a connection loss,
+// until reported again) makes it "unconfirmed": kept, with its signals as
+// they are, and set again once every turnout is reported in place. Level 2 has no other
 // protection: nothing is locked and occupancy is not checked (RTE-7).
 // Level 3 will add checks and locks per area (MIX-4) around this module.
 import {Project} from '../model/project';
@@ -57,8 +58,8 @@ export type ManualThrow = {turnoutId: string; position: string};
 export type RouteDeps = {
   project: () => Project | null;
   turnout: (id: string) => TurnoutLive | undefined;
-  // The turnout's position cannot be relied on right now (connection
-  // interrupted, not reported since, or unknown).
+  // The turnout's position is unknown (after a connection loss, until the
+  // central unit reports it again).
   unconfirmed: (id: string) => boolean;
   setTurnout: (id: string, position: string) => void;
   setSignal: (id: string, aspectId: string) => void;
@@ -262,8 +263,7 @@ export class RouteManager {
     this.deps.changed();
   }
 
-  // Every route again: after an edit (elements no longer in the project), or
-  // when the connection is interrupted or back.
+  // Every route again: after an edit (elements no longer in the project).
   recheck(): void {
     let changed = false;
     for (const route of this.routes.values()) {

@@ -1000,6 +1000,27 @@ span.level-badge {
   }
 }
 
+/* A turnout commanded here, waiting for the central unit: its points blink
+   in the commanded position (the dots say the same without motion). */
+.turnout-waiting {
+  animation: turnout-waiting 900ms ease-in-out infinite alternate;
+}
+
+@keyframes turnout-waiting {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turnout-waiting {
+    animation: none;
+  }
+}
+
 .route-panel {
   position: absolute;
   top: 12px;

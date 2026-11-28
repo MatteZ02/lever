@@ -54,7 +54,9 @@ are set in the properties when nothing is selected.
 
 ## Operating (Level 1)
 
-In **Operate**, click an element on the diagram:
+In **Operate**, click an element on the diagram. A click anywhere on a turnout, its legs included,
+counts; so does a click just beside an element (within one and a half times its size) when nothing
+else that can be clicked is that close:
 
 | Element                   | Click does                                                                                                         |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -72,7 +74,7 @@ more than the central unit has reported:
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | set leg solid yellow          | **confirmed**: seen switching (by Lever, a Throttle or the Roco app) or confirmed by position feedback           |
 | set leg in yellow fine dashes | **reported**: only the start-up answer of the central unit; it may be a default, not where the turnout really is |
-| set leg dotted                | **commanded**: sent, waiting for the central unit to report it                                                   |
+| new leg dotted, blinking      | **commanded**: sent, waiting for the central unit; back to the old leg (with **!**) if it does not move          |
 | both legs cut short, **?**    | **unknown**: nothing reported yet (also after the connection was lost), or outputs that fit no position          |
 | **!** below the turnout       | **failed** (it did not move, see below) or **mismatch** (position feedback disagrees with the central unit)      |
 
@@ -86,6 +88,9 @@ When a turnout's report does not arrive within 2 seconds, Lever asks the central
 turnout is. If it has moved, it is shown as set; if not, Lever sends the command once more and
 asks again. Only if it still has not moved is it shown as **failed**, in the position the central
 unit reports, so the next click sends the right position.
+
+Clicks always go first: when Lever is busy asking the central unit for positions (after starting
+or after a connection break), a turnout you click is switched before the remaining questions.
 
 Occupied track is **solid red**. A block stays red for its release delay after its detectors become
 free. Status is never shown by colour alone: there is always a pattern, marker or text too.
@@ -158,12 +163,13 @@ the route is **released**; a notice names the turnout. This also holds when Leve
 by asking the central unit (_Ask for turnout positions every (s)_, or after the connection was
 back).
 
-While Lever cannot confirm a set route's turnouts, the route is shown **not confirmed** (amber),
-with its signals left as they are: the connection is interrupted (top left: _Connection
-interrupted, asking again…_) or was lost and is being made again. When the central unit answers
-again, Lever asks for every turnout's position: a route whose turnouts are all where it needs them
-is **set** again (green), and one with a turnout elsewhere is released. **Release** works on a
-route that is not confirmed too.
+A set route stays set while the connection is interrupted (top left: _Connection interrupted,
+asking again…_); when the central unit answers again, Lever asks for every turnout's position, and
+only a turnout found moved releases the route. Only after the connection was **lost** (no answer
+for 30 seconds), when no turnout position is known, is the route shown **not confirmed** (amber),
+with its signals left as they are, until the positions are reported again: a route whose turnouts
+are all where it needs them is **set** again (green), and one with a turnout elsewhere is released.
+**Release** works on a route that is not confirmed too.
 
 A turnout that does not move makes the route **fail**; **Cancel** drops it. Level 2 does not lock turnouts or check occupancy (that is Level 3): occupied track
 stays red under the green route.

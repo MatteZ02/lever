@@ -114,6 +114,15 @@ export const toView = (transform: FrameTransform, point: GridPoint): Point => {
   };
 };
 
+// A point of the view on the station's grid (the inverse of toView).
+export const fromView = (transform: FrameTransform, point: Point): Point => {
+  const scaled = {
+    x: (point.x - transform.x) / transform.scale,
+    y: (point.y - transform.y) / transform.scale,
+  };
+  return rotatePoint90(scaled, ORIGIN, -transform.rotation / 90);
+};
+
 // --- views ---------------------------------------------------------------
 
 export const createArrangement = (name: string): Arrangement => ({

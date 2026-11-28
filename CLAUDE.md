@@ -163,10 +163,10 @@ with 45° legs (turnout legs are one grid step).
   deactivate → gap. Startup queries go through it too. No polling loops, except the status poll
   (`statusRefreshMs`, default 1 s, one `LAN_X_GET_STATUS`; the DR5000 broadcasts no STOP/short)
   and the optional position refresh. Keepalive after ~25 s idle.
-- A lost reply is not a lost connection: unanswered for 2 s = _interrupted_ (shown, controls
-  stay usable, state kept); only 30 s of silence = lost (state cleared, reconnect). Set routes
-  are `unconfirmed` meanwhile and set again from the re-asked positions; a moved turnout
-  releases a route (no "broken" state).
+- A lost reply is not a lost connection: two status requests unanswered (2 s each) =
+  _interrupted_ (shown, controls stay usable, state and set routes kept); only 30 s of silence =
+  lost (state cleared, reconnect; set routes `unconfirmed` until re-reported). A moved turnout
+  releases a route (no "broken" state). Switching commands go ahead of all queries in the queue.
 - Optional requests (HWINFO, GET_CODE, …) time out with a fallback; features needing newer firmware
   (extended accessories: FW 1.40) are behind version checks. The test z21 start runs FW 1.33.
 - Always split received datagrams into all datasets.

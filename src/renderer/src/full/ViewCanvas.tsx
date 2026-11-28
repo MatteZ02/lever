@@ -10,6 +10,7 @@ import {
   exitsOnView,
   FrameTransform,
   frameTransform,
+  fromView,
   isFrameSize,
   linePointAt,
   linePoints,
@@ -35,6 +36,7 @@ import {DiagramPointer, DiagramView, ViewLayer} from '../diagram/DiagramView';
 import {RouteOverlay} from '../diagram/RouteOverlay';
 import {PanelRotationContext} from '../diagram/upright';
 import {buildDisplays} from '../operate/displays';
+import {elementAt} from '../operate/hitTest';
 import {useOperateActions} from '../operate/useOperateActions';
 import {isTypingTarget} from '../safety/shortcuts';
 import {
@@ -94,7 +96,7 @@ export const ViewCanvas = ({
   const viewport = useProjectStore(
     (state) => state.viewports[key] ?? DEFAULT_VIEWPORT,
   );
-  const {click, popups, layout} = useOperateActions(project);
+  const {click, clickable, popups, layout} = useOperateActions(project);
   // The drag in progress and where the pointer is, also in refs: pointer
   // events can arrive before React has rendered the previous one.
   const [drag, setDragState] = useState<Drag | null>(null);
@@ -320,7 +322,25 @@ export const ViewCanvas = ({
       }
       return;
     }
-    click(p.elementId ? elements.get(p.elementId) : undefined, p);
+    click(operatedElementAt(p), p);
+  };
+
+  // Operating: the element a click is for, in the frame under the pointer
+  // (the topmost), with the generous operating hit areas (hitTest.ts).
+  const operatedElementAt = (p: DiagramPointer) => {
+    for (const frame of [...arrangement.frames].reverse()) {
+      const view = views.get(frame.viewId);
+      const inside =
+        p.x >= frame.x &&
+        p.x <= frame.x + frame.width &&
+        p.y >= frame.y &&
+        p.y <= frame.y + frame.height;
+      if (view && inside) {
+        const at = fromView(frameTransform(frame, view), p);
+        return elementAt(view.elements, at, clickable);
+      }
+    }
+    return p.elementId ? elements.get(p.elementId) : undefined;
   };
 
   const drawnRect =

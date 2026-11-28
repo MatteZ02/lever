@@ -32,7 +32,11 @@ export const buildDisplays = (
         const live = layout.turnouts[element.id];
         displays[element.id] = {
           turnout: live
-            ? {position: live.position, status: live.status}
+            ? {
+                position: live.position,
+                status: live.status,
+                commanded: live.commanded,
+              }
             : {status: 'unknown'},
         };
         break;

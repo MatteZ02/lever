@@ -122,12 +122,6 @@ export class Interlocking {
   private feedback = new Map<string, FeedbackInputState>();
   // Elements seen switching in this session (any client).
   private seenSwitching = new Set<string>();
-  // The connection is interrupted (see ConnectionManager): reports may be
-  // lost, so set routes cannot be confirmed.
-  private interrupted = false;
-  // Turnouts not reported since the last interruption: their position may be
-  // out of date until the central unit answers for them again.
-  private staleTurnouts = new Set<string>();
   private pending = new Map<string, Pending>();
   private releaseTimers = new Map<string, () => void>();
 
@@ -150,9 +144,10 @@ export class Interlocking {
     this.routes = new RouteManager({
       project: () => this.project,
       turnout: (id) => this.live.turnouts[id],
+      // Unknown position (after a connection loss, until reported again).
+      // A short interruption changes nothing: a set route stays set until a
+      // turnout is reported moved.
       unconfirmed: (id) =>
-        this.interrupted ||
-        this.staleTurnouts.has(id) ||
         this.live.turnouts[id]?.position === undefined ||
         this.live.turnouts[id]?.status === 'unknown',
       setTurnout: (elementId, position) =>
@@ -416,37 +411,7 @@ export class Interlocking {
         this.seenSwitching.add(id);
       }
       this.update(id);
-      this.reported(id);
     }
-    this.flush();
-  }
-
-  // The central unit answered for this element again after an interruption:
-  // its routes can be confirmed (an unchanged position changes nothing else).
-  private reported(id: string): void {
-    if (this.staleTurnouts.delete(id)) {
-      this.routes.turnoutChanged(id);
-    }
-  }
-
-  // ConnectionManager's "interrupted": set routes show as unconfirmed until
-  // the central unit has answered again for each of their turnouts.
-  setInterrupted(interrupted: boolean): void {
-    if (interrupted === this.interrupted) {
-      return;
-    }
-    this.interrupted = interrupted;
-    if (interrupted) {
-      for (const [id, info] of this.infos) {
-        if (
-          info.element.kind === 'turnout' &&
-          info.element.control.kind !== 'manual'
-        ) {
-          this.staleTurnouts.add(id);
-        }
-      }
-    }
-    this.routes.recheck();
     this.flush();
   }
 
@@ -461,7 +426,6 @@ export class Interlocking {
         this.seenSwitching.add(id);
       }
       this.update(id);
-      this.reported(id);
     }
     this.flush();
   }
@@ -483,8 +447,6 @@ export class Interlocking {
   // Positions recorded by the operator and train labels are kept.
   connectionLost(): void {
     // Every position is unknown now; set routes wait for the new reports.
-    this.interrupted = false;
-    this.staleTurnouts.clear();
     this.outputs.clear();
     this.extValues.clear();
     this.feedback.clear();

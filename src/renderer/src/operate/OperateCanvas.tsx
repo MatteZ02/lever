@@ -1,5 +1,6 @@
 // Operating mode for one station view: the live diagram. Clicks are handled
-// by useOperateActions; dragging empty space pans. Clicking a paired station
+// by useOperateActions, with generous hit areas (hitTest.ts); dragging empty
+// space pans. Clicking a paired station
 // exit goes to the station it leads to.
 import {useMemo} from 'react';
 import {partnerOf} from '../../../model/connectors';
@@ -15,6 +16,7 @@ import {
   useProjectStore,
 } from '../store/projectStore';
 import {buildDisplays} from './displays';
+import {elementAt} from './hitTest';
 import {useOperateActions} from './useOperateActions';
 
 export const OperateCanvas = ({
@@ -42,7 +44,10 @@ export const OperateCanvas = ({
     });
     setActiveView(partner.viewId);
   };
-  const {click, popups, layout} = useOperateActions(project, followExit);
+  const {click, clickable, popups, layout} = useOperateActions(
+    project,
+    followExit,
+  );
   const displays = useMemo(
     () => buildDisplays(project, view, layout),
     [project, view, layout],
@@ -60,10 +65,7 @@ export const OperateCanvas = ({
         panOnEmpty
         onPointerUp={(pointer) => {
           if (!pointer.moved) {
-            click(
-              view.elements.find((e) => e.id === pointer.elementId),
-              pointer,
-            );
+            click(elementAt(view.elements, pointer, clickable), pointer);
           }
         }}
       >

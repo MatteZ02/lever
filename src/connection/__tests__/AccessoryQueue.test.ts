@@ -232,10 +232,28 @@ describe('background queries (position refresh)', () => {
     queue.enqueue(refresh(10));
     queue.enqueue(switchJob(2, 0));
     vi.advanceTimersByTime(2000);
+    // One query, not a background one; switching goes first.
     expect(started.map((job) => job.kind)).toEqual([
       'switch',
-      'query',
       'switch',
+      'query',
     ]);
+    expect(started[2]).not.toHaveProperty('background');
+  });
+
+  it('given a round of start-up queries waiting, when the operator throws a turnout, then the throw goes next', () => {
+    const {queue, hexes} = setup();
+    [10, 11, 12, 13].forEach((fAdr) =>
+      queue.enqueue({
+        kind: 'query',
+        key: `turnout:${fAdr}`,
+        dataset: lanXGetTurnoutInfo(fAdr),
+      }),
+    );
+    expect(hexes()).toEqual([toHex(lanXGetTurnoutInfo(10))]);
+
+    queue.enqueue(switchJob(4, 1));
+    vi.advanceTimersByTime(GAP);
+    expect(hexes()[1]).toBe(ACTIVATE_5_OUT2);
   });
 });

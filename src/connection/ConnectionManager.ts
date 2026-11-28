@@ -44,11 +44,13 @@ export const HEALTH_CHECK_INTERVAL_MS = 500;
 // devices, so without it they would show only with the next keepalive.
 // Never more often than this.
 export const MIN_STATUS_POLL_MS = 500;
-// A status request (keepalive, poll) unanswered for this long: the connection
-// is "interrupted". It stays connected and usable (UDP loses packets, more so
-// over WiFi), the request is sent again this often, and the first datagram
-// received ends the interruption.
+// A status request (keepalive, poll) unanswered for this long is sent again.
+// After PROBES_BEFORE_INTERRUPTED of them in a row the connection is
+// "interrupted": it stays connected and usable (UDP loses packets, more so
+// over WiFi, and the DR5000 sometimes answers another client), and the first
+// datagram received ends the interruption. One lost reply shows nothing.
 export const PROBE_TIMEOUT_MS = 2000;
+export const PROBES_BEFORE_INTERRUPTED = 2;
 // On a user action, the track status is asked again if the last request is
 // at least this old. Some central units (the DR5000, FW 1.29) do not send
 // track power, STOP or short-circuit changes made by other devices to Lever,
@@ -146,6 +148,8 @@ export class ConnectionManager {
   // When the status request still waiting for an answer was sent (any
   // datagram received counts as the answer); null if none is waiting.
   private probeSentAt: number | null = null;
+  // Status requests unanswered in a row.
+  private missedProbes = 0;
   private interrupted = false;
   private statusPollMs = 0;
 
@@ -379,10 +383,15 @@ export class ConnectionManager {
     }
     if (this.probeSentAt !== null) {
       if (now - this.probeSentAt >= PROBE_TIMEOUT_MS) {
-        if (!this.interrupted) {
-          this.log('info', 'No reply; connection interrupted');
+        this.missedProbes++;
+        if (this.missedProbes >= PROBES_BEFORE_INTERRUPTED) {
+          if (!this.interrupted) {
+            this.log('info', 'No reply; connection interrupted');
+          }
+          this.setInterrupted(true);
+        } else {
+          this.log('info', 'No reply; asking again');
         }
-        this.setInterrupted(true);
         this.probeSentAt = null;
         this.sendProbe(now);
       }
@@ -459,6 +468,7 @@ export class ConnectionManager {
     this.clearTimer('flagsTimer');
     this.awaitingFlags = false;
     this.probeSentAt = null;
+    this.missedProbes = 0;
     if (this.healthTimer !== null) {
       clearInterval(this.healthTimer);
       this.healthTimer = null;
@@ -497,6 +507,7 @@ export class ConnectionManager {
       this.log('in', `${toHex(data)}  (${types})`);
     }
     this.probeSentAt = null;
+    this.missedProbes = 0;
     if (this.state !== 'connected') {
       this.onConnected();
     } else if (this.interrupted) {
