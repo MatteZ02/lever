@@ -11,6 +11,8 @@ app), which must keep working without Lever.
 - Protocol: `docs/reference/z21-lan-protokoll-en_1.13.pdf` is the source of truth;
   `docs/reference/z21-protocol-notes.md` is the navigation aid (copied from Throttle, extended here).
 - Hardware findings and the "verify on DR5000" list: `docs/hardware-notes.md`.
+- Planned driver's view in Throttle fed by Lever: `docs/driver-interface.md` (same file in Throttle
+  as `docs/lever-driver-interface.md`; keep both in step).
 - For members: `README.md`, `docs/install-en.md`, `docs/install-fi.md` (Finnish written natively),
   `docs/user-guide.md`. Keep the install guides in step with UI labels (Lever's UI is English).
 - Throttle's repository is cloned at `D:\GitHub\aaltoenergia\ar-z21` (not `../throttle`). Read its
