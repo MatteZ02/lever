@@ -24,24 +24,30 @@ under "Wire details".
 
 ## Contents
 
-| File               | What                                                                                         |
-| ------------------ | -------------------------------------------------------------------------------------------- |
-| `version.ts`       | `PROTOCOL_NAME`, `PROTOCOL_VERSION`, `relateVersion`                                         |
-| `capabilities.ts`  | `CAPABILITIES_V1`, reserved names, `intersectCapabilities`                                   |
-| `defaults.ts`      | `LINK_DEFAULTS` (contract section 11), `LINK_LIMITS`                                         |
-| `ids.ts`           | `newLinkId`, `isLinkId`, `linkIdTime` (contract section 3)                                   |
-| `digest.ts`        | `textDigest`, for `locosDigest` and `linesVersion` (any opaque string would do)              |
-| `messages.ts`      | Body schemas for every type, known code lists, `MESSAGE_SCHEMAS`, `partBodySchema`           |
-| `codec.ts`         | `envelopeSchema`, `encodeDatagrams` (validates, splits), `decodeDatagram` (never throws)     |
-| `chunking.ts`      | `Reassembler`                                                                                |
-| `reliability.ts`   | `ResendQueue`, `SeenSequences`, `initialSeq`                                                 |
-| `../fixtures/`     | One datagram per JSON file (pretty-printed; sent compact). Run by `__tests__/fixtures.test.ts` |
+| File              | What                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| `version.ts`      | `PROTOCOL_NAME`, `PROTOCOL_VERSION`, `relateVersion`                                           |
+| `capabilities.ts` | `CAPABILITIES_V1`, reserved names, `intersectCapabilities`                                     |
+| `defaults.ts`     | `LINK_DEFAULTS` (contract section 11), `LINK_LIMITS`                                           |
+| `ids.ts`          | `newLinkId`, `isLinkId`, `linkIdTime` (contract section 3)                                     |
+| `digest.ts`       | `textDigest`, for `locosDigest` and `linesVersion` (any opaque string would do)                |
+| `messages.ts`     | Body schemas for every type, known code lists, `MESSAGE_SCHEMAS`, `partBodySchema`             |
+| `codec.ts`        | `envelopeSchema`, `encodeDatagrams` (validates, splits), `decodeDatagram` (never throws)       |
+| `chunking.ts`     | `Reassembler`                                                                                  |
+| `reliability.ts`  | `ResendQueue`, `SeenSequences`, `initialSeq`                                                   |
+| `../fixtures/`    | One datagram per JSON file (pretty-printed; sent compact). Run by `__tests__/fixtures.test.ts` |
 
 ### Sending
 
 ```ts
 const datagrams = encodeDatagrams(
-  {id: deviceId, ses: lastSessionSeen, seq: nextSeq++, rel: true, ts: Date.now()},
+  {
+    id: deviceId,
+    ses: lastSessionSeen,
+    seq: nextSeq++,
+    rel: true,
+    ts: Date.now(),
+  },
   {type: 'setLine', body: {address: 3, lineId: 'line-pun'}},
   {maxBytes: 1200},
 );
@@ -54,13 +60,13 @@ const datagrams = encodeDatagrams(
 ```ts
 const result = decodeDatagram(text, {maxBytes: 1200});
 switch (result.kind) {
-  case 'message':      // result.message is typed by result.message.type
-  case 'part':         // reassembler.add(result.envelope, result.part, now)
-  case 'unknownType':  // newer minor version: ignore, but ack it if rel
+  case 'message': // result.message is typed by result.message.type
+  case 'part': // reassembler.add(result.envelope, result.part, now)
+  case 'unknownType': // newer minor version: ignore, but ack it if rel
   case 'versionMismatch': // Lever answers `error versionMismatch`; Throttle shows "update needed"
   case 'notLeverLink':
   case 'tooLarge':
-  case 'invalid':      // drop and count
+  case 'invalid': // drop and count
 }
 ```
 
@@ -91,11 +97,11 @@ Unknown values, chunked messages, sequence numbers, `linesVersion`, `lineStatus.
    Source: `packages/driver-link-protocol/` in https://github.com/MatteZ02/lever, commit `<hash>`
    (branch `<branch>`). Lever holds the master copy; do not edit this one.
 
-   | What                  | Source                                       |
-   | --------------------- | -------------------------------------------- |
-   | `*.ts`                | `packages/driver-link-protocol/src/`         |
+   | What                  | Source                                         |
+   | --------------------- | ---------------------------------------------- |
+   | `*.ts`                | `packages/driver-link-protocol/src/`           |
    | `__tests__/*.test.ts` | `packages/driver-link-protocol/src/__tests__/` |
-   | `fixtures/*.json`     | `packages/driver-link-protocol/fixtures/`    |
+   | `fixtures/*.json`     | `packages/driver-link-protocol/fixtures/`      |
 
    ## Differences from the source
 
