@@ -5,8 +5,9 @@
 // control station has set: cancel, release, undo the last one. Manual turnouts are listed, never confirmed: setting the route
 // records them, and the operator throws them by hand.
 import {useMemo, useState} from 'react';
-import {levelOf} from '../../../model/areas';
+import {levelMaps, levelOf} from '../../../model/areas';
 import {newId, Project} from '../../../model/project';
+import {overrideAllowed, routeProblems} from '../../../model/routeChecks';
 import {routeConflicts} from '../../../model/routeConflicts';
 import {RoutePlan} from '../../../model/routing';
 import {buildProjectTopology} from '../../../model/topology';
@@ -27,7 +28,7 @@ import {
 
 const text = strings.routes;
 
-// Routes start in a Level 2 area (Level 1 is manual operation only).
+// Routes start in a Level 2+ area (Level 1 is manual operation only).
 const levelOfPoint = (project: Project, elementId: string) => {
   const element = findElement(project, elementId);
   const view = viewOfElement(project, elementId);
@@ -143,7 +144,9 @@ const RoutePreview = ({
   const pick = useRouteStore((state) => state.pick)!;
   const search = useRouteSearch(project, pick);
   const routes = useEngineStore((state) => state.layout.routes);
+  const blocks = useEngineStore((state) => state.layout.blocks);
   const topology = useMemo(() => buildProjectTopology(project), [project]);
+  const levels = useMemo(() => levelMaps(project), [project]);
   const [saveName, setSaveName] = useState<string | null>(null);
   // The route (by key) whose crossing the operator is asked to confirm.
   const [confirming, setConfirming] = useState<string | null>(null);
@@ -182,13 +185,28 @@ const RoutePreview = ({
   const plan: RoutePlan = search.routes[pick.choice] ?? search.routes[0];
   const startLevel = levelOfPoint(project, pick.from);
   const level1 = plan.areas.filter((area) => area.level === 1);
-  const higher = plan.areas.some((area) => area.level > 2);
   const manual = plan.turnouts.filter((t) => t.manual);
-  const canSet = startLevel === 2 && !higher;
-  const conflicts = routeConflicts(
+  const paths = Object.values(routes).map((route) => ({
+    id: route.id,
+    steps: route.steps,
+  }));
+  // Level 3+ parts: what the engine would refuse (and what may be
+  // overridden).
+  const problems = routeProblems(plan, {
     topology,
-    plan.steps,
-    Object.values(routes).map((route) => ({id: route.id, steps: route.steps})),
+    routes: paths,
+    occupied: (id) => blocks[id]?.occupied ?? false,
+    levelOfBlock: (id) =>
+      levels.blocks.get(id) ?? project.settings.defaultLevel,
+    levelOfElement: (id) =>
+      levels.elements.get(id) ?? project.settings.defaultLevel,
+  });
+  const occupiedProblem = problems.find((p) => p.kind === 'occupied');
+  const conflictProblem = problems.find((p) => p.kind === 'conflict');
+  const needsOverride = problems.length > 0 && overrideAllowed(problems);
+  const canSet = startLevel >= 2 && !conflictProblem;
+  const conflicts = routeConflicts(topology, plan.steps, paths).filter(
+    (c) => !conflictProblem?.routeIds.includes(c.routeId),
   );
   const routeName = (id: string) =>
     routes[id] ? `${name(routes[id].from)} → ${name(routes[id].to)}` : id;
@@ -202,24 +220,36 @@ const RoutePreview = ({
       via: pick.via,
       key: plan.key,
       allowCrossing: crosses.length > 0,
+      override: needsOverride,
     });
     setConfirming(null);
     stopPicking();
   };
-  if (confirming === plan.key && crosses.length > 0) {
+  if (confirming === plan.key && (crosses.length > 0 || needsOverride)) {
     return (
       <>
         <p>
-          <strong>{text.crossQuestion}</strong>
+          <strong>
+            {needsOverride ? text.occupiedQuestion : text.crossQuestion}
+          </strong>
         </p>
-        <p className="route-warning">
-          {text.crosses(
-            crosses.map((c) => routeName(c.routeId)).join(', '),
-            [...new Set(crosses.flatMap((c) => c.elementIds))]
-              .map(name)
-              .join(', '),
-          )}
-        </p>
+        {occupiedProblem && (
+          <p className="route-warning">
+            {text.occupiedOnRoute(
+              occupiedProblem.blockIds.map(name).join(', '),
+            )}
+          </p>
+        )}
+        {crosses.length > 0 && (
+          <p className="route-warning">
+            {text.crosses(
+              crosses.map((c) => routeName(c.routeId)).join(', '),
+              [...new Set(crosses.flatMap((c) => c.elementIds))]
+                .map(name)
+                .join(', '),
+            )}
+          </p>
+        )}
         <div className="button-row">
           <button type="button" className="button" onClick={setRoute}>
             {text.crossConfirm}
@@ -272,8 +302,19 @@ const RoutePreview = ({
         )}
       </p>
       {startLevel < 2 && <p className="route-warning">{text.startLevel1}</p>}
-      {higher && <p className="route-warning">{text.levelNotAvailable}</p>}
-      {startLevel === 2 && level1.length > 0 && (
+      {occupiedProblem && (
+        <p className="route-warning">
+          {text.occupiedOnRoute(occupiedProblem.blockIds.map(name).join(', '))}
+        </p>
+      )}
+      {conflictProblem && (
+        <p className="route-warning">
+          {text.conflictLevel3(
+            conflictProblem.routeIds.map(routeName).join(', '),
+          )}
+        </p>
+      )}
+      {startLevel >= 2 && level1.length > 0 && (
         // MIX-4: allowed, with a warning before setting.
         <p className="route-warning">
           {text.level1Warning(level1.map((a) => a.name).join(', '))}
@@ -312,7 +353,9 @@ const RoutePreview = ({
           className="button"
           disabled={!canSet}
           onClick={() =>
-            crosses.length > 0 ? setConfirming(plan.key) : setRoute()
+            crosses.length > 0 || needsOverride
+              ? setConfirming(plan.key)
+              : setRoute()
           }
         >
           {text.set}

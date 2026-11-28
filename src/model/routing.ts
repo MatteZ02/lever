@@ -89,15 +89,15 @@ export type RouteSearch =
       elementId?: string;
     };
 
-type Directed = {edge: TopologyEdge; forward: boolean};
+export type Directed = {edge: TopologyEdge; forward: boolean};
 type ElementInfo = {element: DiagramElement; view: StationView};
 
 const stateKey = (d: Directed) => `${d.edge.id}|${d.forward ? 1 : 0}`;
-const fromNode = (d: Directed) => (d.forward ? d.edge.from : d.edge.to);
-const toNode = (d: Directed) => (d.forward ? d.edge.to : d.edge.from);
+export const fromNode = (d: Directed) => (d.forward ? d.edge.from : d.edge.to);
+export const toNode = (d: Directed) => (d.forward ? d.edge.to : d.edge.from);
 
 // Direction of travel when leaving the start of a directed edge (track).
-const leavingDirection = (d: Directed): Direction | undefined =>
+export const leavingDirection = (d: Directed): Direction | undefined =>
   d.edge.kind === 'track'
     ? d.forward
       ? d.edge.fromDirection
@@ -105,7 +105,7 @@ const leavingDirection = (d: Directed): Direction | undefined =>
     : undefined;
 
 // Direction of travel when arriving at the end of a directed edge (track).
-const arrivingDirection = (d: Directed): Direction | undefined =>
+export const arrivingDirection = (d: Directed): Direction | undefined =>
   d.edge.kind === 'track'
     ? opposite(d.forward ? d.edge.toDirection : d.edge.fromDirection)
     : undefined;
@@ -116,7 +116,7 @@ const sameTurnout = (a: TopologyEdge, b: TopologyEdge) =>
 // Where a route can go on after `d`: any other edge at its end, except
 // another passage of the same turnout (that would reverse inside it). At a
 // crossing without an element, only straight on.
-const successors = (topology: Topology, d: Directed): Directed[] => {
+export const successors = (topology: Topology, d: Directed): Directed[] => {
   const node = toNode(d);
   const result: Directed[] = [];
   const arriving = leavingDirectionAt(d.edge, node);
@@ -530,3 +530,62 @@ export const findRoutes = (
 // Elements that can be clicked as a route's start or end (RTE-1).
 export const isRoutePoint = (element: DiagramElement): boolean =>
   ROUTE_POINT_KINDS.has(element.kind);
+
+// Level 4: the best route for a train from its block to another block,
+// leaving its block at one of `exitNodes` (its front, or its back when it
+// reverses). The route ends where the train enters the destination block;
+// `from` and `to` are the block ids. Undefined if there is none.
+export const findRouteToBlock = (
+  project: Project,
+  topology: Topology,
+  fromBlockId: string,
+  exitNodes: readonly NodeId[],
+  toBlockId: string,
+): RoutePlan | undefined => {
+  if (fromBlockId === toBlockId) {
+    return undefined;
+  }
+  const index = elementIndex(project);
+  const inBlock = (edge: TopologyEdge, block: string) =>
+    edge.kind === 'track' && edge.blockId === block;
+  const starts: Directed[] = [];
+  for (const edge of topology.edges) {
+    if (!inBlock(edge, fromBlockId)) {
+      continue;
+    }
+    for (const forward of [true, false]) {
+      const arriving: Directed = {edge, forward};
+      if (!exitNodes.includes(toNode(arriving))) {
+        continue;
+      }
+      for (const next of successors(topology, arriving)) {
+        if (
+          !inBlock(next.edge, fromBlockId) &&
+          !starts.some(
+            (s) => s.edge.id === next.edge.id && s.forward === next.forward,
+          )
+        ) {
+          starts.push(next);
+        }
+      }
+    }
+  }
+  const result = cheapestPaths(topology, index, starts, (d) =>
+    inBlock(d.edge, toBlockId),
+  );
+  for (const path of result?.paths ?? []) {
+    const turnouts = turnoutPositionsOf(path, index);
+    if (turnouts) {
+      return describePath(
+        project,
+        topology,
+        index,
+        path,
+        turnouts,
+        {from: fromBlockId, to: toBlockId, via: []},
+        result!.cost,
+      );
+    }
+  }
+  return undefined;
+};

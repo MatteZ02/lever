@@ -24,6 +24,7 @@ import {ViewPanel} from './full/ViewPanel';
 import {ViewToolbox} from './full/ViewToolbox';
 import {AreasPanel} from './operate/AreasPanel';
 import {FeedbackMonitor} from './operate/FeedbackMonitor';
+import {LocoPanel} from './operate/LocoPanel';
 import {OperateCanvas} from './operate/OperateCanvas';
 import {TrafficBoard} from './operate/TrafficBoard';
 import {TrafficStrip} from './operate/TrafficStrip';
@@ -41,11 +42,13 @@ import {useSettingsStore} from './store/settingsStore';
 import {useShownView} from './useShownView';
 import {ViewTabs} from './ViewTabs';
 
-type Drawer = 'areas' | 'feedback' | 'settings' | 'developer' | 'log' | null;
+type Drawer =
+  'areas' | 'locos' | 'feedback' | 'settings' | 'developer' | 'log' | null;
 type BottomPanel = 'problems' | 'addresses';
 
 const ALL_DRAWERS = [
   'areas',
+  'locos',
   'feedback',
   'settings',
   'developer',
@@ -53,11 +56,13 @@ const ALL_DRAWERS = [
 ] as const;
 const OPERATOR_DRAWERS: readonly Exclude<Drawer, null>[] = [
   'areas',
+  'locos',
   'settings',
 ];
 
 const DRAWER_LABELS: Record<Exclude<Drawer, null>, string> = {
   areas: strings.operate.areasShort,
+  locos: strings.locos.short,
   feedback: strings.operate.feedbackShort,
   settings: strings.settings.title,
   developer: strings.developer.short,
@@ -326,6 +331,7 @@ export const Workspace = () => {
         {drawer && (
           <div className="drawer">
             {drawer === 'areas' && <AreasPanel project={project} />}
+            {drawer === 'locos' && <LocoPanel project={project} />}
             {drawer === 'feedback' && <FeedbackMonitor project={project} />}
             {drawer === 'settings' && <SettingsPanel />}
             {drawer === 'developer' && <DeveloperPanel />}

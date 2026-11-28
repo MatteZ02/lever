@@ -71,3 +71,26 @@ export const areaBoundaries = (
   }
   return boundaries;
 };
+
+// The level of every element, and of every block (a block in several areas
+// counts at its highest level), for checks per segment (MIX-4).
+export const levelMaps = (
+  project: Project,
+): {
+  elements: Map<string, AutomationLevel>;
+  blocks: Map<string, AutomationLevel>;
+} => {
+  const elements = new Map<string, AutomationLevel>();
+  const blocks = new Map<string, AutomationLevel>();
+  for (const view of project.views) {
+    for (const element of view.elements) {
+      const level = levelOf(project, view, element);
+      elements.set(element.id, level);
+      if (element.kind === 'track' && element.blockId) {
+        const known = blocks.get(element.blockId) ?? 1;
+        blocks.set(element.blockId, Math.max(known, level) as AutomationLevel);
+      }
+    }
+  }
+  return {elements, blocks};
+};

@@ -70,6 +70,8 @@ const twoStations = (): Project => {
     blocks: [],
     signalTypes: [],
     routes: [],
+    locos: [],
+    schedules: [],
   };
 };
 

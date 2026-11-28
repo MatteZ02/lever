@@ -2,20 +2,15 @@
 // against the modules up to the level of the area its element belongs to
 // (9.1); a refusal carries a reason for the operator.
 //
-// Level 1 (manual) and Level 2 (manual routing) are built. Level 3 (train
-// protection) and Level 4 (automatic routing and driving) will be added as
-// further modules implementing LevelModule; nothing in Levels 1–2 needs to
-// change for that:
+// - Level 1 (manual): everything allowed.
+// - Level 2 (manual routing): signals are set by routes only.
+// - Level 3 (train protection): a turnout locked in a route cannot be thrown
+//   by hand. Route checks, automatic train stop and the override are in
+//   protection.ts.
+// - Level 4 (automatic routing and driving): as Level 3 for commands; the
+//   driving itself is automatic.ts.
 //
-// - Level3Module.check: refuse throwing a turnout locked in a set route,
-//   refuse routes over occupied blocks or conflicting routes, with "override
-//   allowed" reasons the operator can confirm.
-// - Level3Module.onEvent: automatic train stop when a train would enter an
-//   occupied block (per block aspect setting), re-assert stops.
-// - Level4Module: schedules and automatic driving, only inside Level 4 areas
-//   and up to their boundaries (MIX-7).
-//
-// Area ownership between instances (MULTI-7) will be one more check here:
+// Area ownership between instances (MULTI-7) would be one more check here:
 // an area owned by another instance refuses local commands.
 import {AutomationLevel} from '../model/project';
 
@@ -31,11 +26,15 @@ export type CommandOrigin = 'operator' | 'route';
 export type LevelContext = {
   level: AutomationLevel;
   origin: CommandOrigin;
+  // The element is a turnout of a route set (or being set) here, in a
+  // Level 3+ area.
+  locked: boolean;
 };
 
 export type Decision = {ok: true} | {ok: false; reason: RefusalReason};
 
-export type RefusalReason = 'levelNotAvailable' | 'signalNeedsRoute';
+export type RefusalReason =
+  'levelNotAvailable' | 'signalNeedsRoute' | 'turnoutLocked';
 
 export interface LevelModule {
   readonly level: AutomationLevel;
@@ -60,7 +59,30 @@ export const level2Module: LevelModule = {
       : {ok: true},
 };
 
-export const BUILT_LEVELS: LevelModule[] = [level1Module, level2Module];
+// Level 3: turnouts locked in a route stay as they are until the route is
+// released (routes themselves may move them).
+export const level3Module: LevelModule = {
+  level: 3,
+  check: (command, context) =>
+    command.type === 'setTurnout' &&
+    context.origin === 'operator' &&
+    context.locked
+      ? {ok: false, reason: 'turnoutLocked'}
+      : {ok: true},
+};
+
+// Level 4 adds automatic driving, no command rules of its own.
+export const level4Module: LevelModule = {
+  level: 4,
+  check: () => ({ok: true}),
+};
+
+export const BUILT_LEVELS: LevelModule[] = [
+  level1Module,
+  level2Module,
+  level3Module,
+  level4Module,
+];
 
 // Checks a command against every module up to `level`. Levels above the
 // built ones are refused rather than silently treated as lower.
@@ -69,13 +91,14 @@ export const checkCommand = (
   level: AutomationLevel,
   origin: CommandOrigin = 'operator',
   modules: LevelModule[] = BUILT_LEVELS,
+  locked = false,
 ): Decision => {
   const highest = Math.max(...modules.map((module) => module.level));
   if (level > highest) {
     return {ok: false, reason: 'levelNotAvailable'};
   }
   for (const module of modules.filter((m) => m.level <= level)) {
-    const decision = module.check(command, {level, origin});
+    const decision = module.check(command, {level, origin, locked});
     if (!decision.ok) {
       return decision;
     }

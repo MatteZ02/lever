@@ -7,6 +7,7 @@ import {Project} from '../../../model/project';
 import {strings} from '../../../shared/strings';
 import {useEngineStore} from '../store/engineStore';
 import {setPanelOpen, useRouteStore} from '../store/routeStore';
+import {AutomationButton} from './AutomationButton';
 import {
   ActiveRoutes,
   RouteActions,
@@ -61,6 +62,7 @@ export const TrafficStrip = ({project}: {project: Project}) => {
             <ActiveRoutes project={project} />
           )}
         </div>
+        <AutomationButton project={project} />
       </div>
     </section>
   );

@@ -414,13 +414,104 @@ describe('mixed Level 1 and Level 2 areas (MIX-4, MIX-6, MIX-8)', () => {
     expect(route().state).toBe('set');
   });
 
-  it('a route over an area at a level not built yet is refused', () => {
-    const {interlocking, notices} = setup(layout(2, {lineLevel: 3}));
+  it('a route from Level 2 over a Level 3 line is set, checked there', () => {
+    const {interlocking, reportJobs, route} = setup(layout(2, {lineLevel: 3}));
     interlocking.setRoute('S1', 'C2', ['S4']);
+    reportJobs();
+    expect(route().state).toBe('set');
+  });
+});
+
+describe('Level 3: train protection on routes', () => {
+  // Track 2 (t2) is block B2, with a LocoNet detector at address 5.
+  const level3 = (): Project => {
+    const project = layout(3);
+    return {
+      ...project,
+      views: project.views.map((view) => ({
+        ...view,
+        elements: view.elements.map((element) =>
+          element.id === 't2' ? {...element, blockId: 'B2'} : element,
+        ),
+      })),
+      blocks: [
+        {id: 'B2', name: 'Track 2', inputs: [{source: 'loconet', address: 5}]},
+      ],
+    };
+  };
+  const occupy = (interlocking: Interlocking) =>
+    interlocking.feedbackChanged([
+      {
+        key: 'loconet:5',
+        input: {source: 'loconet', address: 5},
+        occupied: true,
+        locos: [],
+        overload: 0,
+        changedAt: 0,
+      },
+    ]);
+
+  it('given a route is set, its turnouts cannot be thrown by hand', () => {
+    const {interlocking, jobs, notices, reportJobs} = setup(level3());
+    interlocking.setRoute('S1', 'S4', []);
+    reportJobs();
+    jobs.splice(0);
+    interlocking.command({
+      type: 'setTurnout',
+      elementId: 'T1',
+      position: 'straight',
+    });
+    expect(jobs).toEqual([]);
+    expect(notices).toContainEqual({
+      code: 'refused',
+      elementId: 'T1',
+      reason: 'turnoutLocked',
+    });
+  });
+
+  it('when the route is released, the turnout is free again', () => {
+    const {interlocking, jobs, reportJobs, route} = setup(level3());
+    interlocking.setRoute('S1', 'S4', []);
+    reportJobs();
+    interlocking.releaseRoute(route().id);
+    jobs.splice(0);
+    interlocking.command({
+      type: 'setTurnout',
+      elementId: 'T1',
+      position: 'straight',
+    });
+    expect(jobs).toHaveLength(1);
+  });
+
+  it('given track 2 is occupied, a route into it is refused, with the reason', () => {
+    const {interlocking, jobs, notices} = setup(level3());
+    occupy(interlocking);
+    interlocking.setRoute('S1', 'S4', []);
+    expect(jobs).toEqual([]);
     expect(notices).toContainEqual({
       code: 'routeRefused',
-      reason: 'levelNotAvailable',
+      reason: 'occupied',
+      blockIds: ['B2'],
     });
+  });
+
+  it('when the operator confirms the override, it is set over the occupied track', () => {
+    const {interlocking, reportJobs, route} = setup(level3());
+    occupy(interlocking);
+    interlocking.setRoute('S1', 'S4', [], undefined, false, true);
+    reportJobs();
+    expect(route().state).toBe('set');
+  });
+
+  it('a conflicting route is refused, not cancelled; the set route stays', () => {
+    const {interlocking, notices, reportJobs} = setup(level3());
+    interlocking.setRoute('S1', 'S4', []);
+    reportJobs();
+    interlocking.setRoute('S1', 'S3', [], undefined, false, true);
+    expect(Object.values(interlocking.state().routes)).toHaveLength(1);
+    expect(notices).toContainEqual(
+      expect.objectContaining({code: 'routeRefused', reason: 'conflict'}),
+    );
   });
 });
 

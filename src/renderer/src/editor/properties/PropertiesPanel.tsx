@@ -433,6 +433,15 @@ const TrackProperties = ({
             placeholder={`${project.settings.blockReleaseDelayMs}`}
             onCommit={(releaseDelayMs) => updateBlock({releaseDelayMs})}
           />
+          <NumberField
+            label={strings.properties.clearAhead}
+            value={block.clearAhead}
+            min={0}
+            max={5}
+            optional
+            placeholder={`${project.settings.blocksClearAhead}`}
+            onCommit={(clearAhead) => updateBlock({clearAhead})}
+          />
         </>
       )}
     </Section>

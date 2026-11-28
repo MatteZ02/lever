@@ -228,6 +228,7 @@ export const useOperateActions = (
       )}
       {popup?.kind === 'label' && (
         <TrainLabelEditor
+          project={project}
           blockId={popup.blockId}
           current={layout.blocks[popup.blockId]?.label ?? ''}
           x={popup.x}
@@ -298,12 +299,14 @@ const AspectMenu = ({
 
 // BLK-4: set, change or clear a block's train number.
 const TrainLabelEditor = ({
+  project,
   blockId,
   current,
   x,
   y,
   onClose,
 }: {
+  project: Project;
   blockId: string;
   current: string;
   x: number;
@@ -311,6 +314,12 @@ const TrainLabelEditor = ({
   onClose: () => void;
 }) => {
   const [text, setText] = useState(current);
+  // The train on this block, if any: its loco can be chosen (Levels 3, 4).
+  const train = useEngineStore((state) =>
+    Object.values(state.layout.trains).find((t) =>
+      t.blockIds.includes(blockId),
+    ),
+  );
   const apply = (label: string | null) => {
     sendCommand({type: 'setTrainLabel', blockId, label});
     onClose();
@@ -334,6 +343,28 @@ const TrainLabelEditor = ({
           onChange={(event) => setText(event.target.value)}
         />
       </label>
+      {train && project.locos.length > 0 && (
+        <label className="field">
+          <span>{strings.trains.loco}</span>
+          <select
+            value={train.locoId ?? ''}
+            onChange={(event) =>
+              sendCommand({
+                type: 'assignTrainLoco',
+                trainId: train.id,
+                locoId: event.target.value || null,
+              })
+            }
+          >
+            <option value="">{strings.trains.noLoco}</option>
+            {project.locos.map((loco) => (
+              <option key={loco.id} value={loco.id}>
+                {loco.name} ({loco.address})
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <div className="button-row">
         <button type="submit" className="button">
           {strings.operate.setLabel}

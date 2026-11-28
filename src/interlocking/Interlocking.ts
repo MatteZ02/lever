@@ -17,18 +17,20 @@ import {
   stateOutputs,
   turnoutCommands,
 } from '../model/accessoryCommands';
-import {levelOf} from '../model/areas';
+import {levelMaps, levelOf} from '../model/areas';
 import {
   DiagramElement,
   GenericAccessory,
   Signal,
   Turnout,
 } from '../model/elements';
+import {Loco} from '../model/locos';
 import {turnoutPositions} from '../model/ports';
-import {Block, Project, StationView} from '../model/project';
+import {AutomationLevel, Block, Project, StationView} from '../model/project';
 import {OutputReport, reconstructState} from '../model/reconstruct';
+import {overrideAllowed, routeProblems} from '../model/routeChecks';
 import {routeConflicts} from '../model/routeConflicts';
-import {findRoutes} from '../model/routing';
+import {findRoutes, RoutePlan} from '../model/routing';
 import {findSignalType, SignalType} from '../model/signalTypes';
 import {buildProjectTopology, Topology} from '../model/topology';
 import {
@@ -51,6 +53,8 @@ import {
   RefusalReason,
 } from './levels';
 import {RouteManager, RouteNotice} from './routes';
+import {TrafficControl, TrafficNotice} from './traffic';
+import {LocoTarget} from './trains';
 
 export type InterlockingNotice =
   | {code: 'refused'; elementId: string; reason: RefusalReason}
@@ -66,9 +70,14 @@ export type InterlockingNotice =
         | 'changed'
         | 'needsLevel2'
         | 'levelNotAvailable'
-        | 'crossing';
+        | 'crossing'
+        | 'occupied'
+        | 'conflict';
+      blockIds?: string[];
+      routeIds?: string[];
     }
-  | RouteNotice;
+  | RouteNotice
+  | TrafficNotice;
 
 export type InterlockingDeps = {
   enqueue: (job: AccessoryJob) => void;
@@ -80,6 +89,11 @@ export type InterlockingDeps = {
   // reply, LAN_X_GET_TURNOUT_INFO). Used to check a command whose report did
   // not arrive.
   query?: (fAdr: number) => void;
+  // Levels 3 and 4: drive a loco (LocoControl), and what it does now.
+  setLocoTarget?: (loco: Loco, target: LocoTarget | null) => void;
+  locoSpeed?: (loco: Loco) => number | undefined;
+  locoForward?: (loco: Loco) => boolean | undefined;
+  now?: () => number;
 };
 
 // How long to wait for the answer to a position check.
@@ -131,8 +145,15 @@ export class Interlocking {
     accessories: {},
     blocks: {},
     routes: {},
+    trains: {},
+    automationPaused: false,
   };
   private changes: LayoutLiveChanges = {};
+  // Blocks that became occupied or free since the last flush (for trains).
+  private occupancy: [string, boolean][] = [];
+  private blockLevels = new Map<string, AutomationLevel>();
+  private elementLevels = new Map<string, AutomationLevel>();
+  private readonly traffic: TrafficControl;
   // The whole layout as one graph, for routes (rebuilt on load).
   private topology: Topology | null = null;
   // True while a project is loaded: live state is being rebuilt, so routes
@@ -151,17 +172,34 @@ export class Interlocking {
         this.live.turnouts[id]?.position === undefined ||
         this.live.turnouts[id]?.status === 'unknown',
       setTurnout: (elementId, position) =>
-        this.command({type: 'setTurnout', elementId, position}),
+        this.command({type: 'setTurnout', elementId, position}, 'route'),
       setSignal: (elementId, aspectId) =>
         this.command({type: 'setSignal', elementId, aspectId}, 'route'),
       // A manual turnout's command records the position (ACC-5).
       recordManual: (elementId, position) =>
-        this.command({type: 'setTurnout', elementId, position}),
+        this.command({type: 'setTurnout', elementId, position}, 'route'),
       notice: (notice) => this.deps.onNotice(notice),
       changed: () => {
         this.live.routes = this.routes.live();
         this.changes.routes = this.live.routes;
       },
+    });
+    this.traffic = new TrafficControl({
+      position: (id) => this.live.turnouts[id]?.position,
+      occupied: (id) => this.live.blocks[id]?.occupied ?? false,
+      signalAtStop: (id) => this.signalAtStop(id),
+      levelOfBlock: (id) => this.levelOfBlock(id),
+      levelOfElement: (id) => this.levelOfElement(id),
+      routes: () => this.live.routes,
+      routePaths: () => this.routes.paths(),
+      setRoute: (plan) => this.setRoutePlan(plan),
+      releaseRoute: (id) => this.routes.release(id),
+      setLocoTarget: (loco, target) => this.deps.setLocoTarget?.(loco, target),
+      locoSpeed: (loco) => this.deps.locoSpeed?.(loco),
+      locoForward: (loco) => this.deps.locoForward?.(loco),
+      schedule: this.deps.schedule,
+      now: this.deps.now ?? Date.now,
+      notice: (notice) => this.deps.onNotice(notice),
     });
   }
 
@@ -265,7 +303,11 @@ export class Interlocking {
       accessories: {},
       blocks: {},
       routes: previous.routes,
+      trains: previous.trains,
+      automationPaused: previous.automationPaused,
     };
+    this.computeLevels(project);
+    this.traffic.load(project, this.topology);
     for (const [id, info] of this.infos) {
       const kind =
         info.element.kind === 'turnout'
@@ -293,6 +335,9 @@ export class Interlocking {
     this.loading = false;
     this.routes.recheck();
     this.live.routes = this.routes.live();
+    this.occupancy = [];
+    this.traffic.evaluate();
+    this.syncTrains();
     this.changes = {};
     this.deps.onChange(this.live);
   }
@@ -309,6 +354,7 @@ export class Interlocking {
     via: string[],
     key?: string,
     allowCrossing = false,
+    override = false,
   ): void {
     const project = this.project;
     if (!project || !this.topology) {
@@ -327,23 +373,45 @@ export class Interlocking {
       this.deps.onNotice({code: 'routeRefused', reason: 'changed'});
       return;
     }
-    // Routes are a Level 2 feature: they start in a Level 2 area and may
-    // run into Level 1 areas (MIX-4; the operator was warned). Levels not
-    // built yet are refused.
+    // Routes start in a Level 2+ area and may run into Level 1 areas
+    // (MIX-4; the operator was warned).
     const start = this.elementInfo(from);
     const startLevel = start
       ? levelOf(project, start.view, start.element)
       : project.settings.defaultLevel;
-    if (startLevel > 2 || plan.areas.some((area) => area.level > 2)) {
-      this.deps.onNotice({code: 'routeRefused', reason: 'levelNotAvailable'});
-      return;
-    }
     if (startLevel < 2) {
       this.deps.onNotice({code: 'routeRefused', reason: 'needsLevel2'});
       return;
     }
-    // Conflicting routes are cancelled; routes that only cross this one in
-    // a crossing or slip stay, once the operator has confirmed.
+    // Level 3+ parts: no occupied blocks (unless the operator confirmed),
+    // no conflicting routes there.
+    const problems = routeProblems(plan, {
+      topology: this.topology,
+      routes: this.routes.paths(),
+      occupied: (id) => this.live.blocks[id]?.occupied ?? false,
+      levelOfBlock: (id) => this.levelOfBlock(id),
+      levelOfElement: (id) => this.levelOfElement(id),
+    });
+    if (problems.length > 0 && !(override && overrideAllowed(problems))) {
+      const problem =
+        problems.find((p) => p.kind === 'conflict') ?? problems[0];
+      this.deps.onNotice(
+        problem.kind === 'conflict'
+          ? {
+              code: 'routeRefused',
+              reason: 'conflict',
+              routeIds: problem.routeIds,
+            }
+          : {
+              code: 'routeRefused',
+              reason: 'occupied',
+              blockIds: problem.blockIds,
+            },
+      );
+      return;
+    }
+    // Elsewhere conflicting routes are cancelled; routes that only cross
+    // this one in a crossing or slip stay, once the operator has confirmed.
     const conflicts = routeConflicts(
       this.topology,
       plan.steps,
@@ -361,6 +429,103 @@ export class Interlocking {
       .forEach((conflict) => this.routes.cancelForConflict(conflict.routeId));
     this.routes.set(plan);
     this.flush();
+  }
+
+  // Level 4: a route for an automatic train, already checked (automatic.ts).
+  // Conflicting routes outside Level 3+ areas are cancelled as usual.
+  private setRoutePlan(plan: RoutePlan): string | undefined {
+    if (!this.topology) {
+      return undefined;
+    }
+    routeConflicts(this.topology, plan.steps, this.routes.paths())
+      .filter((conflict) => conflict.kind === 'conflict')
+      .forEach((conflict) => this.routes.cancelForConflict(conflict.routeId));
+    return this.routes.set(plan);
+  }
+
+  // --- trains (Levels 3 and 4) -------------------------------------------------
+
+  assignTrainLoco(trainId: string, locoId: string | null): void {
+    this.traffic.assignLoco(trainId, locoId);
+    this.flush(true);
+  }
+
+  driveTrain(trainId: string, blockId: string): void {
+    this.traffic.drive(trainId, blockId);
+    this.flush(true);
+  }
+
+  runSchedule(trainId: string, scheduleId: string): void {
+    this.traffic.runSchedule(trainId, scheduleId);
+    this.flush(true);
+  }
+
+  stopTrain(trainId: string): void {
+    this.traffic.stopTrain(trainId);
+    this.flush(true);
+  }
+
+  setAutomationPaused(paused: boolean): void {
+    this.traffic.setPaused(paused);
+    if (this.live.automationPaused !== paused) {
+      this.live.automationPaused = paused;
+      this.changes.automationPaused = paused;
+    }
+    this.flush(true);
+  }
+
+  // A loco's speed or direction changed (driven or reported).
+  locosChanged(): void {
+    this.flush(true);
+  }
+
+  private signalAtStop(signalId: string): boolean {
+    const info = this.infos.get(signalId);
+    const aspect = this.live.signals[signalId]?.aspect;
+    return (
+      info?.signalType !== undefined &&
+      aspect !== undefined &&
+      aspect === info.signalType.stopAspectId
+    );
+  }
+
+  private levelOfBlock(blockId: string): AutomationLevel {
+    return (
+      this.blockLevels.get(blockId) ?? this.project?.settings.defaultLevel ?? 1
+    );
+  }
+
+  private levelOfElement(elementId: string): AutomationLevel {
+    return (
+      this.elementLevels.get(elementId) ??
+      this.project?.settings.defaultLevel ??
+      1
+    );
+  }
+
+  private computeLevels(project: Project): void {
+    const levels = levelMaps(project);
+    this.blockLevels = levels.blocks;
+    this.elementLevels = levels.elements;
+  }
+
+  // Train numbers on blocks follow the trains.
+  private syncTrains(): void {
+    this.live.trains = this.traffic.trains();
+    this.changes.trains = this.live.trains;
+    const labels = this.traffic.labels();
+    for (const [blockId, block] of Object.entries(this.live.blocks)) {
+      const label = labels.get(blockId);
+      if (block.label !== label) {
+        const next = {...block};
+        if (label === undefined) {
+          delete next.label;
+        } else {
+          next.label = label;
+        }
+        this.setBlock(blockId, next);
+      }
+    }
   }
 
   cancelRoute(routeId: string): void {
@@ -447,6 +612,7 @@ export class Interlocking {
   // Positions recorded by the operator and train labels are kept.
   connectionLost(): void {
     // Every position is unknown now; set routes wait for the new reports.
+    this.traffic.connectionLost();
     this.outputs.clear();
     this.extValues.clear();
     this.feedback.clear();
@@ -506,10 +672,18 @@ export class Interlocking {
     if (!info || !this.project) {
       return;
     }
+    // Level 3: a turnout of a route set here is locked.
+    const locked =
+      command.type === 'setTurnout' &&
+      Object.values(this.live.routes).some((route) =>
+        route.turnouts.some((t) => t.turnoutId === command.elementId),
+      );
     const decision = checkCommand(
       command,
       levelOf(this.project, info.view, info.element),
       origin,
+      undefined,
+      locked,
     );
     if (!decision.ok) {
       this.deps.onNotice({
@@ -579,9 +753,8 @@ export class Interlocking {
       this.deps.onNotice({code: 'labelNeedsFeedback', blockId});
       return;
     }
-    const text = label?.trim();
-    this.setBlock(blockId, {...block, label: text ? text : undefined});
-    this.flush();
+    this.traffic.label(blockId, label);
+    this.flush(true);
   }
 
   // The engine's queue started a job of this element: the confirmation
@@ -934,13 +1107,37 @@ export class Interlocking {
   }
 
   private setBlock(blockId: string, next: BlockLive): void {
-    if (!sameJson(this.live.blocks[blockId], next)) {
+    const previous = this.live.blocks[blockId];
+    if (previous && previous.occupied !== next.occupied) {
+      this.occupancy.push([blockId, next.occupied]);
+    }
+    if (!sameJson(previous, next)) {
       this.live.blocks[blockId] = next;
       (this.changes.blocks ??= {})[blockId] = next;
     }
   }
 
-  private flush(): void {
+  // Sends the changes. Trains are worked out again first when anything
+  // they depend on changed (or `trains` says so).
+  private flush(trains = false): void {
+    if (!this.loading) {
+      const occupancy = this.occupancy;
+      this.occupancy = [];
+      for (const [blockId, occupied] of occupancy) {
+        this.traffic.occupancyChanged(blockId, occupied);
+      }
+      const relevant =
+        trains ||
+        occupancy.length > 0 ||
+        this.changes.turnouts !== undefined ||
+        this.changes.signals !== undefined ||
+        this.changes.routes !== undefined ||
+        this.changes.automationPaused !== undefined;
+      if (relevant) {
+        this.traffic.evaluate();
+        this.syncTrains();
+      }
+    }
     if (Object.keys(this.changes).length > 0) {
       const changes = this.changes;
       this.changes = {};

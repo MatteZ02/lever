@@ -4,6 +4,7 @@ import {z} from 'zod';
 import {feedbackInputRefSchema} from '../shared/feedback';
 import {centralUnitProfileSchema} from './centralUnitProfile';
 import {diagramElementSchema, idSchema} from './elements';
+import {locoSchema, scheduleSchema} from './locos';
 import {signalTypeSchema} from './signalTypes';
 
 export const PROJECT_FORMAT = 'lever-project';
@@ -35,6 +36,10 @@ export const blockSchema = z.object({
   inputs: z.array(feedbackInputRefSchema).default([]),
   // undefined: project default (BLK-3).
   releaseDelayMs: z.number().int().min(0).max(60000).optional(),
+  // Level 3+: free blocks a train needs ahead to keep running; undefined:
+  // project default. 0 lets it run into an occupied block, where it is
+  // stopped.
+  clearAhead: z.number().int().min(0).max(5).optional(),
 });
 export type Block = z.infer<typeof blockSchema>;
 
@@ -122,6 +127,8 @@ export const projectSettingsSchema = z.object({
   // Command the last known turnout positions after the first connection
   // (ACC-4). Off by default.
   restoreTurnoutsOnStartup: z.boolean().default(false),
+  // Level 3+: free blocks a train needs ahead (Block.clearAhead default).
+  blocksClearAhead: z.number().int().min(0).max(5).default(1),
   editPassword: passwordHashSchema.optional(),
 });
 export type ProjectSettings = z.infer<typeof projectSettingsSchema>;
@@ -138,6 +145,9 @@ export const projectSchema = z.object({
   blocks: z.array(blockSchema).default([]),
   signalTypes: z.array(signalTypeSchema).default([]),
   routes: z.array(savedRouteSchema).default([]),
+  // Levels 3 and 4 (locos.ts).
+  locos: z.array(locoSchema).default([]),
+  schedules: z.array(scheduleSchema).default([]),
 });
 
 export type Project = z.infer<typeof projectSchema>;

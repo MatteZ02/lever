@@ -2,7 +2,12 @@
 // the live state (later the interlocking levels). Runs in an Electron
 // utilityProcess (STK-4), but has no Electron imports itself: ports are plain
 // message endpoints, so it can be tested in Node.
-import {lanXGetTurnoutInfo, versionToNumber} from '@lever/z21-protocol';
+import {
+  lanXGetLocoInfo,
+  lanXGetTurnoutInfo,
+  lanXSetLocoDrive,
+  versionToNumber,
+} from '@lever/z21-protocol';
 import {
   AccessoryJob,
   AccessoryQueue,
@@ -16,7 +21,8 @@ import {
 } from '../connection/FeedbackTracker';
 import {AccessoryStateStore} from '../interlocking/accessoryState';
 import {Interlocking, InterlockingNotice} from '../interlocking/Interlocking';
-import {projectSchema} from '../model/project';
+import {Loco} from '../model/locos';
+import {Project, projectSchema} from '../model/project';
 import {
   ENGINE_API_VERSION,
   EngineCommand,
@@ -27,6 +33,7 @@ import {
 } from '../shared/engineApi';
 import {FeedbackSource} from '../shared/feedback';
 import {LayoutLiveChanges} from '../shared/liveState';
+import {LocoControl} from './LocoControl';
 
 // LAN_X_SET_EXT_ACCESSORY exists from Z21 FW 1.40 (§5.4). The z21 start in
 // use runs 1.33 (REU-5).
@@ -62,6 +69,13 @@ const realSchedule = (ms: number, run: () => void) => {
 // an operator's action only when the last round is at least this old.
 const MIN_POSITION_REFRESH_MS = 2000;
 const POSITION_REFRESH_ON_ACTION_MS = 3000;
+// LAN_X_GET_LOCO_INFO subscribes a client to at most 16 locos (§4, FIFO).
+export const MAX_LOCO_SUBSCRIPTIONS = 16;
+// While Lever drives a loco (a Level 3 hold, a Level 4 run), its speed is
+// asked this often: a central unit that does not pass on other clients'
+// drive commands (DR5000?) would otherwise hide a driver accelerating a
+// held train.
+export const CONTROLLED_LOCO_POLL_MS = 2000;
 
 const USER_ACTIONS: ReadonlySet<EngineCommand['type']> = new Set([
   'switchAccessory',
@@ -92,6 +106,13 @@ export class Engine {
   private projectId: string | null = null;
   // ACC-4: positions to command after the next connection.
   private pendingRestore: Record<string, string> | null = null;
+  // Levels 3 and 4.
+  private readonly locoControl: LocoControl;
+  private project: Project | null = null;
+  // Loco addresses subscribed (LAN_X_GET_LOCO_INFO), oldest first.
+  private subscribed: number[] = [];
+  private controlledLocos = new Set<number>();
+  private cancelLocoPoll: (() => void) | null = null;
   private readonly report: (report: EngineReport) => void;
   private readonly schedule: (ms: number, run: () => void) => () => void;
   // The station view each window shows (key: its port); their turnouts are
@@ -114,15 +135,42 @@ export class Engine {
       gapMs: options.accessoryGapMs,
       onStart: (job) => this.onJobStart(job),
     });
+    this.locoControl = new LocoControl({
+      drive: ({address, steps, speed, forward}) => {
+        if (this.connection.getState() === 'connected') {
+          this.connection.sendDatasets([
+            lanXSetLocoDrive({
+              address,
+              steps,
+              speed,
+              forward,
+              emergencyStop: false,
+            }),
+          ]);
+        }
+      },
+      schedule: (ms, run) =>
+        this.schedule(ms, () => {
+          run();
+          this.interlocking.locosChanged();
+        }),
+    });
     this.interlocking = new Interlocking({
       enqueue: (job) => this.enqueue(job),
       schedule: this.schedule,
       onChange: (changes) => {
         this.broadcast({type: 'layout', changes});
         this.reportConfirmedTurnouts(changes);
+        if (changes.trains) {
+          this.subscribeTrainLocos();
+        }
       },
       onNotice: (notice) => this.notice(notice),
       query: (fAdr) => this.query(fAdr),
+      setLocoTarget: (loco, target) => this.setLocoTarget(loco, target),
+      locoSpeed: (loco) => this.locoControl.kmh(loco),
+      locoForward: (loco) => this.locoControl.forward(loco),
+      now: this.now,
     });
 
     connection.on('state', (state) => {
@@ -140,6 +188,16 @@ export class Engine {
     });
     connection.on('trackStatus', (status) => {
       this.broadcast({type: 'trackStatus', status});
+      if (
+        status === 'emergencyStop' ||
+        status === 'powerOff' ||
+        status === 'shortCircuit'
+      ) {
+        // Every loco stands; automatic trains must not start again by
+        // themselves when power comes back (resume automation by hand).
+        this.locoControl.allStopped();
+        this.interlocking.setAutomationPaused(true);
+      }
     });
     connection.on('deviceInfo', (deviceInfo) => {
       this.broadcast({type: 'deviceInfo', deviceInfo});
@@ -181,6 +239,18 @@ export class Engine {
             ),
           });
           return;
+      }
+      if (message.type === 'locoInfo') {
+        const {loco} = message;
+        this.locoControl.reported({
+          address: loco.address,
+          speedSteps: loco.speedSteps,
+          forward: loco.forward,
+          speed: loco.speed,
+          emergencyStop: loco.emergencyStop,
+        });
+        this.interlocking.locosChanged();
+        return;
       }
       const changes = this.feedback.handle(message, now);
       if (changes.length > 0) {
@@ -241,6 +311,7 @@ export class Engine {
       this.pendingRestore = null;
     }
     this.projectId = project.id;
+    this.project = project;
     this.interlocking.load(project);
     this.setAccessoryGap(project.settings.centralUnit.accessoryGapMs);
     this.setFeedbackSources(project.settings.centralUnit.feedbackSources);
@@ -362,7 +433,23 @@ export class Engine {
           command.via,
           command.key,
           command.allowCrossing,
+          command.override,
         );
+        break;
+      case 'assignTrainLoco':
+        this.interlocking.assignTrainLoco(command.trainId, command.locoId);
+        break;
+      case 'driveTrain':
+        this.interlocking.driveTrain(command.trainId, command.blockId);
+        break;
+      case 'runSchedule':
+        this.interlocking.runSchedule(command.trainId, command.scheduleId);
+        break;
+      case 'stopTrain':
+        this.interlocking.stopTrain(command.trainId);
+        break;
+      case 'setAutomationPaused':
+        this.interlocking.setAutomationPaused(command.paused);
         break;
       case 'cancelRoute':
         this.interlocking.cancelRoute(command.routeId);
@@ -411,12 +498,16 @@ export class Engine {
       this.accessories.clear();
       this.feedback.clear();
       this.awaitingReply.clear();
+      this.locoControl.forgetReports();
       this.interlocking.connectionLost();
       this.broadcastSnapshot();
       this.stopPositionRefresh();
       return;
     }
     this.startPositionRefresh();
+    // Subscriptions do not survive a new login.
+    this.subscribed = [];
+    this.subscribeTrainLocos();
     this.queryAll();
     feedbackStartupQueries(this.feedbackSources).forEach((job) =>
       this.enqueue(job),
@@ -426,6 +517,69 @@ export class Engine {
       this.pendingRestore = null;
       this.interlocking.restoreTurnouts(positions);
     }
+  }
+
+  // --- locos (Levels 3 and 4) --------------------------------------------------
+
+  private setLocoTarget(
+    loco: Loco,
+    target: {kmh: number; forward?: boolean} | null,
+  ): void {
+    this.locoControl.setTarget(loco, target);
+    if (target) {
+      this.controlledLocos.add(loco.address);
+    } else {
+      this.controlledLocos.delete(loco.address);
+    }
+    this.startLocoPoll();
+  }
+
+  // The locos of the trains: subscribed, so their speed is known (and a
+  // driver accelerating a held train is seen). At most 16, the newest
+  // trains' locos first; Throttles have their own 16 each.
+  private subscribeTrainLocos(): void {
+    if (!this.project || this.connection.getState() !== 'connected') {
+      return;
+    }
+    const locos = new Map(this.project.locos.map((loco) => [loco.id, loco]));
+    const wanted = Object.values(this.interlocking.state().trains)
+      .flatMap((train) => {
+        const loco = train.locoId ? locos.get(train.locoId) : undefined;
+        return loco ? [loco.address] : [];
+      })
+      .slice(-MAX_LOCO_SUBSCRIPTIONS);
+    const added = wanted.filter(
+      (address) => !this.subscribed.includes(address),
+    );
+    if (added.length === 0) {
+      return;
+    }
+    this.subscribed = [...this.subscribed, ...added].slice(
+      -MAX_LOCO_SUBSCRIPTIONS,
+    );
+    this.connection.sendDatasets(added.map(lanXGetLocoInfo));
+  }
+
+  private startLocoPoll(): void {
+    if (this.controlledLocos.size === 0) {
+      this.cancelLocoPoll?.();
+      this.cancelLocoPoll = null;
+      return;
+    }
+    if (this.cancelLocoPoll) {
+      return;
+    }
+    this.cancelLocoPoll = this.schedule(CONTROLLED_LOCO_POLL_MS, () => {
+      this.cancelLocoPoll = null;
+      if (this.connection.getState() === 'connected') {
+        this.connection.sendDatasets(
+          [...this.controlledLocos]
+            .slice(0, MAX_LOCO_SUBSCRIPTIONS)
+            .map(lanXGetLocoInfo),
+        );
+      }
+      this.startLocoPoll();
+    });
   }
 
   // Startup state, rate-limited through the queue, never as a burst
@@ -560,6 +714,14 @@ export class Engine {
         ...('skipped' in notice ? {skipped: notice.skipped} : {}),
         ...('manualBack' in notice ? {manualBack: notice.manualBack} : {}),
         ...('manualThrow' in notice ? {manualThrow: notice.manualThrow} : {}),
+        ...('trainId' in notice ? {trainId: notice.trainId} : {}),
+        ...('name' in notice ? {name: notice.name} : {}),
+        ...('blockIds' in notice && notice.blockIds
+          ? {blockIds: notice.blockIds}
+          : {}),
+        ...('routeIds' in notice && notice.routeIds
+          ? {routeIds: notice.routeIds}
+          : {}),
       },
     });
   }

@@ -1131,6 +1131,38 @@ span.level-badge {
   font-size: 1.05rem;
 }
 
+.train-state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* A train Level 3 is stopping: marked by text too ("Stopping: …"). */
+.train-row--held td:first-child {
+  border-left: 4px solid var(--color-trackOccupied);
+}
+
+.automation-button--paused {
+  border-color: var(--color-trackRouteBroken);
+}
+
+.loco-editor {
+  padding: 6px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.loco-editor summary {
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.schedule-stop .field {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
 .traffic-table {
   width: 100%;
   border-collapse: collapse;

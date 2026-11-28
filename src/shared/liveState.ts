@@ -106,6 +106,38 @@ export const routeLiveSchema = z.object({
 });
 export type RouteLive = z.infer<typeof routeLiveSchema>;
 
+// A train (trains.ts): a train number on blocks, following its train;
+// Levels 3 and 4 add a loco, protection and automatic driving.
+export const trainLiveSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  locoId: z.string().optional(),
+  // Front first.
+  blockIds: z.array(z.string()),
+  // Lever knows which way it runs (it has moved block to block).
+  directionKnown: z.boolean(),
+  // Which DCC direction of its loco runs it that way (Level 4 needs it).
+  aheadIsForward: z.boolean().optional(),
+  // Its loco's speed (km/h) and DCC direction, as driven or reported.
+  speedKmh: z.number().optional(),
+  forward: z.boolean().optional(),
+  // Level 3: held (braked to 0) and why (protection.ts HoldReason).
+  hold: z.string().optional(),
+  // Level 4: driven automatically (automatic.ts).
+  auto: z
+    .object({
+      state: z.string(),
+      reason: z.string().optional(),
+      destinationBlockId: z.string().optional(),
+      scheduleId: z.string().optional(),
+      stopIndex: z.number().int(),
+    })
+    .optional(),
+  // Lever drives its loco now (a hold or an automatic run).
+  controlled: z.boolean(),
+});
+export type TrainLive = z.infer<typeof trainLiveSchema>;
+
 export const layoutLiveSchema = z.object({
   turnouts: z.record(z.string(), turnoutLiveSchema),
   signals: z.record(z.string(), signalLiveSchema),
@@ -113,6 +145,10 @@ export const layoutLiveSchema = z.object({
   blocks: z.record(z.string(), blockLiveSchema),
   // Always sent complete (routes come and go).
   routes: z.record(z.string(), routeLiveSchema),
+  // Always sent complete, like routes.
+  trains: z.record(z.string(), trainLiveSchema),
+  // Level 4: automatic trains stand (Pause automation, STOP, power off).
+  automationPaused: z.boolean(),
 });
 export type LayoutLive = z.infer<typeof layoutLiveSchema>;
 
@@ -122,6 +158,8 @@ export const emptyLayoutLive = (): LayoutLive => ({
   accessories: {},
   blocks: {},
   routes: {},
+  trains: {},
+  automationPaused: false,
 });
 
 // Changes only; the same shape, every part optional.

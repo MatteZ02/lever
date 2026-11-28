@@ -98,10 +98,39 @@ export const engineCommandSchema = z.discriminatedUnion('type', [
     key: z.string().max(10000).optional(),
     // The operator confirmed crossing another route in a crossing or slip.
     allowCrossing: z.boolean().default(false),
+    // Level 3: the operator confirmed setting it over occupied blocks.
+    override: z.boolean().default(false),
   }),
   z.object({v: version, type: z.literal('cancelRoute'), routeId: z.string()}),
   z.object({v: version, type: z.literal('releaseRoute'), routeId: z.string()}),
   z.object({v: version, type: z.literal('undoRoute')}),
+  // Trains (Levels 3 and 4): the loco of a train (a project loco id).
+  z.object({
+    v: version,
+    type: z.literal('assignTrainLoco'),
+    trainId: z.string(),
+    locoId: z.string().nullable(),
+  }),
+  // Level 4: drive a train to a block, or along a schedule; stop it.
+  z.object({
+    v: version,
+    type: z.literal('driveTrain'),
+    trainId: z.string(),
+    blockId: z.string(),
+  }),
+  z.object({
+    v: version,
+    type: z.literal('runSchedule'),
+    trainId: z.string(),
+    scheduleId: z.string(),
+  }),
+  z.object({v: version, type: z.literal('stopTrain'), trainId: z.string()}),
+  // Level 4: every automatic train stands (not STOP: track power stays).
+  z.object({
+    v: version,
+    type: z.literal('setAutomationPaused'),
+    paused: z.boolean(),
+  }),
 ]);
 export type EngineCommand = z.infer<typeof engineCommandSchema>;
 
@@ -184,6 +213,12 @@ export const engineNoticeSchema = z.object({
     // Cancelled because a new route conflicts with it.
     'routeCancelled',
     'routeUndone',
+    // Trains (Levels 3 and 4).
+    'trainHeld',
+    'trainLost',
+    'trainUnclear',
+    'trainArrived',
+    'automationPaused',
   ]),
   time: z.number(),
   elementId: z.string().optional(),
@@ -196,6 +231,12 @@ export const engineNoticeSchema = z.object({
   // put back by hand.
   skipped: z.array(z.string()).optional(),
   manualBack: z.array(z.string()).optional(),
+  // Train notices: the train and its name; routeRefused (Level 3): what is
+  // in the way.
+  trainId: z.string().optional(),
+  name: z.string().optional(),
+  blockIds: z.array(z.string()).optional(),
+  routeIds: z.array(z.string()).optional(),
   // routeSet: manual turnouts to throw by hand, with their positions.
   manualThrow: z
     .array(z.object({turnoutId: z.string(), position: z.string()}))

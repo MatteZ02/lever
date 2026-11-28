@@ -121,6 +121,20 @@ export const ProjectProperties = ({
             }))
           }
         />
+        <NumberField
+          label={strings.properties.blocksClearAhead}
+          help={strings.properties.blocksClearAheadHelp}
+          value={project.settings.blocksClearAhead}
+          min={0}
+          max={5}
+          onCommit={(value) =>
+            value !== undefined &&
+            edit((p) => ({
+              ...p,
+              settings: {...p.settings, blocksClearAhead: value},
+            }))
+          }
+        />
         <CheckField
           label={strings.properties.autoSignals}
           value={project.settings.autoSignalsOnRoute}

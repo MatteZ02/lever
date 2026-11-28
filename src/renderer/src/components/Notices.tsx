@@ -58,6 +58,19 @@ const noticeText = (notice: EngineNotice): string => {
         (notice.skipped ?? []).map(describe),
         (notice.manualBack ?? []).map(describe),
       );
+    case 'trainHeld':
+      return strings.notices.trainHeld(notice.name ?? '', notice.reason ?? '');
+    case 'trainLost':
+      return strings.notices.trainLost(notice.name ?? '');
+    case 'trainUnclear':
+      return strings.notices.trainUnclear(name);
+    case 'trainArrived':
+      return strings.notices.trainArrived(
+        notice.name ?? '',
+        block?.name || describe(notice.blockId),
+      );
+    case 'automationPaused':
+      return strings.notices.automationPaused;
   }
 };
 

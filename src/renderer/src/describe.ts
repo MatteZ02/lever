@@ -1,6 +1,7 @@
 // Names of elements for the operator: "Turnout 13", "Signal 803",
 // "Station exit Päärata Pun": the element's name, else its address, with
-// its kind.
+// its kind. Block ids (the ends of an automatic train's route) get the
+// block's name.
 import {DiagramElement} from '../../model/elements';
 import {Project} from '../../model/project';
 import {findElement} from '../../model/validation';
@@ -24,5 +25,9 @@ export const describeElementId = (
   elementId: string,
 ): string => {
   const element = project ? findElement(project, elementId) : undefined;
-  return element ? describeElement(element) : elementId;
+  if (element) {
+    return describeElement(element);
+  }
+  const block = project?.blocks.find((candidate) => candidate.id === elementId);
+  return block ? block.name || block.id : elementId;
 };

@@ -437,7 +437,7 @@ describe('blocks and feedback (BLK-1–BLK-4)', () => {
 });
 
 describe('mixed levels (ARC-L1)', () => {
-  it('refuses commands in areas whose level is not built yet', () => {
+  it('given a Level 3 area, a turnout in no route is thrown by hand as usual', () => {
     const project = projectWith(dccTurnout(5));
     const area = project.areas.find((a) => a.id === project.views[0].areaId)!;
     area.level = 3;
@@ -447,10 +447,8 @@ describe('mixed levels (ARC-L1)', () => {
       elementId: 'T',
       position: 'diverging',
     });
-    expect(jobs).toEqual([]);
-    expect(notices).toEqual([
-      {code: 'refused', elementId: 'T', reason: 'levelNotAvailable'},
-    ]);
+    expect(jobs).toHaveLength(1);
+    expect(notices).toEqual([]);
   });
 });
 

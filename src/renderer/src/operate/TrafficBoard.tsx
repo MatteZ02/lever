@@ -6,6 +6,7 @@ import {Project} from '../../../model/project';
 import {strings} from '../../../shared/strings';
 import {useEngineStore} from '../store/engineStore';
 import {useRouteStore} from '../store/routeStore';
+import {AutomationButton} from './AutomationButton';
 import {
   ActiveRoutes,
   RouteActions,
@@ -40,6 +41,9 @@ export const TrafficBoard = ({project}: {project: Project}) => {
         {!pick && <SavedRoutes project={project} />}
       </section>
       <section className="traffic-board-section">
+        <div className="button-row">
+          <AutomationButton project={project} />
+        </div>
         <TrainList project={project} />
       </section>
     </div>

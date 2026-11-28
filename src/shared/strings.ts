@@ -205,13 +205,91 @@ const en = {
       'Open what is shown here in a new window, e.g. for a second monitor. Lever reopens its windows where they were.',
   },
 
+  trains: {
+    holds: {
+      signalAtStop: 'signal at stop',
+      occupiedAhead: 'track ahead occupied',
+      enteredOccupied: 'ran into occupied track',
+      endOfTrack: 'the track ends ahead',
+      turnoutAgainst: 'a turnout ahead is set the other way',
+      turnoutUnknown: 'a turnout ahead is not known',
+    } as Record<string, string>,
+    autoStates: {
+      waiting: 'Waiting',
+      routing: 'Setting route',
+      running: 'Running',
+      stopping: 'Stopping',
+      dwelling: 'At a stop',
+      done: 'Arrived',
+    } as Record<string, string>,
+    autoReasons: {
+      paused: 'automation paused',
+      noLoco: 'no loco',
+      directionUnknown:
+        'direction not known yet: drive it one block by hand first',
+      notLevel4: 'only in Level 4 areas',
+      noRoute: 'no route to it',
+      occupied: 'the way is occupied',
+      conflict: 'another route is in the way',
+      routeFailed: 'the route did not set',
+    } as Record<string, string>,
+    loco: 'Loco',
+    noLoco: 'no loco',
+    speed: 'Speed',
+    where: 'Where',
+    state: 'State',
+    driver: 'Driver',
+    held: (reason: string) =>
+      `Stopping: ${strings.trains.holds[reason] ?? reason}`,
+    directionUnknown: 'direction not known',
+    kmh: (kmh: number) => `${kmh} km/h`,
+    driveTo: 'Drive to',
+    chooseBlock: 'Choose a block…',
+    schedule: 'Schedule',
+    chooseSchedule: 'Choose a schedule…',
+    stop: 'Stop',
+    pause: 'Pause automation',
+    resume: 'Resume automation',
+    paused: 'Automation paused',
+    unlabelled: 'Occupied, no train number',
+  },
+  locos: {
+    title: 'Locos and schedules',
+    short: 'Locos',
+    help: 'Locos are driven by Lever at Level 3 (stopping a train) and Level 4 (automatic driving), with the speeds and rates set here, like the power handle in Throttle. Put a loco on a train by clicking its occupied track.',
+    add: 'Add loco',
+    empty: 'No locos yet.',
+    newName: 'New loco',
+    name: 'Name',
+    address: 'Address',
+    speedSteps: 'Speed steps',
+    maxSpeed: 'Top speed (km/h)',
+    acceleration: 'Acceleration (km/h per second)',
+    braking: 'Braking (km/h per second)',
+    cruise: 'Cruising speed (km/h, Level 4)',
+    approach: 'Approach speed (km/h, Level 4)',
+    notes: 'Notes',
+    remove: 'Remove',
+    brakingTime: (seconds: number) =>
+      `From cruising speed it stops in about ${seconds} s.`,
+    schedules: 'Schedules',
+    schedulesHelp:
+      'A schedule is a list of blocks an automatic train (Level 4) is driven to in turn, waiting at each.',
+    addSchedule: 'Add schedule',
+    newSchedule: 'New schedule',
+    noSchedules: 'No schedules yet.',
+    stops: 'Stops',
+    addStop: 'Add stop',
+    dwell: 'Wait (s)',
+    repeat: 'Start again after the last stop',
+  },
   traffic: {
     title: 'Traffic',
     tab: 'Traffic',
     more: 'More',
     less: 'Less',
     noRoutesHere: 'Routes need an area at Level 2 or higher (Levels).',
-    occupied: 'Occupied track',
+    occupied: 'Trains and occupied track',
     noOccupied: 'No track is occupied.',
     train: 'Train',
     block: 'Block',
@@ -242,7 +320,7 @@ const en = {
     summary: (turnouts: number, areas: string[]) =>
       `${turnouts} turnout${turnouts === 1 ? '' : 's'}; through ${areas.join(', ')}.`,
     startLevel1:
-      'Routes start in a Level 2 area. Change the level under Levels to use routes here.',
+      'Routes start in an area at Level 2 or higher. Change the level under Levels to use routes here.',
     levelNotAvailable:
       'This route crosses an area at a level that is not available yet.',
     level1Warning: (areas: string) =>
@@ -255,6 +333,11 @@ const en = {
     crosses: (routes: string, at: string) =>
       `This route crosses ${routes} in ${at}. Both can be set, but trains on them would meet there.`,
     crossQuestion: 'Set this route although it crosses another route?',
+    occupiedQuestion: 'Set this route over occupied track?',
+    occupiedOnRoute: (blocks: string) =>
+      `Occupied on the route (Level 3): ${blocks}. Lever sets it only if you confirm.`,
+    conflictLevel3: (routes: string) =>
+      `Another route uses this track at Level 3: ${routes}. Release it first.`,
     crossConfirm: 'Set anyway',
     crossBack: 'Back',
     save: 'Save…',
@@ -330,9 +413,14 @@ const en = {
     areas: 'Automation levels',
     areasShort: 'Levels',
     areasHelp:
-      'Level 1: switch turnouts and signals by hand. Level 2: also set routes. Changing a level never moves a turnout or changes a signal.',
+      'Level 1: switch turnouts and signals by hand. Level 2: also set routes. Level 3: also train protection (routes are checked, their turnouts locked, trains with a loco are stopped before occupied track or a stop signal). Level 4: also automatic routes and driving. Changing a level never moves a turnout or changes a signal.',
     stationDefault: 'whole station',
-    levelLater: (level: number) => `Level ${level} (later)`,
+    raiseLevel: (area: string, level: number) =>
+      `Raise ${area} to Level ${level}?`,
+    raiseProblems: (routes: string) =>
+      `These routes run over occupied track there: ${routes}. At Level 3 they would not be allowed. Raise the level anyway (the routes stay set), or release them first.`,
+    raiseConfirm: 'Raise anyway',
+    raiseBack: 'Back',
     levelBadge: (level: number) => `Level ${level}`,
   },
 
@@ -540,6 +628,10 @@ const en = {
       '0 = only every 25 s. Shows STOP, track power and short circuits caused by other devices at once on central units that do not report them (DR5000), and notices a broken connection sooner.',
     feedbackSources: 'Feedback buses used',
     blockReleaseDelay: 'Default block release delay (ms)',
+    blocksClearAhead: 'Free blocks needed ahead (Level 3)',
+    blocksClearAheadHelp:
+      'A train with a loco is stopped when fewer blocks than this are free ahead of it. 0: it may run into an occupied block and is stopped there.',
+    clearAhead: 'Free blocks needed ahead',
     autoSignals: 'Set signals along routes automatically',
     pairedWith: 'Leads to',
     notPaired: 'Not linked (line not drawn)',
@@ -666,7 +758,9 @@ const en = {
     refused: (name: string, reason?: string) =>
       reason === 'signalNeedsRoute'
         ? `${name}: at Level 2 signals are set by routes. Click it for "Route from here".`
-        : `${name}: not possible at this automation level.`,
+        : reason === 'turnoutLocked'
+          ? `${name}: locked in a set route (Level 3). Release the route first.`
+          : `${name}: not possible at this automation level.`,
     incomplete: (name: string, reason: string) =>
       `${name}: ${(strings.test.incomplete as Record<string, string>)[reason] ?? reason}. Nothing was sent.`,
     failed: (name: string) =>
@@ -684,7 +778,21 @@ const en = {
           'This route crosses an area at a level that is not available yet.',
         crossing:
           'This route crosses another route. Show it again and confirm the crossing.',
+        occupied:
+          'Route not set: track on it is occupied (Level 3). Show it again to set it anyway.',
+        conflict:
+          'Route not set: another route uses its track (Level 3). Release that route first.',
       })[reason] ?? 'The route could not be set.',
+    trainHeld: (train: string, reason: string) =>
+      `${train} is being stopped: ${strings.trains.holds[reason] ?? reason}.`,
+    trainLost: (train: string) =>
+      `${train}: its track is free and it did not run on to the next block. Its train number was removed.`,
+    trainUnclear: (block: string) =>
+      `${block}: occupied, but Lever cannot tell which train it is. Give it a train number.`,
+    trainArrived: (train: string, block: string) =>
+      `${train} has arrived at ${block}.`,
+    automationPaused:
+      'Automation paused: automatic trains are braked to a stop. Resume it in the traffic strip.',
     routeSet: (manual: string[]) =>
       manual.length > 0
         ? `Route set. Throw by hand: ${manual.join(', ')}.`

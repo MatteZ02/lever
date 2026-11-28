@@ -198,6 +198,84 @@ export const fi: Strings = {
       'Avaa tämä näkymä uuteen ikkunaan, esimerkiksi toiselle näytölle. Lever avaa ikkunansa seuraavalla kerralla samoille paikoille.',
   },
 
+  trains: {
+    holds: {
+      signalAtStop: 'opastin näyttää Seis',
+      occupiedAhead: 'edessä oleva raideosuus on varattu',
+      enteredOccupied: 'ajoi varatulle raideosuudelle',
+      endOfTrack: 'raide päättyy edessä',
+      turnoutAgainst: 'edessä oleva vaihde on väärässä asennossa',
+      turnoutUnknown: 'edessä olevan vaihteen asento ei ole tiedossa',
+    } as Record<string, string>,
+    autoStates: {
+      waiting: 'Odottaa',
+      routing: 'Kulkutietä asetetaan',
+      running: 'Ajaa',
+      stopping: 'Pysähtyy',
+      dwelling: 'Pysähdyksellä',
+      done: 'Perillä',
+    } as Record<string, string>,
+    autoReasons: {
+      paused: 'automaatio keskeytetty',
+      noLoco: 'ei veturia',
+      directionUnknown:
+        'kulkusuunta ei vielä tiedossa: aja juna käsin yksi raideosuus ensin',
+      notLevel4: 'vain tason 4 alueilla',
+      noRoute: 'sinne ei ole kulkutietä',
+      occupied: 'reitti on varattu',
+      conflict: 'toinen kulkutie on tiellä',
+      routeFailed: 'kulkutie ei asettunut',
+    } as Record<string, string>,
+    loco: 'Veturi',
+    noLoco: 'ei veturia',
+    speed: 'Nopeus',
+    where: 'Missä',
+    state: 'Tila',
+    driver: 'Kuljettaja',
+    held: (reason: string) =>
+      `Pysäytetään: ${fi.trains.holds[reason] ?? reason}`,
+    directionUnknown: 'kulkusuunta ei tiedossa',
+    kmh: (kmh: number) => `${kmh} km/h`,
+    driveTo: 'Aja kohteeseen',
+    chooseBlock: 'Valitse raideosuus…',
+    schedule: 'Aikataulu',
+    chooseSchedule: 'Valitse aikataulu…',
+    stop: 'Pysäytä',
+    pause: 'Keskeytä automaatio',
+    resume: 'Jatka automaatiota',
+    paused: 'Automaatio keskeytetty',
+    unlabelled: 'Varattu, ei junanumeroa',
+  },
+  locos: {
+    title: 'Veturit ja aikataulut',
+    short: 'Veturit',
+    help: 'Lever ajaa vetureita tasolla 3 (junan pysäyttäminen) ja tasolla 4 (automaattinen ajo) tässä asetetuilla nopeuksilla ja kiihtyvyyksillä, kuten Throttlen ajokahva. Liitä veturi junaan napsauttamalla junan varaamaa raidetta.',
+    add: 'Lisää veturi',
+    empty: 'Ei vielä vetureita.',
+    newName: 'Uusi veturi',
+    name: 'Nimi',
+    address: 'Osoite',
+    speedSteps: 'Ajoportaat',
+    maxSpeed: 'Huippunopeus (km/h)',
+    acceleration: 'Kiihtyvyys (km/h sekunnissa)',
+    braking: 'Jarrutus (km/h sekunnissa)',
+    cruise: 'Matkanopeus (km/h, taso 4)',
+    approach: 'Lähestymisnopeus (km/h, taso 4)',
+    notes: 'Muistiinpanot',
+    remove: 'Poista',
+    brakingTime: (seconds: number) =>
+      `Matkanopeudesta se pysähtyy noin ${seconds} sekunnissa.`,
+    schedules: 'Aikataulut',
+    schedulesHelp:
+      'Aikataulu on luettelo raideosuuksista, joille automaattinen juna (taso 4) ajetaan vuorollaan, ja odotusaika kullakin.',
+    addSchedule: 'Lisää aikataulu',
+    newSchedule: 'Uusi aikataulu',
+    noSchedules: 'Ei vielä aikatauluja.',
+    stops: 'Pysähdykset',
+    addStop: 'Lisää pysähdys',
+    dwell: 'Odotus (s)',
+    repeat: 'Aloita alusta viimeisen pysähdyksen jälkeen',
+  },
   traffic: {
     title: 'Liikenne',
     tab: 'Liikenne',
@@ -205,7 +283,7 @@ export const fi: Strings = {
     less: 'Vähemmän',
     noRoutesHere:
       'Kulkutiet vaativat alueen, jonka taso on 2 tai korkeampi (Tasot).',
-    occupied: 'Varatut raideosuudet',
+    occupied: 'Junat ja varatut raideosuudet',
     noOccupied: 'Yksikään raideosuus ei ole varattu.',
     train: 'Juna',
     block: 'Raideosuus',
@@ -249,6 +327,11 @@ export const fi: Strings = {
     crosses: (routes: string, at: string) =>
       `Kulkutie risteää kulkuteiden ${routes} kanssa kohdassa ${at}. Molemmat voi asettaa, mutta niillä kulkevat junat kohtaisivat siellä.`,
     crossQuestion: 'Asetetaanko kulkutie, vaikka se risteää toisen kanssa?',
+    occupiedQuestion: 'Asetetaanko kulkutie varatun raideosuuden yli?',
+    occupiedOnRoute: (blocks: string) =>
+      `Kulkutiellä on varattu raideosuus (taso 3): ${blocks}. Lever asettaa sen vain, jos vahvistat.`,
+    conflictLevel3: (routes: string) =>
+      `Toinen kulkutie käyttää näitä raiteita tasolla 3: ${routes}. Pura se ensin.`,
     crossConfirm: 'Aseta silti',
     crossBack: 'Takaisin',
     save: 'Tallenna…',
@@ -324,9 +407,14 @@ export const fi: Strings = {
     areas: 'Automaatiotasot',
     areasShort: 'Tasot',
     areasHelp:
-      'Taso 1: vaihteet käännetään ja opastimet asetetaan yksitellen. Taso 2: lisäksi kulkutiet. Tason vaihtaminen ei koskaan käännä vaihdetta eikä muuta opastetta.',
+      'Taso 1: vaihteet käännetään ja opastimet asetetaan yksitellen. Taso 2: lisäksi kulkutiet. Taso 3: lisäksi junakulunvalvonta (kulkutiet tarkistetaan ja niiden vaihteet lukitaan, veturilla varustetut junat pysäytetään ennen varattua raideosuutta tai Seis-opastetta). Taso 4: lisäksi automaattiset kulkutiet ja ajo. Tason vaihtaminen ei koskaan käännä vaihdetta eikä muuta opastetta.',
     stationDefault: 'koko asema',
-    levelLater: (level: number) => `Taso ${level} (myöhemmin)`,
+    raiseLevel: (area: string, level: number) =>
+      `Nostetaanko ${area} tasolle ${level}?`,
+    raiseProblems: (routes: string) =>
+      `Nämä kulkutiet kulkevat siellä varattujen raideosuuksien yli: ${routes}. Tasolla 3 niitä ei sallittaisi. Nosta taso silti (kulkutiet jäävät voimaan) tai pura ne ensin.`,
+    raiseConfirm: 'Nosta silti',
+    raiseBack: 'Takaisin',
     levelBadge: (level: number) => `Taso ${level}`,
   },
 
@@ -535,6 +623,10 @@ export const fi: Strings = {
       '0 = vain 25 s välein. Näyttää muiden laitteiden aiheuttaman hätäpysäytyksen, ajovirran katkaisun ja oikosulun heti keskusyksiköissä, jotka eivät ilmoita niistä itse (DR5000), ja huomaa yhteyskatkon nopeammin.',
     feedbackSources: 'Käytetyt ilmaisinväylät',
     blockReleaseDelay: 'Raideosuuden vapautumisviiveen oletus (ms)',
+    blocksClearAhead: 'Vapaita raideosuuksia edessä (taso 3)',
+    blocksClearAheadHelp:
+      'Veturilla varustettu juna pysäytetään, kun sen edessä on vapaana vähemmän raideosuuksia kuin tämä. 0: juna saa ajaa varatulle raideosuudelle, ja se pysäytetään siellä.',
+    clearAhead: 'Vapaita raideosuuksia edessä',
     autoSignals: 'Aseta opastimet kulkuteiden varrella automaattisesti',
     pairedWith: 'Johtaa kohteeseen',
     notPaired: 'Ei linkitetty (viivaa ei piirretty)',
@@ -668,7 +760,9 @@ export const fi: Strings = {
     refused: (name: string, reason?: string) =>
       reason === 'signalNeedsRoute'
         ? `${name}: tasolla 2 opastimet asetetaan vain kulkuteiden mukana. Napsauta sitä ja valitse ”Kulkutie alkaa tästä”.`
-        : `${name}: ei mahdollista tällä automaatiotasolla.`,
+        : reason === 'turnoutLocked'
+          ? `${name}: lukittu asetettuun kulkutiehen (taso 3). Pura kulkutie ensin.`
+          : `${name}: ei mahdollista tällä automaatiotasolla.`,
     incomplete: (name: string, reason: string) =>
       `${name}: ${(fi.test.incomplete as Record<string, string>)[reason] ?? reason}. Mitään ei lähetetty.`,
     failed: (name: string) =>
@@ -686,7 +780,21 @@ export const fi: Strings = {
           'Kulkutie kulkee alueen kautta, jonka taso ei ole vielä käytettävissä.',
         crossing:
           'Kulkutie risteää toisen kulkutien kanssa. Näytä se uudelleen ja vahvista risteäminen.',
+        occupied:
+          'Kulkutietä ei asetettu: sen raideosuus on varattu (taso 3). Näytä se uudelleen asettaaksesi sen silti.',
+        conflict:
+          'Kulkutietä ei asetettu: toinen kulkutie käyttää sen raiteita (taso 3). Pura se kulkutie ensin.',
       })[reason] ?? 'Kulkutietä ei voitu asettaa.',
+    trainHeld: (train: string, reason: string) =>
+      `${train} pysäytetään: ${fi.trains.holds[reason] ?? reason}.`,
+    trainLost: (train: string) =>
+      `${train}: sen raideosuus vapautui eikä se ajanut seuraavalle raideosuudelle. Junanumero poistettiin.`,
+    trainUnclear: (block: string) =>
+      `${block}: varattu, mutta Lever ei tiedä mikä juna siellä on. Anna sille junanumero.`,
+    trainArrived: (train: string, block: string) =>
+      `${train} on saapunut raideosuudelle ${block}.`,
+    automationPaused:
+      'Automaatio keskeytetty: automaattiset junat jarrutetaan seis. Jatka sitä liikennepalkista.',
     routeSet: (manual: string[]) =>
       manual.length > 0
         ? `Kulkutie asetettu. Käännä käsin: ${manual.join(', ')}.`
