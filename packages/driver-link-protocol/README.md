@@ -3,8 +3,8 @@
 The Lever ↔ Throttle driver link as code: message schemas (Zod), version and capability handling,
 encoding with the datagram size check, chunking and reassembly, reliability helpers (resend with
 backoff, de-duplication) and id generation. The design is the contract in `docs/driver-link.md`,
-which is the same file in both repositories; this package follows it and adds nothing to it except
-the wire details listed under "Details the contract leaves open".
+which is the same file in both repositories; this package follows it and adds only the limits listed
+under "Wire details".
 
 **Lever holds the master copy.** Throttle copies the package; changes are made here first.
 
@@ -67,32 +67,12 @@ switch (result.kind) {
 Process a message only if `seenSequences.firstTime(envelope.id, envelope.seq)`; acknowledge every
 reliable message, also a repeated one (its first ack may have been lost).
 
-## Details the contract leaves open
+## Wire details
 
-These are the package's choices. They are compatible with the contract and are recorded here so
-both apps read them the same way.
-
-- **Unknown values.** Unknown fields are dropped. An unknown member of an enum that has a value
-  claiming less becomes that value: certainty → `unknown`, aspect → `unknown`, route state →
-  `unconfirmed`, central unit → `lost`, `leadsTo` kind → `unknown`, throttle `kind` → `address`,
-  strip `source` → `manual`. Codes and reasons the receiver words itself (notice and error codes,
-  `hold`, `endsBy`, `auto.state`, `auto.reason`) are open strings; the known values are exported
-  (`NOTICE_CODES`, `HOLD_REASONS`, …) and an unknown one is shown generically.
-- **Chunked messages.** Every part carries the original envelope's `seq` and `rel`. Receivers
-  de-duplicate and acknowledge the reassembled message, never single parts. `msgId` defaults to
-  the seq in base 36. A resent reliable message resends all its parts.
-- **Sequence numbers** start at the sender's clock in milliseconds (`initialSeq`), so they keep
-  increasing across app restarts and a restarted app is never taken for a duplicate.
-- **`linesVersion` and `locosDigest`** are opaque strings of at most 64 characters, compared only
-  for equality (`textDigest` is offered for both).
-- **`driverView` without `train`** means Lever has no train with that loco now.
-- **`lineStatus.stale`** (default false) marks status while Lever's central-unit connection is
-  interrupted or lost, as `driverView.stale` does.
-- **`lines[].directionRequired`** (default false) tells Throttle a directional line needs a
-  direction (the per-line setting in contract section 6).
-- **Limits** (beyond the contract): names ≤ 100 characters, driver names ≤ 60, ids ≤ 64, short
-  names ≤ 12, at most 64 parts per message, 64 KB per reassembled message, 8 messages in parts
-  per sender. DCC addresses 1–10239.
+Unknown values, chunked messages, sequence numbers, `linesVersion`, `lineStatus.stale`,
+`directionRequired` and `driverView` without `train` are defined in the contract (sections 5.1,
+5.2, 5.3, 6, 9.1, 9.2). The package adds only these limits: names ≤ 100 characters, driver names
+≤ 60, ids ≤ 64, short names ≤ 12, DCC addresses 1–10239.
 
 ## Copying into Throttle
 
