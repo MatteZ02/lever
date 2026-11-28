@@ -40,3 +40,4 @@ CONTROL_STATION_PROMPT.md
 # Lever files created next to a layout while it is open
 *.lever.lock
 .lever-backups/
+LEVER_PROMPT.md
