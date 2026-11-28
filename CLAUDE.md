@@ -11,8 +11,9 @@ app), which must keep working without Lever.
 - Protocol: `docs/reference/z21-lan-protokoll-en_1.13.pdf` is the source of truth;
   `docs/reference/z21-protocol-notes.md` is the navigation aid (copied from Throttle, extended here).
 - Hardware findings and the "verify on DR5000" list: `docs/hardware-notes.md`.
-- Planned driver's view in Throttle fed by Lever: `docs/driver-interface.md` (same file in Throttle
-  as `docs/lever-driver-interface.md`; keep both in step).
+- Driver link with Throttle (lines, strip board, driver's view): `docs/driver-link.md`, the
+  contract. The same file is in Throttle; Lever's copy is the master. Change it only with the
+  user's approval, and tell the user so they can copy it.
 - For members: `README.md`, `docs/install-en.md`, `docs/install-fi.md` (Finnish written natively),
   `docs/user-guide.md`. Keep the install guides in step with UI labels (Lever's UI is English).
 - Throttle's repository is cloned at `D:\GitHub\aaltoenergia\ar-z21` (not `../throttle`). Read its
@@ -32,6 +33,7 @@ app), which must keep working without Lever.
 | 5     | Level 2 routing, mixed-level tests                                    | done; scenario tests incl. mixed Level 1/2; end-to-end with the fake Z21 (set, signals, broken by an external switch); awaiting user review on the layout                  |
 | 6     | Packaging, documentation (fi/en)                                      | done: release build checked (installer + portable zip, unsigned); README, install guides fi/en (Finnish to be reviewed by the user), user guide; not published             |
 | 7     | Levels 3 and 4: trains, protection, automatic driving, loco list      | built after real operation; scenario tests and UI automation, **not tried on the layout**; MULTI-7 area ownership not built                                                |
+| 8     | Driver link (`docs/driver-link.md`): ids, lines, strips, link service | branch `feat/driver-link`; Phase 0 plan awaiting approval                                                                                                                  |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
 screenshots (`Z21_control_station_*.PNG`: olten, inselburg-dettingen, Sissach), the JuliaData
