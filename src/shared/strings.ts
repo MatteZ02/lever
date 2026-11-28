@@ -205,8 +205,22 @@ const en = {
       'Open what is shown here in a new window, e.g. for a second monitor. Lever reopens its windows where they were.',
   },
 
+  traffic: {
+    title: 'Traffic',
+    tab: 'Traffic',
+    more: 'More',
+    less: 'Less',
+    noRoutesHere: 'Routes need an area at Level 2 or higher (Levels).',
+    occupied: 'Occupied track',
+    noOccupied: 'No track is occupied.',
+    train: 'Train',
+    block: 'Block',
+    station: 'Station',
+    noLabel: 'no number',
+  },
   routes: {
     title: 'Routes',
+    none: 'No routes set.',
     fold: 'Hide',
     newRoute: 'New route',
     undoLast: 'Undo last route',

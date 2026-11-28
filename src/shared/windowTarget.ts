@@ -1,19 +1,28 @@
-// What a window shows (VIEW-2, ARC-3): a station view or an arrangement of
-// the full layout view. Passed to a new window in its URL hash, reported
+// What a window shows (VIEW-2, ARC-3): a station view, an arrangement of
+// the full layout view, or the traffic view (routes and trains, no diagram). Passed to a new window in its URL hash, reported
 // back to the main process, and saved with the window's position.
 import {z} from 'zod';
 
 export type WindowTarget =
-  {kind: 'view'; viewId: string} | {kind: 'full'; arrangementId: string};
+  | {kind: 'view'; viewId: string}
+  | {kind: 'full'; arrangementId: string}
+  | {kind: 'traffic'};
+
+const TRAFFIC_TARGET = 'traffic:board';
 
 export const windowTargetTextSchema = z.string().max(200);
 
 export const formatWindowTarget = (target: WindowTarget): string =>
   target.kind === 'view'
     ? `view:${target.viewId}`
-    : `full:${target.arrangementId}`;
+    : target.kind === 'full'
+      ? `full:${target.arrangementId}`
+      : TRAFFIC_TARGET;
 
 export const parseWindowTarget = (text: string): WindowTarget | undefined => {
+  if (text === TRAFFIC_TARGET) {
+    return {kind: 'traffic'};
+  }
   const [kind, ...rest] = text.split(':');
   const id = rest.join(':');
   if (!id) {

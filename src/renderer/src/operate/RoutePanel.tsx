@@ -1,8 +1,8 @@
-// Routes (Level 2, section 8.8), in every operating window: choose a start
-// and an end on the diagram (or a saved route), see the route before
-// setting it (alternatives on a tie, manual turnouts, Level 1 parts), and
-// manage the routes this control station has set: cancel, release, undo the
-// last one. Manual turnouts are listed, never confirmed: setting the route
+// Routes (Level 2, section 8.8), parts of the traffic strip and the traffic
+// view (TrafficStrip.tsx, TrafficBoard.tsx): choose a start and an end on the
+// diagram (or a saved route), see the route before setting it (alternatives
+// on a tie, manual turnouts, Level 1 parts), and manage the routes this
+// control station has set: cancel, release, undo the last one. Manual turnouts are listed, never confirmed: setting the route
 // records them, and the operator throws them by hand.
 import {useMemo, useState} from 'react';
 import {levelOf} from '../../../model/areas';
@@ -19,7 +19,6 @@ import {edit, useProjectStore} from '../store/projectStore';
 import {
   chooseAlternative,
   pickSavedRoute,
-  setPanelOpen,
   startPicking,
   stopPicking,
   useRouteSearch,
@@ -37,105 +36,101 @@ const levelOfPoint = (project: Project, elementId: string) => {
     : project.settings.defaultLevel;
 };
 
-export const RoutePanel = ({project}: {project: Project}) => {
-  const routes = useEngineStore((state) => state.layout.routes);
-  const pick = useRouteStore((state) => state.pick);
-  const open = useRouteStore((state) => state.panelOpen);
-  const readOnly = useProjectStore((state) => state.document?.readOnly);
-  const active = Object.values(routes).sort((a, b) => b.order - a.order);
-  const level2 = project.areas.some((area) => area.level >= 2);
+// Whether routes can be used at all: some area at Level 2 or higher.
+export const routesAvailable = (project: Project): boolean =>
+  project.areas.some((area) => area.level >= 2);
 
-  if (!level2 && active.length === 0 && !pick) {
-    return null;
-  }
-  if (!open) {
-    return (
-      <div className="route-panel route-panel--folded">
+// New route and undo, for the traffic strip and the traffic view. A new
+// route is picked on a diagram, so the traffic view leaves it out.
+export const RouteActions = ({
+  project,
+  newRoute = true,
+}: {
+  project: Project;
+  newRoute?: boolean;
+}) => {
+  const routes = useEngineStore((state) => state.layout.routes);
+  const count = Object.keys(routes).length;
+  return (
+    <>
+      {newRoute && (
         <button
           type="button"
           className="button"
-          onClick={() => setPanelOpen(true)}
+          disabled={!routesAvailable(project)}
+          onClick={() => startPicking()}
         >
-          {text.title}
-          {active.length > 0 && ` (${active.length})`}
+          {text.newRoute}
         </button>
-      </div>
-    );
-  }
+      )}
+      <button
+        type="button"
+        className="button"
+        disabled={count === 0}
+        onClick={() => sendCommand({type: 'undoRoute'})}
+      >
+        {text.undoLast}
+      </button>
+    </>
+  );
+};
+
+// The routes this control station has set, newest first.
+export const ActiveRoutes = ({project}: {project: Project}) => {
+  const routes = useEngineStore((state) => state.layout.routes);
+  const active = Object.values(routes).sort((a, b) => b.order - a.order);
   const name = (id: string) => describeElementId(project, id);
   return (
-    <aside className="route-panel" aria-label={text.title}>
-      <div className="button-row">
-        <h3>{text.title}</h3>
-        <button
-          type="button"
-          className="button button--small"
-          onClick={() => setPanelOpen(false)}
-        >
-          {text.fold}
-        </button>
-      </div>
-
-      {pick ? (
-        <RoutePreview project={project} readOnly={readOnly ?? true} />
-      ) : (
-        <div className="button-row">
-          <button
-            type="button"
-            className="button"
-            disabled={!level2}
-            onClick={() => startPicking()}
-          >
-            {text.newRoute}
-          </button>
-          <button
-            type="button"
-            className="button"
-            disabled={active.length === 0}
-            onClick={() => sendCommand({type: 'undoRoute'})}
-          >
-            {text.undoLast}
-          </button>
-        </div>
-      )}
-
+    <>
       {active.map((route) => (
         <ActiveRoute key={route.id} route={route} name={name} />
       ))}
-
-      {!pick && project.routes.length > 0 && (
-        <div>
-          <p className="muted small">{text.saved}</p>
-          {project.routes.map((saved) => (
-            <div key={saved.id} className="route-row">
-              <span>{saved.name}</span>
-              <button
-                type="button"
-                className="button button--small"
-                onClick={() => pickSavedRoute(saved)}
-              >
-                {text.show}
-              </button>
-              {!readOnly && (
-                <button
-                  type="button"
-                  className="button button--small"
-                  onClick={() =>
-                    edit((p) => ({
-                      ...p,
-                      routes: p.routes.filter((r) => r.id !== saved.id),
-                    }))
-                  }
-                >
-                  {text.deleteSaved}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </aside>
+    </>
   );
+};
+
+export const SavedRoutes = ({project}: {project: Project}) => {
+  const readOnly = useProjectStore((state) => state.document?.readOnly);
+  if (project.routes.length === 0) {
+    return null;
+  }
+  return (
+    <div className="saved-routes">
+      <p className="muted small">{text.saved}</p>
+      {project.routes.map((saved) => (
+        <div key={saved.id} className="route-row">
+          <span>{saved.name}</span>
+          <button
+            type="button"
+            className="button button--small"
+            onClick={() => pickSavedRoute(saved)}
+          >
+            {text.show}
+          </button>
+          {!readOnly && (
+            <button
+              type="button"
+              className="button button--small"
+              onClick={() =>
+                edit((p) => ({
+                  ...p,
+                  routes: p.routes.filter((r) => r.id !== saved.id),
+                }))
+              }
+            >
+              {text.deleteSaved}
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// The route being made: what to click next, or the preview to set it.
+export const RouteMaking = ({project}: {project: Project}) => {
+  const readOnly = useProjectStore((state) => state.document?.readOnly);
+  return <RoutePreview project={project} readOnly={readOnly ?? true} />;
 };
 
 const RoutePreview = ({

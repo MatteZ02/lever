@@ -4,12 +4,13 @@
 // (main.tsx).
 import {ViewCanvas} from './full/ViewCanvas';
 import {OperateCanvas} from './operate/OperateCanvas';
-import {RoutePanel} from './operate/RoutePanel';
+import {TrafficBoard} from './operate/TrafficBoard';
+import {TrafficStrip} from './operate/TrafficStrip';
 import {useShownView} from './useShownView';
 import {ViewTabs} from './ViewTabs';
 
 export const PlainWorkspace = () => {
-  const {project, view, fullView, arrangement} = useShownView({
+  const {project, view, fullView, traffic, arrangement} = useShownView({
     fitStationsOnFirstShow: true,
   });
   if (!project) {
@@ -22,11 +23,14 @@ export const PlainWorkspace = () => {
           project={project}
           shownArrangementId={arrangement?.id}
           shownViewId={fullView ? undefined : view?.id}
+          trafficShown={traffic}
         />
       </div>
       <div className="layout-main">
         <div className="canvas-area">
-          {fullView && arrangement ? (
+          {traffic ? (
+            <TrafficBoard project={project} />
+          ) : fullView && arrangement ? (
             <ViewCanvas
               project={project}
               arrangement={arrangement}
@@ -35,9 +39,9 @@ export const PlainWorkspace = () => {
           ) : (
             view && <OperateCanvas project={project} view={view} />
           )}
-          <RoutePanel project={project} />
         </div>
       </div>
+      {!traffic && <TrafficStrip project={project} />}
     </div>
   );
 };

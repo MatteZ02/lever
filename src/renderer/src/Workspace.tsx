@@ -25,7 +25,8 @@ import {ViewToolbox} from './full/ViewToolbox';
 import {AreasPanel} from './operate/AreasPanel';
 import {FeedbackMonitor} from './operate/FeedbackMonitor';
 import {OperateCanvas} from './operate/OperateCanvas';
-import {RoutePanel} from './operate/RoutePanel';
+import {TrafficBoard} from './operate/TrafficBoard';
+import {TrafficStrip} from './operate/TrafficStrip';
 import {
   edit,
   redo,
@@ -86,10 +87,15 @@ export const Workspace = () => {
   const [drawing, setDrawing] = useState<GridPoint[]>([]);
   const [placeRotation, setPlaceRotation] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const {view, fullView, arrangement, fit, targetText} = useShownView();
+  const {view, fullView, traffic, arrangement, fit, targetText} =
+    useShownView();
   // A switch to another tab (by click or number key) drops a half-drawn
   // track and the view tools' state.
-  const shownKey = fullView ? `view:${arrangement?.id}` : `station:${view?.id}`;
+  const shownKey = traffic
+    ? 'traffic'
+    : fullView
+      ? `view:${arrangement?.id}`
+      : `station:${view?.id}`;
   const [lastShown, setLastShown] = useState(shownKey);
   if (lastShown !== shownKey) {
     setLastShown(shownKey);
@@ -151,6 +157,7 @@ export const Workspace = () => {
           project={project}
           shownArrangementId={arrangement?.id}
           shownViewId={fullView ? undefined : view?.id}
+          trafficShown={traffic && !editing}
           editing={editing}
         >
           {editing && (
@@ -261,6 +268,7 @@ export const Workspace = () => {
           />
         )}
         <div className="canvas-area">
+          {traffic && !editing && <TrafficBoard project={project} />}
           {fullView && arrangement && (
             <ViewCanvas
               project={project}
@@ -285,7 +293,6 @@ export const Workspace = () => {
             ) : (
               <OperateCanvas project={project} view={view} />
             ))}
-          {!editing && <RoutePanel project={project} />}
           {hint && (
             <div
               key={hint}
@@ -326,6 +333,8 @@ export const Workspace = () => {
           </div>
         )}
       </div>
+
+      {!editing && !traffic && <TrafficStrip project={project} />}
 
       {editing && (
         <div className="bottom-panel">

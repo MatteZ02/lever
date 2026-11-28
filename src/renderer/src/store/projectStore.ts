@@ -39,6 +39,8 @@ export const DEFAULT_VIEWPORT: Viewport = {x: -2, y: -2, scale: 24};
 // activeViewId while a layout view (FULL-1) is shown; which one is
 // activeArrangementId.
 export const FULL_VIEW = '__full';
+// activeViewId while the traffic view (routes and trains) is shown.
+export const TRAFFIC_VIEW = '__traffic';
 
 // Viewport key of a layout view.
 export const fullViewportKey = (arrangementId: string) =>
@@ -99,12 +101,18 @@ export const activeView = () => {
   if (activeViewId === FULL_VIEW && (project?.arrangements.length ?? 0) > 0) {
     return undefined;
   }
+  if (activeViewId === TRAFFIC_VIEW) {
+    return undefined;
+  }
   return (
     project?.views.find((view) => view.id === activeViewId) ?? project?.views[0]
   );
 };
 
 export const isFullView = () => get().activeViewId === FULL_VIEW;
+
+export const setTrafficView = () =>
+  set({activeViewId: TRAFFIC_VIEW, selection: []});
 
 export const setActiveArrangement = (arrangementId: string) =>
   set({
@@ -218,8 +226,17 @@ export const setActiveView = (viewId: string) =>
 export const setViewport = (viewId: string, viewport: Viewport) =>
   set((state) => ({viewports: {...state.viewports, [viewId]: viewport}}));
 
+// The traffic view has nothing to edit: editing starts on the first station.
 export const setMode = (mode: Mode) =>
-  set({mode, testMode: false, tool: {kind: 'select'}, selection: []});
+  set({
+    mode,
+    testMode: false,
+    tool: {kind: 'select'},
+    selection: [],
+    ...(mode === 'edit' && get().activeViewId === TRAFFIC_VIEW
+      ? {activeViewId: get().project?.views[0]?.id ?? null}
+      : {}),
+  });
 
 export const setTestMode = (testMode: boolean) => set({testMode});
 
@@ -260,6 +277,8 @@ export const bindProjectStore = (): (() => void) => {
           activeViewId: FULL_VIEW,
           activeArrangementId: target.arrangementId,
         });
+      } else if (target?.kind === 'traffic') {
+        set({activeViewId: TRAFFIC_VIEW});
       }
     }
     const fromElsewhere =
@@ -279,6 +298,7 @@ export const bindProjectStore = (): (() => void) => {
         future: sameProject ? current.future : [],
         activeViewId:
           get().activeViewId === FULL_VIEW ||
+          get().activeViewId === TRAFFIC_VIEW ||
           state.project.views.some((view) => view.id === get().activeViewId)
             ? get().activeViewId
             : (state.project.views[0]?.id ?? null),

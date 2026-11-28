@@ -131,13 +131,17 @@ area: Lever warns first and sets it normally there.
 
 ## Routes (Level 2)
 
-Routes are for areas at **Level 2** (switch an area's level under **Levels**). The **Routes** panel
-appears at the top right of the diagram, in every window.
+Routes are for areas at **Level 2** (switch an area's level under **Levels**). They are handled
+in the **traffic strip** along the bottom of every operating window: **New route**, **Undo last
+route** and the routes you have set, on one line, so the diagram keeps the whole width. **More**
+opens the saved routes and the occupied track above that line. The **Traffic** tab (first of the
+tabs) shows the same without a diagram, and **New window** opens it in a window of its own, e.g.
+on a second monitor; routes are set there from the saved ones.
 
 1. Click a **signal**, **station exit** or **route point** and choose **Route from here**. Then
    click where the route ends and choose **Route ends here**; to make it go a certain way, click
    a route point (or signal) on the way first and choose **Via here**. (**New route** in the
-   panel works too, and also takes a turnout as start or end.) A route leaves a signal in the
+   traffic strip works too, and also takes a turnout as start or end.) A route leaves a signal in the
    direction it faces and ends in front of a signal facing the train. While you are making a
    route, clicking turnouts does nothing.
 2. Lever shows the route dashed on the diagram. It picks the route with the fewest turnouts,
@@ -182,7 +186,7 @@ double slip** (or a crossing or single slip) without sharing a leg, with the sli
 position, or straight across the middle of a scissors crossover, can both be set. The preview warns that trains on them would meet there, and **Set
 route** asks once more (**Set anyway** / **Back**).
 
-**Save…** keeps a route by name, with its route points; saved routes are listed in the panel, and
+**Save…** keeps a route by name, with its route points; saved routes are listed under **More** and in the Traffic tab, and
 clicking the same start and end uses the saved one.
 
 **Signals at Level 2 are set by routes only:** clicking such a signal offers **Route from here**,

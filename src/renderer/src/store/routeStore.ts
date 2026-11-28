@@ -19,20 +19,20 @@ export type RoutePick = {
 
 type RouteStore = {
   pick: RoutePick | null;
-  // The routes panel is shown (it can be folded away).
+  // The traffic strip shows its details (saved routes, trains).
   panelOpen: boolean;
 };
 
 export const useRouteStore = create<RouteStore>()(() => ({
   pick: null,
-  panelOpen: true,
+  panelOpen: false,
 }));
 
 const set = useRouteStore.setState;
 const get = useRouteStore.getState;
 
 export const startPicking = (from?: string) =>
-  set({pick: {from, via: [], choice: 0}, panelOpen: true});
+  set({pick: {from, via: [], choice: 0}});
 
 export const stopPicking = () => set({pick: null});
 
@@ -93,7 +93,6 @@ export const setRouteEnd = (project: Project, elementId: string) => {
       savedRouteId: saved?.id,
       choice: 0,
     },
-    panelOpen: true,
   });
 };
 
@@ -123,7 +122,6 @@ export const pickSavedRoute = (route: Project['routes'][number]): void =>
       choice: 0,
       savedRouteId: route.id,
     },
-    panelOpen: true,
   });
 
 // The route(s) between the picked points, worked out again when the layout

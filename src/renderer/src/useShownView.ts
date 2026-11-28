@@ -16,6 +16,7 @@ import {
   FULL_VIEW,
   fullViewportKey,
   setViewport,
+  TRAFFIC_VIEW,
   useProjectStore,
 } from './store/projectStore';
 
@@ -48,6 +49,7 @@ export const useShownView = ({
       : undefined;
   // A view that is gone falls back to a station (activeView).
   const fullView = arrangement !== undefined;
+  const traffic = activeViewId === TRAFFIC_VIEW;
 
   const fit = useCallback(() => {
     const current = activeView();
@@ -78,14 +80,19 @@ export const useShownView = ({
     });
   }, [shownViews]);
 
-  const target: WindowTarget | undefined =
-    fullView && arrangement
+  const target: WindowTarget | undefined = traffic
+    ? {kind: 'traffic'}
+    : fullView && arrangement
       ? {kind: 'full', arrangementId: arrangement.id}
       : view
         ? {kind: 'view', viewId: view.id}
         : undefined;
   const targetText = target ? formatWindowTarget(target) : '';
-  const shownName = fullView ? arrangement?.name : view?.name;
+  const shownName = traffic
+    ? strings.traffic.title
+    : fullView
+      ? arrangement?.name
+      : view?.name;
   useEffect(() => {
     window.lever.window.setTarget(targetText);
   }, [targetText]);
@@ -113,5 +120,14 @@ export const useShownView = ({
     }
   }, [shouldFit, fit]);
 
-  return {project, view, fullView, arrangement, arrangements, fit, targetText};
+  return {
+    project,
+    view,
+    fullView,
+    traffic,
+    arrangement,
+    arrangements,
+    fit,
+    targetText,
+  };
 };

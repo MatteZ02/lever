@@ -198,8 +198,23 @@ export const fi: Strings = {
       'Avaa tämä näkymä uuteen ikkunaan, esimerkiksi toiselle näytölle. Lever avaa ikkunansa seuraavalla kerralla samoille paikoille.',
   },
 
+  traffic: {
+    title: 'Liikenne',
+    tab: 'Liikenne',
+    more: 'Lisää',
+    less: 'Vähemmän',
+    noRoutesHere:
+      'Kulkutiet vaativat alueen, jonka taso on 2 tai korkeampi (Tasot).',
+    occupied: 'Varatut raideosuudet',
+    noOccupied: 'Yksikään raideosuus ei ole varattu.',
+    train: 'Juna',
+    block: 'Raideosuus',
+    station: 'Liikennepaikka',
+    noLabel: 'ei numeroa',
+  },
   routes: {
     title: 'Kulkutiet',
+    none: 'Ei asetettuja kulkuteitä.',
     fold: 'Piilota',
     newRoute: 'Uusi kulkutie',
     undoLast: 'Kumoa viimeisin kulkutie',

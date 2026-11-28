@@ -1,5 +1,5 @@
-// Tabs of the layout views and the stations, shared by the main window and
-// plain station windows. In edit mode, "+ View" adds an empty view, and a
+// Tabs of the traffic view, the layout views and the stations, shared by the
+// main window and plain station windows. In edit mode, "+ View" adds an empty view, and a
 // tab can be dragged to another place in its own group (views among views,
 // stations among stations); one move is one undo step.
 import {PointerEvent, ReactNode, useRef, useState} from 'react';
@@ -7,7 +7,12 @@ import {arrangementsOf, createArrangement} from '../../model/arrangement';
 import {moveLayoutView, moveStation} from '../../model/editing';
 import {Project} from '../../model/project';
 import {strings} from '../../shared/strings';
-import {edit, setActiveArrangement, setActiveView} from './store/projectStore';
+import {
+  edit,
+  setActiveArrangement,
+  setActiveView,
+  setTrafficView,
+} from './store/projectStore';
 
 type Group = 'views' | 'stations';
 type Drag = {
@@ -28,6 +33,7 @@ export const ViewTabs = ({
   project,
   shownArrangementId,
   shownViewId,
+  trafficShown = false,
   editing = false,
   onSwitch,
   children,
@@ -36,6 +42,7 @@ export const ViewTabs = ({
   // The view or station shown (one of them).
   shownArrangementId?: string;
   shownViewId?: string;
+  trafficShown?: boolean;
   editing?: boolean;
   onSwitch?: () => void;
   // More tabs after the stations (e.g. "+ Add station").
@@ -168,6 +175,17 @@ export const ViewTabs = ({
       role="tablist"
       aria-label={strings.full.tabsLabel}
     >
+      {!editing && (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={trafficShown}
+          className={`view-tab view-tab--layout${trafficShown ? ' view-tab--active' : ''}`}
+          onClick={() => switchTo(setTrafficView)}
+        >
+          {strings.traffic.tab}
+        </button>
+      )}
       {arrangements.map((arrangement, index) => {
         const active = arrangement.id === shownArrangementId;
         return (
