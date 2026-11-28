@@ -29,6 +29,7 @@ app), which must keep working without Lever.
 | 4     | Several views, multiple windows, full layout view, station connectors | done; verified with UI automation (drag/scale panels, pairing, following an exit, a second window throwing a turnout via the fake Z21); window restore needs a manual test |
 | 5     | Level 2 routing, mixed-level tests                                    | done; scenario tests incl. mixed Level 1/2; end-to-end with the fake Z21 (set, signals, broken by an external switch); awaiting user review on the layout                  |
 | 6     | Packaging, documentation (fi/en)                                      | done: release build checked (installer + portable zip, unsigned); README, install guides fi/en (Finnish to be reviewed by the user), user guide; not published             |
+| 7     | Levels 3 and 4: trains, protection, automatic driving, loco list      | built after real operation; scenario tests and UI automation, **not tried on the layout**; MULTI-7 area ownership not built                                                |
 
 Local-only reference material (gitignored, never commit): the spec PDF, the Z21 control-station
 screenshots (`Z21_control_station_*.PNG`: olten, inselburg-dettingen, Sissach), the JuliaData
@@ -94,7 +95,8 @@ src/main/z21File.ts     Reads a Z21 app .z21 export (zipReader.ts + node:sqlite)
 src/main/turnoutPositions.ts  Last known turnout positions per project (ACC-4), in user data,
                         never in the .lever (engine reports them over parentPort).
 src/preload/            contextBridge API `window.lever` (types in api.ts). Holds the raw port.
-src/engine/             utilityProcess entry (index.ts) + Engine (no Electron imports; tested).
+src/engine/             utilityProcess entry (index.ts) + Engine (no Electron imports; tested),
+                        LocoControl.ts (drives locos along their ramps, Levels 3/4).
 src/connection/         ConnectionManager (from Throttle, see COPIED_FROM.md; runtime broadcast
                         flags), Node dgram transport (ephemeral port), AccessoryQueue (LOAD-2),
                         FeedbackTracker (R-Bus/LocoNet/CAN → one input-state shape).
@@ -106,9 +108,15 @@ src/model/              PURE: project.ts (schema v2, .lever), migrations.ts, ele
                         accessoryCommands.ts (element + position → FAdr/output/pulse),
                         topology.ts (derived graph; project graph joined at paired exits),
                         connectors.ts, arrangement.ts (layout views: frames and lines),
-                        routing.ts (route finding, ROUTE_WEIGHTS), routeSignals.ts (RTE-5 rules), validation.ts, addressTable.ts,
+                        routing.ts (route finding, ROUTE_WEIGHTS, findRouteToBlock),
+                        routeSignals.ts (RTE-5 rules), routeChecks.ts (Level 3 route checks),
+                        blockGraph.ts (blocks as a graph), locos.ts (locos, schedules,
+                        ramps), validation.ts, addressTable.ts,
                         editing.ts (pure edit ops), placement.ts.
-src/interlocking/       PURE: Interlocking.ts (Level 1 live state: positions/aspects from outputs,
+src/interlocking/       PURE: traffic.ts (trains + Levels 3/4, owned by the Interlocking),
+                        trains.ts (trains follow occupancy), protection.ts (Level 3
+                        automatic stop), automatic.ts (Level 4 state machine);
+                        Interlocking.ts (Level 1 live state: positions/aspects from outputs,
                         confirmation timeout + one retry, blocks with release delay, train
                         labels, ACC-4 restore), routes.ts (Level 2 routes: set, unconfirmed,
                         release, undo), levels.ts (per-level command checks),
@@ -161,8 +169,10 @@ with 45° legs (turnout legs are one grid step).
   Re-send flags after every (re)connect.
 - All accessory commands go through one rate-limited queue (LOAD-2), `Q=0`, activate → pulse →
   deactivate → gap. Startup queries go through it too. No polling loops, except the status poll
-  (`statusRefreshMs`, default 1 s, one `LAN_X_GET_STATUS`; the DR5000 broadcasts no STOP/short)
-  and the optional position refresh. Keepalive after ~25 s idle.
+  (`statusRefreshMs`, default 1 s, one `LAN_X_GET_STATUS`; the DR5000 broadcasts no STOP/short),
+  the optional position refresh, and `LAN_X_GET_LOCO_INFO` every 2 s for locos Lever is driving
+  (Level 3 hold / Level 4 run). Loco drive commands bypass the accessory queue (ramps, ≤ 1 per
+  loco per 200 ms); subscribe at most 16 locos. Keepalive after ~25 s idle.
 - A lost reply is not a lost connection: two status requests unanswered (2 s each) =
   _interrupted_ (shown, controls stay usable, state and set routes kept); only 30 s of silence =
   lost (state cleared, reconnect; set routes `unconfirmed` until re-reported). A moved turnout

@@ -101,8 +101,8 @@ wiring. **Feedback**, **Accessory test** and **Protocol log** are developer tool
 the top bar only when **Settings → Developer tools** is on.
 
 **Levels** shows the automation areas and their level. You can change a level while operating,
-without the edit password. Lowering a level never moves turnouts or changes signals. Level 3 and 4
-are not available yet.
+without the edit password. Lowering a level never moves turnouts or changes signals. Raising an
+area to Level 3 or 4 first lists routes you have set there over occupied track, and asks.
 
 **Restore turnout positions on startup** (layout properties, off by default): when Lever opens the
 layout, it switches every connected turnout to the last position the central unit confirmed, one
@@ -118,7 +118,15 @@ Every part of the layout runs at an **automation level**:
 - **Level 2, manual routing:** routes from a start to an end (next section). Signals are set by
   routes only; turnouts can still be thrown one by one. Nothing is locked and occupancy is not
   checked.
-- Levels 3 (train protection) and 4 (automatic routing and driving) are planned, not available.
+- **Level 3, train protection:** as Level 2, and routes are checked: a route over occupied track
+  is set only if you confirm (**Set anyway**), and one that shares track with a route you have set
+  is refused (release that one first). The turnouts of a set route are locked: release the route
+  to throw them. Trains with a loco are stopped automatically (see Trains below).
+- **Level 4, automatic routing and driving:** as Level 3, and Lever can drive trains to a block or
+  along a schedule by itself (see Trains below).
+
+Levels 3 and 4 are new and have not been tried on a layout yet: watch them closely the first
+times.
 
 The parts are **automation areas**. Every station is one; in the editor you can add areas for part
 of a station or the line between stations, and choose an element's area in its properties. Each
@@ -196,6 +204,56 @@ hand at Level 2.
 **Several control stations:** each Lever knows only its own routes. Another station's routes
 look like turnouts set by someone else, and a turnout thrown by another station can break your
 route. Operate each area from one control station at a time.
+
+## Trains (Levels 3 and 4)
+
+A **train** is a train number you give to occupied track (click it). The number now follows the
+train: when the next block becomes occupied, the train moves on, and the blocks it leaves are
+freed behind it. Lever then also knows which way it runs. If Lever cannot tell which train
+entered a block, it says so; give that train its number again. If a train's track becomes free and
+it did not run on, its number is removed.
+
+**Locos** (top bar) lists the locos Lever may drive, with their **address**, **speed steps**,
+**top speed**, **acceleration** and **braking** (km/h per second, as in Throttle's loco editor),
+and for Level 4 the **cruising** and **approach** speeds. Click a train's track to choose its
+**Loco**. Lever drives a loco only while it stops or drives the train; otherwise the driver (a
+Throttle, a handset) has it.
+
+**Train protection (Level 3).** A train with a loco, whose direction Lever knows (it has run from
+one block to the next), is braked to a stop when:
+
+- the signal at the end of its block shows stop;
+- fewer blocks ahead are free than **Free blocks needed ahead** (layout properties, default 1;
+  each block can have its own). With **0** the train may run into an occupied block and is stopped
+  there;
+- the track ends ahead, or a turnout ahead is set the other way or its position is not known.
+
+It brakes at the loco's own braking rate, like a driver would; it is not an emergency stop. If a
+driver accelerates the train while it must stand, Lever brakes it again. When the way is clear,
+the driver can go on. A driver can always reverse out. Protection applies in Level 3 and 4 areas
+and to trains entering them, not after they leave them.
+
+The **traffic strip** (**More**) and the **Traffic** tab list the trains: train number, loco,
+speed and direction, where it is, and what Lever does with it (_Driver_, _Stopping: …_, or the
+automatic state).
+
+**Automatic driving (Level 4).** In a Level 4 area, choose **Drive to…** a block for a train, or a
+**Schedule…** (made under **Locos**: blocks to drive to in turn, with a wait at each, optionally
+starting again). Lever finds the route (only through Level 4 areas; a train in one block may also
+reverse), checks it as Level 3 does, sets it, and drives the loco: up to cruising speed, approach
+speed when the next block is the stop, then braking to a stop in it, after which the route is
+released. If the way is occupied or another route is in the way, the train waits and starts when
+it can. **Stop** (in the list) brakes the train and gives it back to its driver. A train's
+direction must be known first: drive it one block by hand.
+
+**Pause automation** (in the strip and the Traffic tab) brakes every automatic train to a stop and
+keeps their destinations; **Resume automation** drives them on. It is not STOP: track power stays
+on. STOP, track power off and a short circuit pause automation too, so trains never start again by
+themselves when power returns.
+
+**One control station per Level 3 or 4 area.** Each Lever protects and drives only its own trains
+and knows only its own routes. Two Levers running the same Level 3 or 4 area would work against
+each other.
 
 ## Views, linked stations and windows
 

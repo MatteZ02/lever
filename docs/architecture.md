@@ -318,7 +318,7 @@ may be defaults) to main over parentPort (`engineReportSchema`); main keeps them
 and its setting is on, main sends `restoreTurnouts`; the engine commands them once after
 connecting, through the interlocking and the queue, after the start-up queries.
 
-## 5. Interlocking engine (Levels 1 and 2 built)
+## 5. Interlocking engine (Levels 1–4 built)
 
 ```ts
 interface LevelModule {
@@ -343,8 +343,8 @@ interface LevelModule {
 
 As built (Phases 3 and 5):
 
-- `src/interlocking/levels.ts`: level modules checking element commands; Levels 3 and 4 are
-  documented placeholders and refused.
+- `src/interlocking/levels.ts`: level modules checking element commands, stacked: Level 2
+  refuses hand-set signals, Level 3 refuses throwing a turnout locked in a route set here.
 - `src/model/routing.ts`: route finding over **directed edges** of the project topology
   (stations joined at linked exits). A state is "this edge, in this direction"; the next edge is
   any other edge at its end except another passage of the same turnout, so routes go leg to leg
@@ -364,8 +364,59 @@ As built (Phases 3 and 5):
   connection interruption leaves it set (the engine asks every position again afterwards, in the
   background); while a turnout's position is unknown (after a connection loss) the route is
   `unconfirmed`, signals left as they are, and is set again or released once reported. Release, cancel, undo with history (RTE-6b). A route must start
-  in a Level 2 area; Level 1 parts are allowed (the window warns first, MIX-4); higher levels
-  are refused until built. Level 3 will add checks and locks per segment around this module.
+  in a Level 2+ area; Level 1 parts are allowed (the window warns first, MIX-4).
+
+### 5.1 Levels 3 and 4 (built, not yet tested on the layout)
+
+All pure, in `src/interlocking/` (the route checks in `src/model/` so the preview uses them
+too), owned by the `Interlocking` through `traffic.ts` (`TrafficControl`), which the interlocking
+gives its state through `TrafficDeps` and calls after every relevant change (`evaluate()` in
+`flush`).
+
+- `src/model/blockGraph.ts`: blocks as a graph. From each end of a block, the next block (or the
+  end of the track), the turnout passages on the way and the signals facing that way. Built
+  with the route search's step rules (`successors` in `routing.ts`). `nextBlock` answers "what
+  lies ahead of a train that entered this block at this node, with the turnouts as they are"
+  (block, end, blocked, unknown).
+- `src/interlocking/trains.ts` (`TrainTracker`): a **train** is a train number on blocks (BLK-4),
+  optionally with a project loco. When a block next to one of its blocks becomes occupied, the
+  train moves in (new front, entry node = its direction; reversing out at its back flips it);
+  freed blocks drop off. Its DCC direction ahead (`aheadIsForward`) is learnt from the loco's
+  reported direction when it moves on. Feedback cannot show a train entering an occupied block:
+  when its last block frees and the block ahead is occupied, it is taken to be there
+  (`enteredOccupied`). Occupancy no train explains stays unlabelled; block labels follow trains.
+- `src/interlocking/protection.ts`: **automatic train stop**. A train with a loco and a known
+  direction, in or entering a Level 3+ block, is held while the signal at the end of its block
+  shows its type's stop aspect, fewer than `clearAhead` blocks ahead are free (block setting,
+  else `settings.blocksClearAhead`, default 1; 0 = may run in, stopped there), the track ends,
+  or a turnout ahead is against it or unknown. Blocks below Level 3 are not checked (MIX-5).
+  A loco set to run backwards (opposite to `aheadIsForward`) is not held, so a driver can back
+  out.
+- `src/model/routeChecks.ts`: **route checks** in Level 3+ parts: occupied blocks (override
+  allowed, `setRoute.override`), conflicting routes (refused; elsewhere they are still cancelled
+  as at Level 2). Turnouts of any route set here are locked against hand throws (Level 3
+  module).
+- `src/interlocking/automatic.ts`: **Level 4**, one state machine per train: waiting → routing →
+  running → stopping → dwelling/done. Routes come from `findRouteToBlock` (routing.ts: from the
+  train's front block, or its back for a one-block train, which then reverses), only through
+  Level 4 areas (MIX-7), checked like Level 3. Cruise speed, approach speed once the next block
+  is the stop, brake to 0 in it, release, dwell, next stop (schedules). Level 3 holds apply on
+  top. Paused automation stands every automatic train (state kept); the engine pauses it on
+  STOP, power off and short circuit.
+- `src/engine/LocoControl.ts`: drives controlled locos along their ramp (km/h per second,
+  `src/model/locos.ts`, the same figures as Throttle's loco library: top speed, acceleration,
+  braking; plus cruise and approach speeds), sending `LAN_X_SET_LOCO_DRIVE` on step changes, at
+  most once per loco per 200 ms tick, outside the accessory queue. Never an emergency stop.
+  `LAN_X_LOCO_INFO` resets the ramp's starting point, so a driver accelerating a held train is
+  braked again. A loco is controlled only while it has a target (hold or run); otherwise its
+  driver has it.
+- Loco info: the engine subscribes the train locos (`LAN_X_GET_LOCO_INFO`, at most 16 per
+  client, newest trains first; Throttles have their own 16) and re-subscribes after every
+  login. While it controls a loco it asks its info every 2 s (`CONTROLLED_LOCO_POLL_MS`), in case
+  the central unit does not pass on other clients' drive commands.
+- Area ownership between instances (MULTI-7) is **not built**: two Levers running Level 3/4 on
+  the same area would each drive and protect on their own. The user guide says to run a Level
+  3/4 area from one control station. The check would go into `levels.ts` and `traffic.ts`.
 
 ## 6. Our layout
 

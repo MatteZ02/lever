@@ -33,12 +33,12 @@ reports it.
 
 Each part of the layout runs at a level. Each level adds to the one below it.
 
-| Level | What it means                                                                                                                                                                                                                                   | State     |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| **1** | **Manual.** Throw turnouts and set signals one by one; occupancy and train numbers are shown. No automation, no protection.                                                                                                                     | available |
-| **2** | **Manual routing.** Click a start and an end; Lever finds the route, throws its turnouts through the queue and sets its signals. If a turnout of a set route moves, its signals go to stop at once. Signals are set by routes only. No locking. | available |
-| **3** | **Train protection:** route checks and locking, automatic train stop, block signalling.                                                                                                                                                         | planned   |
-| **4** | **Automatic routing and driving.**                                                                                                                                                                                                              | planned   |
+| Level | What it means                                                                                                                                                                                                                                   | State                                 |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| **1** | **Manual.** Throw turnouts and set signals one by one; occupancy and train numbers are shown. No automation, no protection.                                                                                                                     | available                             |
+| **2** | **Manual routing.** Click a start and an end; Lever finds the route, throws its turnouts through the queue and sets its signals. If a turnout of a set route moves, its signals go to stop at once. Signals are set by routes only. No locking. | available                             |
+| **3** | **Train protection.** Routes are checked (no occupied track, no conflicting route) and their turnouts locked. A train with a loco is braked to a stop before occupied track, a stop signal or the end of the track, by its own braking rate.    | available, not yet tested on a layout |
+| **4** | **Automatic routing and driving.** Send a train to a block or along a schedule: Lever sets the routes and drives the loco with its configured acceleration, speeds and braking.                                                                 | available, not yet tested on a layout |
 
 **Mixed levels.** Every station is an automation area, and an area can also be part of a station
 or the line between stations. Areas can run at different levels at the same time, and the operator
@@ -46,7 +46,8 @@ changes an area's level while operating. A route from a Level 2 area may continu
 area: Lever warns first, and sets it normally there. Lowering a level never moves turnouts or
 changes signals. Each area's level is shown in its view, with its boundaries on the diagram.
 
-Each Lever knows only its own routes; operate each area from one control station at a time.
+Each Lever knows only its own routes and trains; operate each area from one control station at a
+time, and a Level 3 or 4 area from one control station only.
 
 ## Central units
 

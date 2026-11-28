@@ -60,6 +60,19 @@ On the layout, with real turnouts (later):
 - [ ] Operating mode: throwing from the diagram, signal aspects, occupancy from the layout's
       detectors, and ACC-4 restore (setting on) after a Lever restart.
 
+Levels 3 and 4 (built without hardware; check on the DR5000 before trusting them):
+
+- [ ] `LAN_X_GET_LOCO_INFO` subscribes Lever to a loco: does the DR5000 send `LAN_X_LOCO_INFO` to
+      Lever when **another** client (a Throttle) changes that loco's speed? If not, Lever sees a
+      driver accelerating a held train only with its 2 s poll (`CONTROLLED_LOCO_POLL_MS`).
+- [ ] Lever's `LAN_X_SET_LOCO_DRIVE` ramps (one command per 200 ms per loco while braking or
+      accelerating) are carried out smoothly, also with several locos at once and Throttles
+      driving.
+- [ ] Train following: a train number moves block to block with the club's detectors and release
+      delay (a gap in detection between two blocks loses the train).
+- [ ] Automatic stop: a held train stops inside its block with the loco's braking rate (adjust
+      the braking or the free blocks needed ahead otherwise).
+
 Tools, the same for every central unit:
 
 ```powershell
